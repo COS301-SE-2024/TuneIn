@@ -242,7 +242,8 @@ const RoomPage: React.FC = () => {
 		router.navigate({
 			pathname: "/screens/rooms/ParticipantsPage",
 			params: {
-				participants: JSON.stringify(participants),
+				participantsFr: JSON.stringify(participants),
+				roomID: roomID,
 			},
 		});
 	};

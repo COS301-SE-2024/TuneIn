@@ -800,14 +800,23 @@ export class RoomsService {
 		// }
 	}
 
-	async getBannedUsers(roomID: string): Promise<UserDto[]> {
+	async getBannedUsers(
+		roomID: string,
+		userID: string | undefined,
+	): Promise<UserDto[]> {
 		// Implement the logic to get the banned users for the room
 		console.log(roomID);
-		if (true) {
-			// room does not exist
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
-		}
-		return [];
+		const bannedUsers = await this.prisma.banned.findMany({
+			where: {
+				room_id: roomID,
+			},
+		});
+		const bannedUserIDs: string[] = bannedUsers.map((banned) => banned.user_id);
+		const bannedUserDtos: UserDto[] = await this.dtogen.generateMultipleUserDto(
+			bannedUserIDs,
+			userID,
+		);
+		return bannedUserDtos;
 	}
 
 	async banUser(
@@ -819,25 +828,18 @@ export class RoomsService {
 		console.log(roomID);
 		console.log(initiatorID);
 		console.log(bannedUserID);
-		if (true) {
-			// room does not exist
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		try {
+			await this.leaveRoom(roomID, bannedUserID);
+			await this.prisma.banned.create({
+				data: {
+					room_id: roomID,
+					user_id: bannedUserID,
+				},
+			});
+		} catch (error) {
+			throw error;
 		}
-
-		// if (true) {
-		// 	// user does not exist
-		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		// }
-
-		// if (true) {
-		// 	// user does not have permission to ban
-		// 	throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
-		// }
-
-		// if (true) {
-		// 	// user is trying to ban themselves
-		// 	throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
-		// }
+		throw new HttpException("User banned", HttpStatus.OK);
 	}
 
 	async undoBan(
@@ -849,25 +851,17 @@ export class RoomsService {
 		console.log(roomID);
 		console.log(initiatorID);
 		console.log(bannedUserID);
-		if (true) {
-			// room does not exist
-			throw new HttpException("Room does not exist", HttpStatus.NOT_FOUND);
+		try {
+			await this.prisma.banned.deleteMany({
+				where: {
+					room_id: roomID,
+					user_id: bannedUserID,
+				},
+			});
+		} catch (error) {
+			throw error;
 		}
-
-		// if (true) {
-		// 	// user does not exist
-		// 	throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
-		// }
-
-		// if (true) {
-		// 	// user does not have permission to ban
-		// 	throw new HttpException("User is not in the room", HttpStatus.FORBIDDEN);
-		// }
-
-		// if (true) {
-		// 	// user is trying to undo their own ban
-		// 	throw new HttpException("User is the initiator", HttpStatus.BAD_REQUEST);
-		// }
+		throw new HttpException("User unbanned", HttpStatus.OK);
 	}
 
 	async getCalendarFile(roomID: string): Promise<File> {

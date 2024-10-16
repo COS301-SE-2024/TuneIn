@@ -11,6 +11,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { colors } from "../../styles/colors";
+import * as utils from "../../services/Utils";
+import auth from "../../services/AuthManagement";
 
 interface Participant {
 	id: string;
@@ -20,8 +23,7 @@ interface Participant {
 
 interface ParticipantsPageProps {
 	participants: Participant[];
-}
-import { colors } from "../../styles/colors"; // Assuming colors file is available
+} // Assuming colors file is available
 
 interface Participant {
 	id: string;
@@ -41,29 +43,27 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
 
-	let _roomParticipants = useLocalSearchParams();
-	let roomParticipants = _roomParticipants.participants;
-	const participantsInRoom: Participant[] = [];
-	if (typeof roomParticipants === "string") {
-		const roomParticipantsArray = JSON.parse(roomParticipants);
-		roomParticipantsArray.forEach(
-			(participant: {
-				userID: string;
-				username: string;
-				profile_picture_url: string;
-			}) => {
-				participantsInRoom.push({
-					id: participant.userID,
-					username: participant.username,
-					profilePictureUrl: participant.profile_picture_url,
-				});
-			},
-		);
-	} else if (Array.isArray(roomParticipants)) {
-		roomParticipants.forEach((participant) => {
-			participantsInRoom.push(JSON.parse(participant));
-		});
-	}
+	const { participantsFr, roomID } = useLocalSearchParams();
+	console.log("participantsFr", participantsFr, "roomID", roomID);
+	let roomParticipants = JSON.parse(participantsFr as string);
+	const [participantsInRoom, setParticipantsInRoom] = useState<Participant[]>(
+		[],
+	);
+
+	const roomParticipantsArray = roomParticipants;
+	roomParticipantsArray.forEach(
+		(participant: {
+			userID: string;
+			username: string;
+			profile_picture_url: string;
+		}) => {
+			participantsInRoom.push({
+				id: participant.userID,
+				username: participant.username,
+				profilePictureUrl: participant.profile_picture_url,
+			});
+		},
+	);
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -75,8 +75,36 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		setSelectedParticipant(null);
 	};
 
-	const handleBanUser = () => {
+	const handleBanUser = async () => {
 		console.log(`Banning user: ${selectedParticipant?.username}`);
+		const token = await auth.getToken();
+		if (!token) {
+			console.error("Failed to get token");
+			return;
+		}
+		const response = await fetch(
+			`${utils.API_BASE_URL}/rooms/${roomID}/banned`,
+			{
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					userID: selectedParticipant?.id,
+				}),
+			},
+		);
+		if (!response.ok) {
+			console.error("Failed to ban user");
+			return;
+		}
+		console.log("User banned successfully");
+		setParticipantsInRoom(
+			participantsInRoom.filter(() => {
+				return selectedParticipant?.id;
+			}),
+		);
 		handleCloseContextMenu();
 	};
 
@@ -155,7 +183,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 				<FlatList
 					data={participantsInRoom}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.userID}
+					keyExtractor={(item) => item.id}
 				/>
 			)}
 

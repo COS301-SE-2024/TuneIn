@@ -861,6 +861,9 @@ export class RoomsController {
 
 	@Get(":roomID/banned")
 	@ApiTags("room management")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({
 		summary: "Get list of banned users",
 		description:
@@ -880,12 +883,19 @@ export class RoomsController {
 		description:
 			"An array of UserDto representing the banned users in the room.",
 	})
-	async getBannedUsers(@Param("roomID") roomID: string): Promise<UserDto[]> {
-		return await this.roomsService.getBannedUsers(roomID);
+	async getBannedUsers(
+		@Request() req: Request,
+		@Param("roomID") roomID: string,
+	): Promise<UserDto[]> {
+		const userInfo = this.auth.getUserInfo(req);
+		return await this.roomsService.getBannedUsers(roomID, userInfo.id);
 	}
 
 	@Post(":roomID/banned")
 	@ApiTags("room management")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({
 		summary: "Perma ban someone from a room",
 		description: "Permanently bans a user from the room.",
@@ -922,6 +932,9 @@ export class RoomsController {
 
 	@Delete(":roomID/banned")
 	@ApiTags("room management")
+	@ApiBearerAuth()
+	@ApiSecurity("bearer")
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({
 		summary: "Undo participant ban",
 		description: "Undoes the ban of a participant in the room.",
