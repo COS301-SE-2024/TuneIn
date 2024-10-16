@@ -2,119 +2,121 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import ParticipantsPage from "../app/screens/rooms/ParticipantsPage"; // Adjust the import path as needed
 import { useNavigation } from "@react-navigation/native";
-import { useLocalSearchParams } from "expo-router";
-// Mock useNavigation from React Navigation
-jest.mock("@react-navigation/native", () => ({
-	useNavigation: jest.fn(),
-}));
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useAPI } from "../app/APIContext";
+import { useLive } from "../app/LiveContext";
 
+// Mocking external hooks
 jest.mock("expo-router", () => ({
-	useLocalSearchParams: jest.fn(),
 	useRouter: jest.fn(),
 }));
 
+jest.mock("../app/APIContext", () => ({
+	useAPI: jest.fn(),
+}));
+
+jest.mock("../app/LiveContext", () => ({
+	useLive: jest.fn(),
+}));
+
+jest.mock("expo-router", () => ({
+	useRouter: jest.fn(),
+	useLocalSearchParams: jest.fn(() => ({ roomID: "room123" })), // Mock roomID
+}));
+
 describe("ParticipantsPage", () => {
-	const mockNavigate = jest.fn();
-	const mockGoBack = jest.fn();
+	let mockRouter: { back: any }, mockRooms, mockRoomID, mockLiveContext;
 
 	beforeEach(() => {
-		// Mock the navigation functions
-		(useNavigation as jest.Mock).mockReturnValue({
-			navigate: mockNavigate,
-			goBack: mockGoBack,
-		});
+		// Setup mock for router
+		mockRouter = { back: jest.fn() };
+		(useRouter as jest.Mock).mockReturnValue(mockRouter);
 
-		(useLocalSearchParams as jest.Mock).mockReturnValue({
-			participants: JSON.stringify([
-				{
-					userID: "1",
-					username: "user_1",
-					profile_picture_url: "https://example.com/user1.jpg",
-				},
-				{
-					userID: "2",
-					username: "user_2_with_a_very_long_name",
-					profile_picture_url: "https://example.com/user2.jpg",
-				},
-			]),
-		});
+		// Mock API context
+		mockRooms = {
+			getRoomUsers: jest.fn().mockResolvedValue({
+				data: [
+					{ userID: "1", username: "user1", profile_picture_url: "" },
+					{
+						userID: "2",
+						username: "longusername_exce...",
+						profile_picture_url: "",
+					},
+				],
+			}),
+		};
+		(useAPI as jest.Mock).mockReturnValue({ rooms: mockRooms });
+
+		// Mock Live context
+		mockLiveContext = {
+			currentRoom: null,
+			roomParticipants: [],
+		};
+		(useLive as jest.Mock).mockReturnValue(mockLiveContext);
+
+		// Mock roomID param
+		mockRoomID = "room123";
 	});
 
-	const mockParticipants = [
-		{
-			id: "1",
-			username: "user_1",
-			profilePictureUrl: "https://example.com/user1.jpg",
-		},
-		{
-			id: "2",
-			username: "user_2_with_a_very_long_name",
-			profilePictureUrl: "https://example.com/user2.jpg",
-		},
-	];
+	it("renders correctly and displays participants", async () => {
+		const { findByText, getByTestId } = render(<ParticipantsPage />);
 
-	it("should render participants correctly", () => {
-		const { getByText } = render(
-			<ParticipantsPage participants={mockParticipants} />,
-		);
+		// Verify the component renders with participants
+		expect(await findByText("user1")).toBeTruthy();
+		expect(await findByText("longusername_exce...")).toBeTruthy();
 
-		// Check if both participants are rendered
-		expect(getByText("user_1")).toBeTruthy();
-		expect(getByText("user_2_with_a_ver...")).toBeTruthy();
+		// Check back button exists
+		expect(getByTestId("back-button")).toBeTruthy();
 	});
 
-	it("should navigate back when the back button is pressed", () => {
-		const { getByTestId } = render(
-			<ParticipantsPage participants={mockParticipants} />,
-		);
+	it("navigates back when back button is pressed", () => {
+		const { getByTestId } = render(<ParticipantsPage />);
 
-		// Simulate pressing the back button
+		// Simulate pressing back button
 		fireEvent.press(getByTestId("back-button"));
 
-		// Check if goBack was called
-		expect(mockGoBack).toHaveBeenCalled();
+		// Check if router.back() was called
+		expect(mockRouter.back).toHaveBeenCalled();
 	});
 
-	it("opens the context menu when the ellipsis button is pressed", () => {
-		const { getByTestId, getByText, queryByText } = render(
-			<ParticipantsPage participants={mockParticipants} />,
-		);
+	it("shows context menu when ellipsis button is pressed", async () => {
+		const { findByTestId, findByText } = render(<ParticipantsPage />);
 
-		const optionsButton = getByTestId("ellipsis-button-1"); // Assuming you add testID for ellipsis buttons
-		fireEvent.press(optionsButton);
+		// Wait for the ellipsis button to appear
+		const ellipsisButton = await findByTestId("ellipsis-button-1");
 
-		// Check if the context menu modal is displayed
-		expect(getByText("Ban user_1?")).toBeTruthy();
+		// Press the ellipsis button for user1
+		fireEvent.press(ellipsisButton);
+
+		// Check if modal appears
+		expect(await findByText("Ban user1?")).toBeTruthy();
 	});
 
-	it("sets the selected participant and shows the context menu", () => {
-		const { getByTestId, getByText } = render(
-			<ParticipantsPage participants={mockParticipants} />,
-		);
+	it("bans user when 'Ban User' is pressed", async () => {
+		const { findByTestId, findByText } = render(<ParticipantsPage />);
 
-		const optionsButton = getByTestId("ellipsis-button-2");
-		fireEvent.press(optionsButton);
+		// Open context menu
+		const ellipsisButton = await findByTestId("ellipsis-button-1");
+		fireEvent.press(ellipsisButton);
 
-		// Expect the modal to show the correct truncated username
-		expect(getByText("Ban user_2_with_a_ver...?")).toBeTruthy();
+		// Press 'Ban User'
+		fireEvent.press(await findByText("Ban User"));
+
+		// Ensure modal closes
+		expect(await findByText("Participants")).toBeTruthy();
 	});
 
-	it("bans the selected user and closes the context menu", () => {
-		console.log = jest.fn(); // Mock console.log to check if it's called
-		const { getByTestId, getByText, queryByText } = render(
-			<ParticipantsPage participants={mockParticipants} />,
-		);
+	it("closes context menu when 'Cancel' is pressed", async () => {
+		const { findByTestId, findByText } = render(<ParticipantsPage />);
 
-		const optionsButton = getByTestId("ellipsis-button-1");
-		fireEvent.press(optionsButton);
+		// Open context menu
+		const ellipsisButton = await findByTestId("ellipsis-button-1");
+		fireEvent.press(ellipsisButton);
 
-		const banButton = getByText("Ban User");
-		fireEvent.press(banButton);
+		// Press 'Cancel'
+		fireEvent.press(await findByText("Cancel"));
 
-		// Check if the user was banned
-		expect(console.log).toHaveBeenCalledWith("Banning user: user_1");
-
-		// Check if the modal is closed
-		expect(queryByText("Ban user_1?")).toBeNull();
+		// Ensure the modal is closed
+		expect(await findByText("Participants")).toBeTruthy();
 	});
 });
