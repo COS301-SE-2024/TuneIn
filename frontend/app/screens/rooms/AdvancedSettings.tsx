@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -25,6 +25,9 @@ import * as utils from "../../services/Utils";
 import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
 import { Track } from "../../models/Track";
 import { color } from "react-native-elements/dist/helpers";
+import { set } from "react-datepicker/dist/date_utils";
+import DateTimePickerComponent from "./DatePicker";
+import axios from "axios";
 const placeholderImage = require("../../assets/spotify.png");
 
 type Queues = {
@@ -37,8 +40,10 @@ const AdvancedSettings = () => {
 	const [toggle1, setToggle1] = useState(true);
 	const [toggle2, setToggle2] = useState(true);
 	const [toggle3, setToggle3] = useState(true);
-	const [toggle4, setToggle4] = useState(true);
 	const [genres, setGenres] = useState<string[]>([]);
+	const [roomData, setRoomData] = useState<Room | null>(null);
+	const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
 	const { room } = useLocalSearchParams();
 
@@ -53,7 +58,28 @@ const AdvancedSettings = () => {
 	const toggleSwitch1 = () => setToggle1((previousState) => !previousState);
 	const toggleSwitch2 = () => setToggle2((previousState) => !previousState);
 	const toggleSwitch3 = () => setToggle3((previousState) => !previousState);
-	const toggleSwitch4 = () => setToggle4((previousState) => !previousState);
+
+	useEffect(() => {
+		if (room) {
+			const formattedRoom = JSON.parse(room as string);
+			console.log("Formatted room data: ", formattedRoom);
+			setRoomData(formattedRoom);
+			setToggle1(formattedRoom.isPrivate);
+			setToggle2(
+				(formattedRoom.start_date !== undefined ||
+					formattedRoom.end_date !== undefined) as boolean,
+			);
+			setToggle3(formattedRoom.isTemporary ?? false);
+			setStartDate(
+				formattedRoom.start_date
+					? new Date(formattedRoom.start_date)
+					: undefined,
+			);
+			setEndDate(
+				formattedRoom.end_date ? new Date(formattedRoom.end_date) : undefined,
+			);
+		}
+	}, []);
 
 	const goToEditScreen = () => {
 		const formattedRoom = formatRoomData(JSON.parse(room as string));
@@ -328,8 +354,92 @@ const AdvancedSettings = () => {
 		}
 	};
 
-	const handleSave = () => {
-		setShowSaveModal(true); // Open the save modal
+	const handleSave = async () => {
+		try {
+			const token = await auth.getToken();
+			if (roomData) {
+				const roomID = roomData.id ?? roomData.roomID;
+				if (startDate === undefined && endDate === undefined) {
+					// alert message based on the OS
+					if (Platform.OS === "web") {
+						alert("Please select a start or end date");
+					} else {
+						ToastAndroid.show(
+							"Please select a start or end date",
+							ToastAndroid.SHORT,
+						);
+					}
+					return;
+				}
+				// check if the dates make sense
+				if (startDate && endDate && startDate >= endDate) {
+					// alert message based on the OS
+					if (Platform.OS === "web") {
+						alert("Start date must be before end date");
+					} else {
+						ToastAndroid.show(
+							"Start date must be before end date",
+							ToastAndroid.SHORT,
+						);
+					}
+					return;
+				}
+				// check if the start date is in the past
+				if (startDate && startDate < new Date()) {
+					if (Platform.OS === "web") {
+						alert("Start date must be in the future");
+					} else {
+						ToastAndroid.show(
+							"Start date must be in the future",
+							ToastAndroid.SHORT,
+						);
+					}
+					return;
+				}
+				// check if the end date is in the past
+				if (endDate && endDate < new Date()) {
+					alert("End date must be in the future");
+					return;
+				}
+				const data = {
+					is_private: toggle1,
+					is_scheduled: toggle2,
+					is_temporary: toggle3,
+					start_date: startDate,
+					end_date: endDate,
+				};
+				console.log("Room data to save: ", data, token);
+				const response = await axios(`${utils.API_BASE_URL}/rooms/${roomID}`, {
+					method: "PATCH",
+					headers: {
+						Authorization: `Bearer ${token}`,
+						"Content-Type": "application/json",
+					},
+					data: JSON.stringify(data),
+				});
+				console.log("Response to advanced edit: ", response);
+			} else {
+				console.log("No room data found");
+				if (Platform.OS === "android" && ToastAndroid) {
+					ToastAndroid.show("Failed to save room settings", ToastAndroid.SHORT);
+				} else if (Platform.OS === "web") {
+					alert("Failed to save room settings");
+				} else {
+					Alert.alert("Error", "Failed to save room settings.");
+				}
+				return;
+			}
+			setShowSaveModal(true);
+		} catch (error) {
+			console.log("Error saving room settings: ", error);
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Failed to save room settings", ToastAndroid.SHORT);
+			} else if (Platform.OS === "web") {
+				alert("Failed to save room settings");
+			} else {
+				Alert.alert("Error", "Failed to save room settings.");
+			}
+		}
 	};
 
 	const closeSaveModal = () => {
@@ -361,7 +471,7 @@ const AdvancedSettings = () => {
 				onClose={handleClosePopup}
 			/>
 			<ScrollView>
-				<Text style={styles.sectionHeader}>Who can join your room?</Text>
+				{/* <Text style={styles.sectionHeader}>Who can join your room?</Text>
 				<View style={styles.optionsContainer}>
 					<TouchableOpacity
 						style={[
@@ -403,11 +513,11 @@ const AdvancedSettings = () => {
 						<Text style={styles.optionText}>Only Friends</Text>
 						{selectedOption === 4 && <Text> ✓ </Text>}
 					</TouchableOpacity>
-				</View>
+				</View> */}
 
 				<View style={styles.toggleContainer}>
 					<View style={styles.toggleItem}>
-						<Text style={styles.toggleHeader}>Searchability</Text>
+						<Text style={styles.toggleHeader}>Private</Text>
 						<View style={styles.toggleSwitchContainer}>
 							<Switch
 								value={toggle1}
@@ -416,11 +526,11 @@ const AdvancedSettings = () => {
 							/>
 						</View>
 						<Text style={styles.toggleDescription}>
-							Make this room searchable
+							Room will only be visible to your friends
 						</Text>
 					</View>
 					<View style={styles.toggleItem}>
-						<Text style={styles.toggleHeader}>Listeners can add</Text>
+						<Text style={styles.toggleHeader}>Scheduled</Text>
 						<View style={styles.toggleSwitchContainer}>
 							<Switch
 								value={toggle2}
@@ -429,11 +539,29 @@ const AdvancedSettings = () => {
 							/>
 						</View>
 						<Text style={styles.toggleDescription}>
-							Allow everyone to add tracks
+							Set a start and end date for the room
 						</Text>
+						{toggle2 && (
+							<>
+								<DateTimePickerComponent
+									startDate={startDate}
+									endDate={endDate}
+									setStartDate={setStartDate}
+									setEndDate={setEndDate}
+								></DateTimePickerComponent>
+								<TouchableOpacity
+									onPress={() => {
+										setStartDate(undefined);
+										setEndDate(undefined);
+									}}
+								>
+									<Text style={styles.clearDatesButton}>Clear dates</Text>
+								</TouchableOpacity>
+							</>
+						)}
 					</View>
 					<View style={styles.toggleItem}>
-						<Text style={styles.toggleHeader}>Enable chat in room</Text>
+						<Text style={styles.toggleHeader}>Temporary</Text>
 						<View style={styles.toggleSwitchContainer}>
 							<Switch
 								value={toggle3}
@@ -442,10 +570,10 @@ const AdvancedSettings = () => {
 							/>
 						</View>
 						<Text style={styles.toggleDescription}>
-							Listeners can use chat functionality
+							The songs in queue will be deleted on end of playlist
 						</Text>
 					</View>
-					<View style={styles.toggleItem}>
+					{/* <View style={styles.toggleItem}>
 						<Text style={styles.toggleHeader}>Can vote</Text>
 						<View style={styles.toggleSwitchContainer}>
 							<Switch
@@ -457,7 +585,7 @@ const AdvancedSettings = () => {
 						<Text style={styles.toggleDescription}>
 							Listeners can vote for next song
 						</Text>
-					</View>
+					</View> */}
 				</View>
 
 				<TouchableOpacity style={styles.editButton} onPress={goToEditScreen}>
@@ -550,6 +678,12 @@ const styles = StyleSheet.create({
 		flex: 1,
 		padding: 20,
 		backgroundColor: "white",
+	},
+	clearDatesButton: {
+		padding: 10,
+		fontSize: 16,
+		textAlign: "center",
+		flex: 1,
 	},
 	header: {
 		flexDirection: "row",
