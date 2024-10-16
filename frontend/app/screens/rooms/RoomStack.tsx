@@ -22,6 +22,7 @@ import { useAPI } from "../../APIContext";
 import { RoomDto, RoomSongDto } from "../../../api";
 import auth from "../../services/AuthManagement";
 import * as utils from "../../services/Utils";
+import { Room } from "../../models/Room";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -133,7 +134,7 @@ function MyRoomTabs() {
 			});
 	};
 
-	const getRoom = async (roomID: string) => {
+	const getRoom = async (roomID: string): Promise<Room | null | undefined> => {
 		const token = await auth.getToken();
 		try {
 			const response = await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
@@ -165,10 +166,16 @@ function MyRoomTabs() {
 				isExplicit: data.has_explicit_content,
 				isNsfw: data.has_nsfw_content,
 				language: data.language,
-				roomSize: "50",
+				roomSize: data.room_size,
 				userProfile: data.creator.profile_picture_url,
 				mine: data.creator.userID === currentUser?.userID,
 				songName: data.current_song ? data.current_song.title : null,
+				artistName: data.current_song ? data.current_song.artists[0] : null,
+				isPrivate: data.is_private,
+				date_created: new Date(data.date_created),
+				start_date: data.start_date ? new Date(data.start_date) : undefined,
+				end_date: data.end_date ? new Date(data.end_date) : undefined,
+				childrenRoomIDs: data.childrenRoomIDs,
 			};
 		} catch (error) {
 			console.log("Error getting room: ", error);

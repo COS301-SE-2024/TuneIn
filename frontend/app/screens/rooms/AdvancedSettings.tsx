@@ -20,7 +20,7 @@ import CreateButton from "../../components/CreateButton";
 import DeleteButton from "../../components//DeleteButton";
 import { colors } from "../../styles/colors";
 import RoomShareSheet from "../../components/messaging/RoomShareSheet";
-import { formatRoomData } from "../../models/Room";
+import { formatRoomData, Room } from "../../models/Room";
 import * as utils from "../../services/Utils";
 import SplittingPopUp from "../../components/rooms/SplittingRoomPopUp";
 import { Track } from "../../models/Track";
@@ -101,7 +101,7 @@ const AdvancedSettings = () => {
 			}
 		}
 	};
-	const getRoom = async (roomID: string) => {
+	const getRoom = async (roomID: string): Promise<Room | null | undefined> => {
 		const token = await auth.getToken();
 		try {
 			const response = await fetch(`${utils.API_BASE_URL}/rooms/${roomID}`, {
@@ -133,10 +133,16 @@ const AdvancedSettings = () => {
 				isExplicit: data.has_explicit_content,
 				isNsfw: data.has_nsfw_content,
 				language: data.language,
-				roomSize: "50",
+				roomSize: data.room_size,
 				userProfile: data.creator.profile_picture_url,
 				mine: true,
 				songName: data.current_song ? data.current_song.title : null,
+				artistName: data.current_song ? data.current_song.artist : null,
+				isPrivate: data.is_private,
+				date_created: new Date(data.date_created),
+				start_date: data.start_date ? new Date(data.start_date) : undefined,
+				end_date: data.end_date ? new Date(data.end_date) : undefined,
+				childrenRoomIDs: data.childrenRoomIDs,
 			};
 		} catch (error) {
 			console.log("Error getting room: ", error);
@@ -222,8 +228,12 @@ const AdvancedSettings = () => {
 					const childRoom1 = await getRoom(data.childrenRoomIDs[0]);
 					const childRoom2 = await getRoom(data.childrenRoomIDs[1]);
 					if (childRoom1 && childRoom2) {
-						const childRoom1Queue = await getRoomQueue(childRoom1.id);
-						const childRoom2Queue = await getRoomQueue(childRoom2.id);
+						const childRoom1Queue = await getRoomQueue(
+							childRoom1.id ?? childRoom1.roomID ?? "",
+						);
+						const childRoom2Queue = await getRoomQueue(
+							childRoom2.id ?? childRoom2.roomID ?? "",
+						);
 						if (childRoom1Queue && childRoom2Queue) {
 							router.navigate({
 								pathname: "/screens/rooms/SplittingRoom",

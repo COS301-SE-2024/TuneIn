@@ -40,7 +40,7 @@ export const formatRoomData = (room: any): Room => {
 		userID: room.userID,
 		userProfile: room.userProfile ? room.userProfile : defaultProfileIcon,
 		username: room.username ? room.username : "Unknown",
-		roomSize: room.room_size,
+		roomSize: room.room_size ?? room.roomSize,
 		tags: room.tags ? room.tags : [],
 		mine: room.mine,
 		isNsfw: room.isNsfw,
