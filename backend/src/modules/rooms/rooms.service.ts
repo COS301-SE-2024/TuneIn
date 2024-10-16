@@ -195,6 +195,56 @@ export class RoomsService {
 			updatedRoom.room_language = updateRoomDto.language;
 		}
 
+		if (updateRoomDto.is_temporary !== undefined) {
+			updatedRoom.is_temporary = updateRoomDto.is_temporary;
+		}
+
+		if (updateRoomDto.is_scheduled !== undefined) {
+			if (updateRoomDto.is_scheduled) {
+				// update if the room already is a scheduled room, else create a new scheduled room
+				updatedRoom.scheduled_room = {
+					upsert: {
+						create: {
+							start_date: updateRoomDto.start_date ?? null,
+							end_date: updateRoomDto.end_date ?? null,
+						},
+						update: {
+							start_date: updateRoomDto.start_date ?? null,
+							end_date: updateRoomDto.end_date ?? null,
+						},
+					},
+				};
+			} else {
+				updatedRoom.scheduled_room = {
+					delete: true,
+				};
+			}
+		}
+
+		if (updateRoomDto.is_private !== undefined) {
+			if (updateRoomDto.is_private) {
+				updatedRoom.public_room = {
+					delete: true,
+				};
+				updatedRoom.private_room = {
+					upsert: {
+						create: {},
+						update: {},
+					},
+				};
+			} else {
+				updatedRoom.private_room = {
+					delete: true,
+				};
+				updatedRoom.public_room = {
+					upsert: {
+						create: {},
+						update: {},
+					},
+				};
+			}
+		}
+
 		try {
 			const room: FullyQualifiedRoom = await this.prisma.room.update({
 				where: {
