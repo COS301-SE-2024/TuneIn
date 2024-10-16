@@ -2,30 +2,35 @@
 const defaultProfileIcon = require("../../assets/profile-icon.png");
 
 export interface Room {
-	roomID?: string;
+	id?: string;
+	roomID: string;
 	backgroundImage: string;
 	name: string;
 	songName?: string | null;
 	artistName?: string | null;
 	description: string;
-	userProfile?: string;
+	userProfile: string;
 	userID: string;
-	username?: string;
-	mine?: boolean;
+	username: string;
+	mine: boolean;
 	tags: string[];
 	playlist?: string[];
 	genre?: string;
-	language?: string;
-	roomSize?: number;
-	isExplicit?: boolean;
-	isNsfw?: boolean;
-	start_date: Date;
-	end_date: Date;
-	childrenRoomIDs?: string[];
+	language: string;
+	roomSize: number;
+	isExplicit: boolean;
+	isNsfw: boolean;
+	isPrivate: boolean;
+	date_created: Date;
+	start_date: Date | undefined;
+	end_date: Date | undefined;
+	childrenRoomIDs: string[];
+	isTemporary?: boolean;
 }
 
 export const formatRoomData = (room: any): Room => {
 	return {
+		id: room.roomID ?? room.id,
 		roomID: room.id ?? room.roomID,
 		backgroundImage: room.backgroundImage,
 		name: room.name,
@@ -36,7 +41,7 @@ export const formatRoomData = (room: any): Room => {
 		userID: room.userID,
 		userProfile: room.userProfile ? room.userProfile : defaultProfileIcon,
 		username: room.username ? room.username : "Unknown",
-		roomSize: 55,
+		roomSize: room.room_size ?? room.roomSize,
 		tags: room.tags ? room.tags : [],
 		mine: room.mine,
 		isNsfw: room.isNsfw,
@@ -44,5 +49,9 @@ export const formatRoomData = (room: any): Room => {
 		start_date: room.start_date,
 		end_date: room.end_date,
 		childrenRoomIDs: room.childrenRoomIDs,
+		playlist: room.playlist,
+		isPrivate: room.is_private,
+		date_created: room.date_created,
+		isTemporary: room.is_temporary,
 	};
 };

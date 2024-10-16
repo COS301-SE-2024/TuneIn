@@ -241,7 +241,10 @@ const RoomPage: React.FC = () => {
 	const handleViewParticipants = () => {
 		router.navigate({
 			pathname: "/screens/rooms/ParticipantsPage",
-			params: { roomID: roomID },
+			params: {
+				participantsFr: JSON.stringify(participants),
+				roomID: roomID,
+			},
 		});
 	};
 
@@ -413,7 +416,16 @@ const RoomPage: React.FC = () => {
 			getAndSetRoomInfo();
 			checkBookmarked();
 		}
+		checkBookmarked();
 	}, []);
+	const handleUserPress = () => {
+		router.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: roomData.profile_picture_url,
+				username: roomData.username,
+			})}&user=${roomData.user}`,
+		);
+	};
 
 	return (
 		<View style={styles.container}>
@@ -539,7 +551,7 @@ const RoomPage: React.FC = () => {
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
 				<TouchableOpacity
-					// onPress={handleUserPress}
+					onPress={handleUserPress}
 					style={styles.userInfoContainer}
 				>
 					<Image

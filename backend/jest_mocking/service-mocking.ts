@@ -429,6 +429,7 @@ export const mockUsersService = {
 	calculatePopularity: jest.fn(),
 	calculateActivity: jest.fn(),
 	calculateGenreSimilarity: jest.fn(),
+	updateProfile: jest.fn(),
 };
 
 export const mockRecommendationsService = {

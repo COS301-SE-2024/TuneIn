@@ -87,15 +87,21 @@ const MorePage: React.FC = () => {
 				</TouchableOpacity>
 				<Text style={[styles.title, { paddingRight: 30 }]}>{params.title}</Text>
 			</View>
-			<FlatList
-				ref={flatListRef}
-				data={items}
-				renderItem={renderResult}
-				contentContainerStyle={styles.resultsContainer}
-				onScroll={handleScroll}
-				// ListFooterComponent={renderFooter}
-				testID="flatlist"
-			/>
+			{(items.length === 0 && (
+				<View style={styles.emptyQueueContainer}>
+					<Text style={styles.emptyQueueText}>No users found.</Text>
+				</View>
+			)) || (
+				<FlatList
+					ref={flatListRef}
+					data={items}
+					renderItem={renderResult}
+					contentContainerStyle={styles.resultsContainer}
+					onScroll={handleScroll}
+					// ListFooterComponent={renderFooter}
+					testID="flatlist"
+				/>
+			)}
 		</View>
 	);
 };
@@ -106,6 +112,17 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingTop: 30,
 		backgroundColor: "#fff",
+	},
+	emptyQueueContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: 20,
+	},
+	emptyQueueText: {
+		fontSize: 18,
+		textAlign: "center",
+		color: "#888",
 	},
 	roomCardPadding: {
 		marginTop: 20,
