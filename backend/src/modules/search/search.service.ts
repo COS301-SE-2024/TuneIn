@@ -205,7 +205,10 @@ export class SearchService {
 					!blocked_rooms.map((room) => room.room_id.toString()).includes(id),
 			);
 
-			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
+			const roomDtos = await this.dtogen.generateMultipleRoomDto(
+				roomIds,
+				userID,
+			);
 			// console.log(roomDtos);
 
 			if (roomDtos) {
@@ -431,7 +434,10 @@ export class SearchService {
 				(id) =>
 					!blocked_rooms.map((room) => room.room_id.toString()).includes(id),
 			);
-			const roomDtos = await this.dtogen.generateMultipleRoomDto(roomIds);
+			const roomDtos = await this.dtogen.generateMultipleRoomDto(
+				roomIds,
+				userID,
+			);
 
 			if (roomDtos) {
 				const sortedRooms = roomIds

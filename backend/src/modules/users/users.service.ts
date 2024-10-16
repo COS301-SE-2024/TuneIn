@@ -537,11 +537,23 @@ export class UsersService {
 			throw new Error("User has no friends");
 		}
 		const friendIDs = friends.map((friend) => friend.user_id);
-		const rooms: RoomDto[] = [];
-		for (const friendID of friendIDs) {
-			const friendRooms = await this.getUserRooms(friendID);
-			rooms.push(...friendRooms);
-		}
+		const friendRooms: FullyQualifiedRoom[] = await this.prisma.room.findMany({
+			where: {
+				room_creator: {
+					in: friendIDs,
+				},
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
+		});
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDtoFromRoom(
+			friendRooms,
+		);
 		return rooms;
 	}
 
@@ -553,11 +565,20 @@ export class UsersService {
 		const followingIDs = following
 			.map((follow) => follow.user_id)
 			.filter((id) => id !== userID);
-		const rooms: RoomDto[] = [];
-		for (const followID of followingIDs) {
-			const followRooms = await this.getUserRooms(followID);
-			rooms.push(...followRooms);
-		}
+		const followingRoomsIDs = await this.prisma.room.findMany({
+			where: {
+				room_creator: {
+					in: followingIDs,
+				},
+			},
+			select: {
+				room_id: true,
+			},
+		});
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
+			followingRoomsIDs.map((room) => room.room_id),
+			userID,
+		);
 		return rooms;
 	}
 	async getUserRooms(userID: string): Promise<RoomDto[]> {
@@ -578,7 +599,7 @@ export class UsersService {
 		}
 
 		const ids: string[] = rooms.map((room) => room.room_id);
-		const r = await this.dtogen.generateMultipleRoomDto(ids);
+		const r = await this.dtogen.generateMultipleRoomDto(ids, userID);
 		return r;
 	}
 
@@ -601,15 +622,17 @@ export class UsersService {
 		if (createRoomDto.is_temporary !== undefined)
 			newRoom.is_temporary = createRoomDto.is_temporary;
 
-		/*
-		if (createRoomDto.language) newRoom.language = createRoomDto.language;
-		*/
+		if (createRoomDto.language !== undefined)
+			newRoom.room_language = createRoomDto.language;
 		if (createRoomDto.has_explicit_content !== undefined)
 			newRoom.explicit = createRoomDto.has_explicit_content;
 		if (createRoomDto.has_nsfw_content !== undefined)
 			newRoom.nsfw = createRoomDto.has_nsfw_content;
 		if (createRoomDto.room_image !== undefined)
 			newRoom.playlist_photo = createRoomDto.room_image;
+		if (createRoomDto.room_size !== undefined)
+			newRoom.room_size = createRoomDto.room_size;
+		if (createRoomDto.tags !== undefined) newRoom.tags = createRoomDto.tags;
 
 		/*
 		if (createRoomDto.current_song)
@@ -789,6 +812,7 @@ export class UsersService {
 			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
 			const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
 				randomRooms.map((room: PrismaTypes.room) => room.room_id),
+				userID,
 			);
 			return r === null ? [] : r;
 		}
@@ -805,7 +829,7 @@ export class UsersService {
 		const ids: string[] = recommendedRooms.map(
 			(room: { playlist: string; score: number }) => room.playlist,
 		);
-		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids);
+		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids, userID);
 		return r;
 	}
 
@@ -904,7 +928,10 @@ export class UsersService {
 			});
 
 		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
-		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
+			roomIDs,
+			u.user_id,
+		);
 		return rooms;
 	}
 
