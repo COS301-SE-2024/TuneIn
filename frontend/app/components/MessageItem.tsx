@@ -19,6 +19,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 				<Image
 					source={{ uri: message.message.sender.profile_picture_url }}
 					style={styles.avatar}
+					accessibilityLabel={`${message.message.sender.username}'s avatar`}
 				/>
 			)}
 			<View
