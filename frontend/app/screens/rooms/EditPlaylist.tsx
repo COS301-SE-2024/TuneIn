@@ -49,6 +49,12 @@ const EditPlaylist: React.FC = () => {
 	// }, []);
 
 	useEffect(() => {
+		if (searchQuery.length > 3) {
+			handleSearch(searchQuery);
+		}
+	}, [searchQuery]);
+
+	useEffect(() => {
 		if (!unsavedChanges) {
 			fetchSongInfo(roomQueue.map((song) => song.spotifyID)).then(
 				(tracks: Spotify.Track[]) => {
@@ -213,7 +219,7 @@ const EditPlaylist: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
-			<View>
+			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
 					onPress={() => router.back()}
@@ -221,21 +227,21 @@ const EditPlaylist: React.FC = () => {
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
+				<View style={styles.searchContainer}>
+					<TextInput
+						style={styles.input}
+						placeholder="Search for songs..."
+						value={searchQuery}
+						onChangeText={setSearchQuery}
+					/>
+					<Ionicons
+						name="search"
+						size={24}
+						color={colors.primary}
+						style={styles.searchIcon}
+					/>
+				</View>
 			</View>
-			<TextInput
-				style={styles.input}
-				placeholder="Search for songs..."
-				value={searchQuery}
-				onChangeText={setSearchQuery}
-			/>
-			<TouchableOpacity
-				style={styles.searchButton}
-				onPress={() => handleSearch(searchQuery)}
-			>
-				<Text style={styles.buttonText}>Search</Text>
-			</TouchableOpacity>
-
-			{/* Selected Playlist Section */}
 			<ScrollView style={styles.selectedContainer}>
 				<Text style={styles.sectionTitle}>Selected Tracks</Text>
 				{newQueue.map((song) => (
@@ -307,21 +313,20 @@ const styles = StyleSheet.create({
 		padding: 20,
 		backgroundColor: "#fff",
 	},
+	headerContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 20,
+	},
 	backButton: {
-		position: "absolute",
-		left: 0,
-		top: -10,
+		marginRight: 10,
 	},
 	input: {
-		marginTop: 30,
-		borderWidth: 1,
-		borderColor: "#ccc",
-		borderRadius: 20,
-		padding: 10,
-		marginBottom: 15,
+		flex: 1,
+		height: 40,
 	},
 	selectedContainer: {
-		maxHeight: 200,
+		maxHeight: "40%",
 		marginBottom: 10,
 		borderColor: "#ddd",
 		borderWidth: 1,
@@ -363,15 +368,19 @@ const styles = StyleSheet.create({
 	resultsContainer: {
 		flex: 1,
 	},
-	searchButton: {
-		backgroundColor: colors.primary,
-		borderRadius: 30,
-		height: 50,
+	searchContainer: {
+		flex: 1,
+		marginTop: 20,
+		flexDirection: "row",
 		alignItems: "center",
-		justifyContent: "center",
-		elevation: 5,
-		marginTop: 5,
-		marginBottom: 10,
+		marginBottom: 20,
+		borderColor: "#ccc",
+		borderWidth: 1,
+		borderRadius: 56,
+		paddingHorizontal: 15,
+	},
+	searchIcon: {
+		marginLeft: 10,
 	},
 	clearButton: {
 		backgroundColor: colors.secondary,
@@ -383,7 +392,7 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 	},
 	saveButton: {
-		backgroundColor: colors.secondary,
+		backgroundColor: colors.primary,
 		borderRadius: 30,
 		height: 50,
 		alignItems: "center",
