@@ -1654,8 +1654,22 @@ export class UsersService {
 		}
 		// unfriend and unfollow user
 		try {
-			await this.unfollowUser(userID, usernameToBlock);
-			await this.unfriendUser(userID, usernameToBlock);
+			await this.prisma.friends.deleteMany({
+				where: {
+					OR: [
+						{ friend1: userID, friend2: user.user_id },
+						{ friend1: user.user_id, friend2: userID },
+					],
+				},
+			});
+			await this.prisma.follows.deleteMany({
+				where: {
+					OR: [
+						{ follower: userID, followee: user.user_id },
+						{ follower: user.user_id, followee: userID },
+					],
+				},
+			});
 		} catch (e) {
 			console.log(e);
 		}
