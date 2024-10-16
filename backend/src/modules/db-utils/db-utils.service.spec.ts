@@ -36,6 +36,7 @@ describe("DbUtilsService", () => {
 					explicit: null,
 					tags: [],
 					playlist_id: null,
+					room_size: 50 as any,
 				},
 				{
 					room_id: "2",
@@ -50,6 +51,7 @@ describe("DbUtilsService", () => {
 					explicit: null,
 					tags: [],
 					playlist_id: null,
+					room_size: 50 as any,
 				},
 			];
 			jest.spyOn(mockPrismaService.room, "findMany").mockResolvedValue(rooms);
@@ -83,6 +85,7 @@ describe("DbUtilsService", () => {
 					explicit: null,
 					tags: [],
 					playlist_id: null,
+					room_size: 50 as any,
 				},
 				{
 					room_id: "2",
@@ -97,6 +100,7 @@ describe("DbUtilsService", () => {
 					explicit: null,
 					tags: [],
 					playlist_id: null,
+					room_size: 0.0 as any,
 				},
 			];
 			jest.spyOn(mockPrismaService.room, "findMany").mockResolvedValue(rooms);
@@ -123,6 +127,7 @@ describe("DbUtilsService", () => {
 				explicit: null,
 				tags: [],
 				playlist_id: null,
+				room_size: 50 as any,
 			};
 			const publicRoom: PrismaTypes.public_room = { room_id: "1" };
 			jest.spyOn(mockPrismaService.room, "findUnique").mockResolvedValue(room);
@@ -151,6 +156,7 @@ describe("DbUtilsService", () => {
 				explicit: null,
 				tags: [],
 				playlist_id: null,
+				room_size: 50 as any,
 			};
 			jest.spyOn(mockPrismaService.room, "findUnique").mockResolvedValue(room);
 			jest
@@ -190,6 +196,7 @@ describe("DbUtilsService", () => {
 				explicit: null,
 				tags: [],
 				playlist_id: null,
+				room_size: 50 as any,
 			};
 			const privateRoom: PrismaTypes.private_room = {
 				room_id: "1",
@@ -223,6 +230,7 @@ describe("DbUtilsService", () => {
 				explicit: null,
 				tags: [],
 				playlist_id: null,
+				room_size: 50 as any,
 			};
 			jest.spyOn(mockPrismaService.room, "findUnique").mockResolvedValue(room);
 			jest
@@ -264,6 +272,7 @@ describe("DbUtilsService", () => {
 				explicit: null,
 				tags: [],
 				playlist_id: null,
+				room_size: 50 as any,
 			};
 			jest.spyOn(mockPrismaService.room, "findUnique").mockResolvedValue(room);
 

@@ -2,8 +2,18 @@ import axios from "axios";
 import auth from "./AuthManagement";
 import * as utils from "./Utils";
 import { Friend } from "../models/friend";
+import { Alert, Platform, ToastAndroid } from "react-native";
 
 class FriendServices {
+	static showErrorMessage(message: string): void {
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		} else if (Platform.OS === "web") {
+			alert(message);
+		} else {
+			Alert.alert("Error", message);
+		}
+	}
 	// Fetch all friends
 	static async getFriends(): Promise<Friend[]> {
 		const token = await auth.getToken();
@@ -18,7 +28,7 @@ class FriendServices {
 				relationship: friend.relationship,
 			}));
 		} catch (error) {
-			console.error("Error fetching friends:", error);
+			this.showErrorMessage("Error fetching friends.");
 			throw error;
 		}
 	}
@@ -39,7 +49,7 @@ class FriendServices {
 				username: request.username,
 			}));
 		} catch (error) {
-			console.error("Error fetching friend requests:", error);
+			this.showErrorMessage("Error fetching friend requests.");
 			throw error;
 		}
 	}
@@ -61,7 +71,7 @@ class FriendServices {
 				relationship: "mutual",
 			}));
 		} catch (error) {
-			console.error("Error fetching potential friends:", error);
+			this.showErrorMessage("Error fetching potential friends.");
 			throw error;
 		}
 	}
@@ -83,7 +93,7 @@ class FriendServices {
 				relationship: "pending",
 			}));
 		} catch (error) {
-			console.error("Error fetching pending requests:", error);
+			this.showErrorMessage("Error fetching pending friend requests.");
 			throw error;
 		}
 	}
@@ -99,10 +109,13 @@ class FriendServices {
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
-			if (response.status !== 201) throw new Error("Failed to send request.");
+			if (response.status !== 201) {
+				console.log("Failed to send request.");
+			}
+			return;
 		} catch (error) {
-			console.error("Error sending request:", error);
-			throw error;
+			this.showErrorMessage("Error sending request.");
+			console.log("Error sending request:", error);
 		}
 	}
 
@@ -110,17 +123,14 @@ class FriendServices {
 	static async handleCancelRequest(friend: Friend): Promise<void> {
 		const token = await auth.getToken();
 		try {
-			const response = await fetch(
-				`${utils.API_BASE_URL}/users/${friend.username}/cancel`,
-				{
-					method: "POST",
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
-			if (response.status !== 201) throw new Error("Failed to cancel request.");
+			await fetch(`${utils.API_BASE_URL}/users/${friend.username}/cancel`, {
+				method: "POST",
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			// if (response.status !== 201) throw new Error("Failed to cancel request.");
 		} catch (error) {
-			console.error("Error cancelling request:", error);
-			throw error;
+			this.showErrorMessage("Error cancelling request.");
+			console.log("Error cancelling request:", error);
 		}
 	}
 
@@ -131,17 +141,17 @@ class FriendServices {
 	): Promise<void> {
 		const token = await auth.getToken();
 		try {
-			const response = await fetch(
+			await fetch(
 				`${utils.API_BASE_URL}/users/${friend.username}/${accept ? "accept" : "reject"}`,
 				{
 					method: "POST",
 					headers: { Authorization: `Bearer ${token}` },
 				},
 			);
-			if (response.status !== 201) throw new Error("Failed to handle request.");
+			// if (response.status !== 201) throw new Error("Failed to handle request.");
 		} catch (error) {
-			console.error("Error handling friend request:", error);
-			throw error;
+			this.showErrorMessage("Error handling request.");
+			// throw error;
 		}
 	}
 
@@ -149,17 +159,14 @@ class FriendServices {
 	static async handleFriend(friend: Friend): Promise<void> {
 		const token = await auth.getToken();
 		try {
-			const response = await fetch(
-				`${utils.API_BASE_URL}/users/${friend.username}/unfriend`,
-				{
-					method: "POST",
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
-			if (response.status !== 201) throw new Error("Failed to unfriend.");
+			await fetch(`${utils.API_BASE_URL}/users/${friend.username}/unfriend`, {
+				method: "POST",
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			// if (response.status !== 201) throw new Error("Failed to unfriend.");
 		} catch (error) {
-			console.error("Error unfriending user:", error);
-			throw error;
+			this.showErrorMessage("Error unfriending user.");
+			// throw error;
 		}
 	}
 	// Fetch followers
@@ -186,7 +193,7 @@ class FriendServices {
 					}),
 				);
 		} catch (error) {
-			console.error("Error fetching followers:", error);
+			this.showErrorMessage("Error fetching followers.");
 			throw error;
 		}
 	}
@@ -226,7 +233,7 @@ class FriendServices {
 
 			return combinedFollowing;
 		} catch (error) {
-			console.error("Error fetching following:", error);
+			this.showErrorMessage("Error fetching following.");
 			throw error;
 		}
 	}
@@ -248,7 +255,7 @@ class FriendServices {
 				relationship: "pending",
 			}));
 		} catch (error) {
-			console.error("Error fetching pending friend requests:", error);
+			this.showErrorMessage("Error fetching pending requests.");
 			throw error;
 		}
 	}
@@ -261,7 +268,7 @@ class FriendServices {
 			throw new Error("No token found.");
 		}
 		try {
-			const response = await axios.post(
+			await axios.post(
 				`${utils.API_BASE_URL}/users/${friend.username}/unfollow`,
 				{},
 				{
@@ -270,10 +277,10 @@ class FriendServices {
 					},
 				},
 			);
-			if (!response) throw new Error("Error unfollowing user.");
+			// if (!response) throw new Error("Error unfollowing user.");
 		} catch (error) {
-			console.error("Error unfollowing user:", error);
-			throw error;
+			this.showErrorMessage("Error unfollowing user.");
+			// throw error;
 		}
 	}
 
@@ -284,7 +291,7 @@ class FriendServices {
 			throw new Error("No token found.");
 		}
 		try {
-			const response = await axios.post(
+			await axios.post(
 				`${utils.API_BASE_URL}/users/${friend.username}/follow`,
 				{},
 				{
@@ -293,10 +300,10 @@ class FriendServices {
 					},
 				},
 			);
-			if (!response) throw new Error("Error unfollowing user.");
+			// if (!response) throw new Error("Error unfollowing user.");
 		} catch (error) {
-			console.error("Error unfollowing user:", error);
-			throw error;
+			this.showErrorMessage("Error following user.");
+			// throw error;
 		}
 	}
 }

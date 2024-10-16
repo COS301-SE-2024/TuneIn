@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -11,6 +11,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
+import * as utils from "../../services/Utils";
+import auth from "../../services/AuthManagement";
+import { useLocalSearchParams } from "expo-router";
 
 interface Participant {
 	id: string;
@@ -22,26 +25,11 @@ interface BannedUsersProps {
 	bannedUsers?: Participant[]; // Make bannedUsers optional
 }
 
-const BannedUsers: React.FC<BannedUsersProps> = ({
-	bannedUsers = [
-		{
-			id: "1",
-			username: "john_doe_123",
-			profilePictureUrl: "https://randomuser.me/api/portraits/men/1.jpg",
-		},
-		{
-			id: "2",
-			username: "jane_smith_456",
-			profilePictureUrl: "https://randomuser.me/api/portraits/women/2.jpg",
-		},
-		{
-			id: "3",
-			username: "sam_wilson_789",
-			profilePictureUrl: "https://randomuser.me/api/portraits/men/3.jpg",
-		},
-	],
-}) => {
+const BannedUsers: React.FC<BannedUsersProps> = () => {
 	const navigation = useNavigation();
+	const router = useLocalSearchParams();
+	const { room } = router;
+	const [bannedUsersArray, setBannedUsersarray] = useState<Participant[]>([]);
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
@@ -56,12 +44,79 @@ const BannedUsers: React.FC<BannedUsersProps> = ({
 		setSelectedParticipant(null);
 	};
 
-	const handleUnbanUser = () => {
+	const handleUnbanUser = async () => {
 		// Perform the unban action here
 		console.log(`Unbanning user: ${selectedParticipant?.username}`);
 		// After unbanning, close the menu
+		console.log(`Banning user: ${selectedParticipant?.username}`);
+		const token = await auth.getToken();
+		if (!token) {
+			console.error("Failed to get token");
+			return;
+		}
+		const roomData = JSON.parse(room as string);
+		const response = await fetch(
+			`${utils.API_BASE_URL}/rooms/${roomData.id}/banned`,
+			{
+				method: "DELETE",
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					userID: selectedParticipant?.id,
+				}),
+			},
+		);
+		if (!response.ok) {
+			console.error("Failed to ban user");
+			return;
+		}
+		console.log("User banned successfully");
+		setBannedUsersarray(
+			bannedUsersArray.filter(() => {
+				return selectedParticipant?.id;
+			}),
+		);
 		handleCloseContextMenu();
 	};
+
+	useEffect(() => {
+		const getBannedUsers = async () => {
+			// Fetch banned users from the server
+			const token = await auth.getToken();
+			if (!token) {
+				console.error("Failed to get token");
+				return;
+			}
+			const roomData = JSON.parse(room as string);
+			const response = await fetch(
+				`${utils.API_BASE_URL}/rooms/${roomData.roomID}/banned`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			if (!response.ok) {
+				console.error("Failed to fetch banned users");
+				return;
+			}
+			const data = await response.json();
+			console.log("Banned users:", data);
+			setBannedUsersarray(
+				data?.map((user: any): Participant => {
+					return {
+						id: user.userID,
+						username: user.username,
+						profilePictureUrl: user.profile_picture_url,
+					};
+				}),
+			);
+		};
+		getBannedUsers();
+	}, []);
 
 	const renderItem = ({ item }: { item: Participant }) => {
 		const truncatedUsername =
@@ -110,7 +165,7 @@ const BannedUsers: React.FC<BannedUsersProps> = ({
 				<Text style={styles.header}>Banned Users</Text>
 			</View>
 
-			{bannedUsers.length === 0 ? (
+			{bannedUsersArray.length === 0 ? (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no banned users.
@@ -118,7 +173,7 @@ const BannedUsers: React.FC<BannedUsersProps> = ({
 				</View>
 			) : (
 				<FlatList
-					data={bannedUsers}
+					data={bannedUsersArray}
 					renderItem={renderItem}
 					keyExtractor={(item) => item.id}
 				/>

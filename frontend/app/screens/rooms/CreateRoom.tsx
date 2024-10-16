@@ -2,31 +2,36 @@ import React, { useState } from "react";
 import {
 	View,
 	Text,
-	TextInput,
 	Switch,
 	TouchableOpacity,
 	KeyboardAvoidingView,
 	Platform,
 	ScrollView,
-	Alert,
+	ToastAndroid,
 } from "react-native";
 import { useRouter } from "expo-router"; // Import useRouter from 'expo-router'
 import MyToggleWidget from "../../components/ToggleWidget"; // Adjust the import path as needed
-import DateTimePicker from "@react-native-community/datetimepicker";
-import moment from "moment";
 import CreateButton from "../../components/CreateButton";
+import DateTimePickerComponent from "./DatePicker";
 
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();
 	const [isSwitched, setIsSwitched] = useState(false);
-	const [newRoom] = useState({
+	const [newRoom] = useState<{
+		is_permanent: boolean;
+		is_private: boolean;
+		is_scheduled: boolean;
+		start_date: Date | null;
+		end_date: Date | null;
+	}>({
 		is_permanent: true,
 		is_private: false,
+		is_scheduled: false,
+		start_date: null,
+		end_date: null,
 	});
-	const [date, setDate] = useState(new Date());
-	const [time, setTime] = useState(new Date());
-	const [showDatePicker, setShowDatePicker] = useState(false);
-	const [showTimePicker, setShowTimePicker] = useState(false);
+	const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
 	const handleToggleChange = (isFirstOptionSelected: boolean) => {
 		newRoom["is_permanent"] = isFirstOptionSelected;
@@ -47,65 +52,59 @@ const CreateRoomScreen: React.FC = () => {
 	const navigateToRoomDetails = () => {
 		console.log("Navigating to RoomDetails screen");
 		if (isSwitched) {
-			const currentDate = moment(date).format("MM/DD/YYYY");
-			const currentTime = moment(time).format("HH:mm");
-			console.log("Date before:", date);
-			const newDate = new Date(
-				date.getFullYear(),
-				date.getMonth(),
-				date.getDate(),
-				time.getHours(),
-				time.getMinutes(),
-			);
-
-			if (newDate < new Date()) {
-				Alert.alert(
-					"Invalid Date",
-					"Please select a future date and time.",
-					[{ text: "OK" }],
-					{ cancelable: false },
-				);
+			newRoom["start_date"] = startDate ?? null;
+			newRoom["end_date"] = endDate ?? null;
+			if (startDate === undefined && endDate === undefined) {
+				// alert message based on the OS
+				if (Platform.OS === "web") {
+					alert("Please select a start or end date");
+				} else {
+					ToastAndroid.show(
+						"Please select a start or end date",
+						ToastAndroid.SHORT,
+					);
+				}
 				return;
 			}
-			Alert.alert(
-				"Scheduled Room",
-				`Room will be scheduled for ${currentDate} at ${currentTime}.`,
-				[{ text: "OK" }],
-				{ cancelable: false },
-			);
-			newRoom["start_date"] = newDate;
+			// check if the dates make sense
+			if (startDate && endDate && startDate >= endDate) {
+				// alert message based on the OS
+				if (Platform.OS === "web") {
+					alert("Start date must be before end date");
+				} else {
+					ToastAndroid.show(
+						"Start date must be before end date",
+						ToastAndroid.SHORT,
+					);
+				}
+				return;
+			}
+			// check if the start date is in the past
+			if (startDate && startDate < new Date()) {
+				if (Platform.OS === "web") {
+					alert("Start date must be in the future");
+				} else {
+					ToastAndroid.show(
+						"Start date must be in the future",
+						ToastAndroid.SHORT,
+					);
+				}
+				return;
+			}
+			// check if the end date is in the past
+			if (endDate && endDate < new Date()) {
+				alert("End date must be in the future");
+				return;
+			}
 		}
+		console.log("Today date:", new Date());
 		newRoom["is_scheduled"] = isSwitched;
 		const room = JSON.stringify(newRoom);
+		console.log("New room:", room);
 		router.navigate({
 			pathname: "/screens/rooms/RoomDetails",
 			params: { room: room },
 		});
-	};
-
-	const handleDateChange = (event, selectedDate) => {
-		const currentDate = selectedDate || date;
-		setShowDatePicker(Platform.OS === "ios");
-		setDate(currentDate);
-		console.log(
-			"Selected date:",
-			selectedDate,
-			currentDate,
-			moment(currentDate).format("MM/DD/YYYY"),
-		);
-		currentDate.setHours(time.getHours());
-	};
-
-	const handleTimeChange = (event, selectedTime) => {
-		const currentTime = selectedTime || time;
-		setShowTimePicker(Platform.OS === "ios");
-		setTime(currentTime);
-		console.log(
-			"Selected time:",
-			selectedTime,
-			currentTime,
-			moment(currentTime).format("HH:mm"),
-		);
 	};
 
 	return (
@@ -142,42 +141,22 @@ const CreateRoomScreen: React.FC = () => {
 							<Switch value={isSwitched} onValueChange={setIsSwitched} />
 						</View>
 						{isSwitched && (
-							<View style={styles.dateTimePickerContainer}>
+							<View styles={styles.dateTimePickerContainer}>
+								<DateTimePickerComponent
+									startDate={startDate}
+									setStartDate={setStartDate}
+									endDate={endDate}
+									setEndDate={setEndDate}
+								/>
+								{/* button to clear dates*/}
 								<TouchableOpacity
-									onPress={() => setShowDatePicker(true)}
-									style={styles.dateTimePicker}
+									onPress={() => {
+										setStartDate(undefined);
+										setEndDate(undefined);
+									}}
 								>
-									<TextInput
-										style={styles.dateTimePickerInput}
-										placeholder="Select Day"
-										value={moment(date).format("MM/DD/YYYY")}
-										editable={false}
-									/>
+									<Text style={styles.clearDatesButton}>Clear dates</Text>
 								</TouchableOpacity>
-								{showDatePicker && (
-									<DateTimePicker
-										value={date}
-										mode="date"
-										display="default"
-										onChange={handleDateChange}
-									/>
-								)}
-								<TouchableOpacity onPress={() => setShowTimePicker(true)}>
-									<TextInput
-										style={styles.dateTimePickerInput}
-										placeholder="Select Time"
-										value={moment(time).format("HH:mm")}
-										editable={false}
-									/>
-								</TouchableOpacity>
-								{showTimePicker && (
-									<DateTimePicker
-										value={time}
-										mode="time"
-										display="default"
-										onChange={handleTimeChange}
-									/>
-								)}
 							</View>
 						)}
 					</View>
@@ -189,6 +168,15 @@ const CreateRoomScreen: React.FC = () => {
 };
 
 const styles = {
+	// add styles for the clear dates button with padding and size and spacing
+	// turn it into a button
+	// make the button such that the date picker will hover over it
+	clearDatesButton: {
+		padding: 10,
+		fontSize: 16,
+		textAlign: "center",
+		flex: 1,
+	},
 	keyboardAvoidingView: {
 		flex: 1,
 		backgroundColor: "white",
@@ -237,7 +225,10 @@ const styles = {
 		fontWeight: "bold",
 	},
 	dateTimePickerContainer: {
-		marginBottom: 20,
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		padding: 20,
 	},
 	dateTimePicker: {
 		marginBottom: 20,

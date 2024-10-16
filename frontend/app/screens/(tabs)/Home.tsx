@@ -99,9 +99,10 @@ const Home: React.FC = () => {
 			return [];
 		}
 
-		return rooms.map((room, index) => {
+		return rooms.map((room, index): Room => {
 			return {
 				id: room.roomID,
+				roomID: room.roomID,
 				backgroundImage: room.room_image ? room.room_image : BackgroundIMG,
 				name: room.room_name,
 				language: room.language,
@@ -115,13 +116,15 @@ const Home: React.FC = () => {
 					? room.creator.profile_picture_url
 					: ProfileIMG,
 				username: room.creator ? room.creator.username : "Unknown",
-				roomSize: 50,
+				roomSize: room.room_size,
 				tags: room.tags ? room.tags : [],
 				mine: mine,
 				isNsfw: room.has_nsfw_content,
 				isExplicit: room.has_explicit_content,
+				isPrivate: room.is_private,
 				start_date: room.start_date,
 				end_date: room.end_date,
+				date_created: room.date_created,
 				childrenRoomIDs: room.childrenRoomIDs,
 			};
 		});

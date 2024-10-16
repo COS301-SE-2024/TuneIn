@@ -950,6 +950,7 @@ const ProfileScreen: React.FC = () => {
 						isPotential={arePotentialFriends}
 						isRequesting={hasRequested}
 						isPending={isPendingRequest}
+						isFollowing={following}
 						handleUnfollow={followHandler}
 						handleRequest={handleFriendRequest}
 						handleUnfriend={handleFriend}

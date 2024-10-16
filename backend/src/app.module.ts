@@ -26,6 +26,7 @@ import { MyLogger } from "./logger/logger.service";
 import { RecommendationsModule } from "./recommendations/recommendations.module";
 import { ImageModule } from "./image/image.module";
 import { RetryModule } from "./retry/retry.module";
+import { MailerModule } from "@nestjs-modules/mailer";
 
 @Module({
 	imports: [
@@ -59,6 +60,16 @@ import { RetryModule } from "./retry/retry.module";
 			ignoreUnlockFail: false,
 		}),
 		RecommendationsModule,
+		MailerModule.forRoot({
+			transport: {
+				host: process.env.EMAIL_HOST,
+				port: process.env.EMAIL_PORT,
+				auth: {
+					user: process.env.EMAIL_USERNAME,
+					pass: process.env.EMAIL_PASSWORD,
+				},
+			},
+		}),
 		ImageModule,
 		RetryModule,
 	],

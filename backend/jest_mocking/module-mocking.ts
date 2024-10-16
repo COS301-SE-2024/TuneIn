@@ -68,6 +68,7 @@ import { RecommendationsService } from "../src/recommendations/recommendations.s
 import { RecommendationsModule } from "../src/recommendations/recommendations.module";
 import { RoomAnalyticsService } from "../src/modules/rooms/roomanalytics.service";
 import { Module } from "@nestjs/common";
+import { MailerModule, MailerService } from "@nestjs-modules/mailer";
 
 const tmpSecret: string | null = mockConfigService.get("JWT_SECRET_KEY");
 if (!tmpSecret || tmpSecret === null) {
@@ -115,6 +116,16 @@ export async function createAppTestingModule(): Promise<TestingModule> {
 			MulterModule.register({
 				dest: "./uploads",
 				storage: memoryStorage(),
+			}),
+			MailerModule.forRoot({
+				transport: {
+					host: "host",
+					port: 1234,
+					auth: {
+						user: "user",
+						pass: "pass",
+					},
+				},
 			}),
 			SpotifyModule,
 			HttpModule,
@@ -278,12 +289,13 @@ export async function createUsersTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		imports: [PrismaModule, RecommendationsModule],
 		providers: [
-			UsersService,
+			{ provide: UsersService, useValue: mockUsersService },
 			{ provide: PrismaService, useValue: mockPrismaService },
 			DtoGenService,
 			DbUtilsService,
 			RecommendationsService,
 			AuthService,
+			MailerService,
 			{ provide: ConfigService, useValue: mockConfigService }, // Provide the mockConfigService
 		],
 	}).compile();
@@ -293,7 +305,7 @@ export async function createUsersUpdateTestingModule(): Promise<TestingModule> {
 	return await Test.createTestingModule({
 		imports: [PrismaModule],
 		providers: [
-			UsersService,
+			{ provide: UsersService, useValue: mockUsersService },
 			PrismaService,
 			DtoGenService,
 			DbUtilsService,

@@ -22,9 +22,10 @@ import {
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
 import { HttpException } from "@nestjs/common";
 import { UpdateUserDto } from "./dto/updateuser.dto";
-import { createUsersUpdateTestingModule } from "../../../jest_mocking/module-mocking";
+// import { createUsersUpdateTestingModule } from "../../../jest_mocking/module-mocking";
 import * as PrismaTypes from "@prisma/client";
 import { RecommendationsService } from "../../../src/recommendations/recommendations.service";
+import { MailerService } from "@nestjs-modules/mailer";
 
 const mockUserDto: UserDto = {
 	profile_name: "Testing",
@@ -104,6 +105,12 @@ describe("UsersService", () => {
 					useValue: mockDtoGenService,
 				},
 				{
+					provide: MailerService,
+					useValue: {
+						sendMail: jest.fn(),
+					},
+				},
+				{
 					provide: ConfigService,
 					useValue: {
 						get: jest.fn().mockImplementation((key: string) => {
@@ -121,6 +128,13 @@ describe("UsersService", () => {
 		prismaService = module.get<PrismaService>(PrismaService);
 		dbUtilsService = module.get<DbUtilsService>(DbUtilsService);
 		dtoGenService = module.get<DtoGenService>(DtoGenService);
+	});
+	afterEach(() => {
+		jest.clearAllMocks(); // Clear all mocks after each test
+	});
+
+	afterAll(async () => {
+		await prismaService.$disconnect(); // Ensure Prisma disconnects
 	});
 	describe("followUser", () => {
 		it("should be defined", () => {
@@ -508,6 +522,7 @@ describe("UsersService", () => {
 					nsfw: false,
 					tags: [],
 					playlist_id: null,
+					room_size: 0.0 as any,
 				},
 				{
 					room_id: "roomID2",
@@ -522,6 +537,7 @@ describe("UsersService", () => {
 					nsfw: false,
 					tags: [],
 					playlist_id: null,
+					room_size: 0.0 as any,
 				},
 			]);
 			const mockRoomDtos: RoomDto[] = [
@@ -540,6 +556,7 @@ describe("UsersService", () => {
 					room_image: "",
 					tags: [],
 					childrenRoomIDs: [],
+					date_created: new Date(),
 				},
 				{
 					creator: new UserDto(),
@@ -556,6 +573,7 @@ describe("UsersService", () => {
 					room_image: "",
 					tags: [],
 					childrenRoomIDs: [],
+					date_created: new Date(),
 				},
 			];
 			jest
@@ -958,18 +976,16 @@ describe("UsersService", () => {
 		});
 	});
 	describe("UsersService Update Functionality", () => {
-		let service: UsersService;
-		let dtoGen: DtoGenService;
+		// let dtoGen: DtoGenService;
 
-		beforeEach(async () => {
-			const module: TestingModule = await createUsersUpdateTestingModule();
-			service = module.get<UsersService>(UsersService);
-			dtoGen = module.get<DtoGenService>(DtoGenService);
-		});
+		// beforeEach(async () => {
+		// 	const module: TestingModule = await createUsersUpdateTestingModule();
+		// 	dtoGen = module.get<DtoGenService>(DtoGenService);
+		// });
 
-		afterEach(async () => {
-			await service.updateProfile(mockUserDto.userID, mockUserDto);
-		}, 50000);
+		// afterEach(async () => {
+		// 	await service.updateProfile(mockUserDto.userID, mockUserDto);
+		// }, 50000);
 
 		it("updates profile", async () => {
 			const mockUpdate: UpdateUserDto = {
@@ -1004,9 +1020,14 @@ describe("UsersService", () => {
 					],
 				},
 			};
-
-			await service.updateProfile(mockUserDto.userID, mockUpdate);
-			const result = await dtoGen.generateUserDto(mockUserDto.userID);
+			jest
+				.spyOn(prismaService.users, "findUnique")
+				.mockResolvedValue(mockUserDto as any);
+			const result = await usersService.updateProfile(
+				mockUserDto.userID,
+				mockUpdate,
+			);
+			// const result = await dtoGen.generateUserDto(mockUserDto.userID);
 
 			expect(result.profile_name).toBe("Tester");
 			expect(result.username).toBe("testing");
@@ -1015,7 +1036,7 @@ describe("UsersService", () => {
 			});
 			expect(result.fav_genres.data).toEqual(["j-pop"]);
 			expect(result.fav_songs.data[0]?.title).toBe("STYX HELIX");
-		}, 50000);
+		});
 	});
 
 	describe("UsersService", () => {

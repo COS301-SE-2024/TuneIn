@@ -13,6 +13,8 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
+import auth from "../../services/AuthManagement";
+import * as utils from "../../services/Utils";
 
 const menuItems = [
 	{
@@ -92,16 +94,36 @@ export default function HelpMenu() {
 		router.navigate(`/${screen}`);
 	};
 
-	const handleSendMessage = () => {
+	const handleSendMessage = async () => {
 		if (message.trim() === "") {
 			// Show modal with error message if no message is typed
 			setModalMessage("Please enter a message before sending.");
 		} else {
 			// Show modal with success message if message is typed
-			setModalMessage(
-				"Thank you for your feedback! We will get back to you soon.",
-			);
-			setMessage(""); // Clear the input field after sending
+			const token = await auth.getToken();
+			// Send message to backend
+			try {
+				const response = await fetch(`${utils.API_BASE_URL}/users/feedback`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({ feedback: message }),
+				});
+				if (!response.ok) {
+					const error = await response.json();
+					setModalMessage(error.message);
+				} else {
+					setModalMessage(
+						"Thank you for your feedback! We will get back to you soon.",
+					);
+					setMessage(""); // Clear the input field after sending
+				}
+			} catch (error) {
+				console.log("Failed to send feedback:", error);
+				setModalMessage("Failed to send feedback. Please try again later.");
+			}
 		}
 		setIsModalVisible(true); // Trigger modal to show
 	};

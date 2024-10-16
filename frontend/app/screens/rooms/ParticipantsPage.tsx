@@ -8,12 +8,22 @@ import {
 	FlatList,
 	Modal,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useLive } from "../../LiveContext";
-import { UserDto } from "../../../api";
-import { useAPI } from "../../APIContext";
-import { colors } from "../../styles/colors"; // Assuming colors file is available
+import { colors } from "../../styles/colors";
+import * as utils from "../../services/Utils";
+import auth from "../../services/AuthManagement";
+
+interface Participant {
+	id: string;
+	username: string;
+	profilePictureUrl: string;
+}
+
+interface ParticipantsPageProps {
+	participants: Participant[];
+} // Assuming colors file is available
 
 interface Participant {
 	id: string;
@@ -25,16 +35,35 @@ interface ParticipantsPageProps {
 	participants: Participant[];
 }
 
-const ParticipantsPage: React.FC = () => {
-	const router = useRouter();
+const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
+	participants,
+}) => {
+	const navigation = useRouter();
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
 
-	const { roomID } = useLocalSearchParams<{ roomID: string }>();
-	const { rooms } = useAPI();
-	const { currentRoom, roomParticipants } = useLive();
-	const [participants, setParticipants] = React.useState<UserDto[]>([]);
+	const { participantsFr, roomID } = useLocalSearchParams();
+	console.log("participantsFr", participantsFr, "roomID", roomID);
+	let roomParticipants = JSON.parse(participantsFr as string);
+	const [participantsInRoom, setParticipantsInRoom] = useState<Participant[]>(
+		[],
+	);
+
+	const roomParticipantsArray = roomParticipants;
+	roomParticipantsArray.forEach(
+		(participant: {
+			userID: string;
+			username: string;
+			profile_picture_url: string;
+		}) => {
+			participantsInRoom.push({
+				id: participant.userID,
+				username: participant.username,
+				profilePictureUrl: participant.profile_picture_url,
+			});
+		},
+	);
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -46,8 +75,36 @@ const ParticipantsPage: React.FC = () => {
 		setSelectedParticipant(null);
 	};
 
-	const handleBanUser = () => {
+	const handleBanUser = async () => {
 		console.log(`Banning user: ${selectedParticipant?.username}`);
+		const token = await auth.getToken();
+		if (!token) {
+			console.error("Failed to get token");
+			return;
+		}
+		const response = await fetch(
+			`${utils.API_BASE_URL}/rooms/${roomID}/banned`,
+			{
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					userID: selectedParticipant?.id,
+				}),
+			},
+		);
+		if (!response.ok) {
+			console.error("Failed to ban user");
+			return;
+		}
+		console.log("User banned successfully");
+		setParticipantsInRoom(
+			participantsInRoom.filter(() => {
+				return selectedParticipant?.id;
+			}),
+		);
 		handleCloseContextMenu();
 	};
 
@@ -55,7 +112,16 @@ const ParticipantsPage: React.FC = () => {
 		return username.length > 20 ? `${username.slice(0, 17)}...` : username;
 	};
 
-	const renderItem = ({ item }: { item: UserDto }) => {
+	const navigateToProfile = (user: any) => {
+		console.log("Navigating to profile page for user:", user);
+		navigation.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: user.profile_picture_url,
+				username: user.username,
+			})}&user=${user}`,
+		);
+	};
+	const renderItem = ({ item }: { item: Participant }) => {
 		// Truncate the username if it's longer than 20 characters
 		const truncatedUsername =
 			item.username.length > 20
@@ -63,14 +129,17 @@ const ParticipantsPage: React.FC = () => {
 				: item.username;
 
 		const participant: Participant = {
-			id: item.userID, // Assuming userID maps to id
+			id: item.id, // Assuming userID maps to id
 			username: item.username,
-			profilePictureUrl: item.profile_picture_url || "", // Fallback if profile_picture_url is missing
+			profilePictureUrl: item.profilePictureUrl || "", // Fallback if profile_picture_url is missing
 		};
 
 		return (
 			<View style={styles.participantContainer}>
-				<TouchableOpacity style={styles.profileInfoContainer}>
+				<TouchableOpacity
+					style={styles.profileInfoContainer}
+					onPress={navigateToProfile.bind(null, item)}
+				>
 					<Image
 						source={
 							participant.profilePictureUrl
@@ -92,46 +161,19 @@ const ParticipantsPage: React.FC = () => {
 		);
 	};
 
-	const fetchRoomParticipants = useCallback(async (): Promise<UserDto[]> => {
-		const usersResponse = await rooms.getRoomUsers(roomID);
-		return usersResponse.data;
-	}, [roomID, rooms]);
-
-	// on roomID or currentRoom change
-	useEffect(() => {
-		if (currentRoom) {
-			setParticipants(roomParticipants);
-		} else {
-			fetchRoomParticipants().then((users) => {
-				setParticipants(users);
-			});
-		}
-	}, [currentRoom, roomParticipants]);
-
-	// on mount
-	useEffect(() => {
-		if (currentRoom) {
-			setParticipants(roomParticipants);
-		} else {
-			fetchRoomParticipants().then((users) => {
-				setParticipants(users);
-			});
-		}
-	}, []);
-
 	return (
 		<View style={styles.container}>
 			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
-					onPress={() => router.back()}
+					onPress={() => navigation.back()}
 					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				<Text style={styles.header}>Participants</Text>
 			</View>
-			{(participants.length === 0 && (
+			{(participantsInRoom.length === 0 && (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
 						This room has no participants.
@@ -139,9 +181,9 @@ const ParticipantsPage: React.FC = () => {
 				</View>
 			)) || (
 				<FlatList
-					data={participants}
+					data={participantsInRoom}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.userID}
+					keyExtractor={(item) => item.id}
 				/>
 			)}
 
