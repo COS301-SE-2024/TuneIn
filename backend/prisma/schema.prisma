@@ -54,6 +54,29 @@ model chat_reactions {
   users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
 }
 
+model child_room {
+  room_id                              String @id @db.Uuid
+  parent_room_id                       String @db.Uuid
+  room_child_room_parent_room_idToroom room   @relation("child_room_parent_room_idToroom", fields: [parent_room_id], references: [room_id], onDelete: Cascade)
+  room_child_room_room_idToroom        room   @relation("child_room_room_idToroom", fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model favorite_genres {
+  genre_id    String @db.Uuid
+  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String @db.Uuid
+  genre       genre  @relation(fields: [genre_id], references: [genre_id], onDelete: Cascade)
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model favorite_songs {
+  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  song_id     String @db.Uuid
+  user_id     String @db.Uuid
+  song        song   @relation(fields: [song_id], references: [song_id], onDelete: Cascade)
+  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
 model follows {
   follower                      String?  @db.Uuid
   followee                      String?  @db.Uuid
@@ -95,7 +118,6 @@ model message {
   room_message    room_message?
 }
 
-/// This table has subclasses and requires additional setup for migrations. Visit https://pris.ly/d/table-inheritance for more info.
 model participate {
   user_id        String @db.Uuid
   room_id        String @db.Uuid
@@ -129,6 +151,12 @@ model private_room {
   room_id   String  @id @db.Uuid
   is_listed Boolean @default(true)
   room      room    @relation(fields: [room_id], references: [room_id], onDelete: Cascade)
+}
+
+model public_key {
+  user_id String @id(map: "public_key_pkey1") @db.Uuid
+  key     String
+  users   users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "public_key_user_id_fkey1")
 }
 
 model public_room {
@@ -187,11 +215,14 @@ model room_message {
   message    message @relation(fields: [message_id], references: [message_id], onDelete: Cascade)
 }
 
+model room_previews {
+  room_id        String   @db.Uuid
+  user_id        String   @db.Uuid
+  date_previewed DateTime @default(now()) @db.Timestamptz(6)
+  preview_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+}
+
 model scheduled_room {
-  room_id    String    @id @db.Uuid
-  start_date DateTime? @db.Timestamptz(6)
-  end_date   DateTime? @db.Timestamptz(6)
-  room       room      @relation(fields: [room_id], references: [room_id], onDelete: Cascade, map: "scheduled_room ")
   room_id    String    @id @db.Uuid
   start_date DateTime? @db.Timestamptz(6)
   end_date   DateTime? @db.Timestamptz(6)
@@ -231,6 +262,14 @@ model song {
   queue          queue[]
 }
 
+model symmetric_key {
+  sender                              String @id(map: "public_key_pkey") @db.Uuid
+  key                                 String
+  reciever                            String @db.Uuid
+  users_symmetric_key_recieverTousers users  @relation("symmetric_key_recieverTousers", fields: [reciever], references: [user_id], onDelete: Cascade, map: "public_key_reciever_fkey")
+  users_symmetric_key_senderTousers   users  @relation("symmetric_key_senderTousers", fields: [sender], references: [user_id], onDelete: Cascade, map: "public_key_user_id_fkey")
+}
+
 model table_state {
   room_id   String    @id @db.Uuid
   index     Int?
@@ -252,37 +291,38 @@ model user_activity {
 }
 
 model users {
-  user_id                               String            @id(map: "user_pkey") @unique(map: "username") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username                              String
-  bio                                   String?
-  profile_picture                       String?
-  activity                              Json?             @db.Json
-  preferences                           Json?             @db.Json
-  full_name                             String?
-  external_links                        Json?             @db.Json
-  email                                 String?
-  authentication                        authentication?
-  banned                                banned[]
-  blocked_blocked_blockeeTousers        blocked[]         @relation("blocked_blockeeTousers")
-  blocked_blocked_blockerTousers        blocked[]         @relation("blocked_blockerTousers")
-  bookmark                              bookmark[]
-  chat_reactions                        chat_reactions[]
-  favorite_genres                       favorite_genres[]
-  favorite_songs                        favorite_songs[]
-  follows_follows_followeeTousers       follows[]         @relation("follows_followeeTousers")
-  follows_follows_followerTousers       follows[]         @relation("follows_followerTousers")
-  friends_friends_friend1Tousers        friends[]         @relation("friends_friend1Tousers")
-  friends_friends_friend2Tousers        friends[]         @relation("friends_friend2Tousers")
-  message                               message[]
-  participate                           participate[]
-  playlist                              playlist[]
-  private_message                       private_message[]
-  public_key_public_key_recieverTousers public_key[]      @relation("public_key_recieverTousers")
-  public_key_public_key_senderTousers   public_key?       @relation("public_key_senderTousers")
-  room                                  room[]
-  search_history                        search_history[]
-  user_activity                         user_activity[]
-  vote                                  vote[]
+  user_id                                     String            @id(map: "user_pkey") @unique(map: "username") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                                    String
+  bio                                         String?
+  profile_picture                             String?
+  activity                                    Json?             @db.Json
+  preferences                                 Json?             @db.Json
+  full_name                                   String?
+  external_links                              Json?             @db.Json
+  email                                       String?
+  authentication                              authentication?
+  banned                                      banned[]
+  blocked_blocked_blockeeTousers              blocked[]         @relation("blocked_blockeeTousers")
+  blocked_blocked_blockerTousers              blocked[]         @relation("blocked_blockerTousers")
+  bookmark                                    bookmark[]
+  chat_reactions                              chat_reactions[]
+  favorite_genres                             favorite_genres[]
+  favorite_songs                              favorite_songs[]
+  follows_follows_followeeTousers             follows[]         @relation("follows_followeeTousers")
+  follows_follows_followerTousers             follows[]         @relation("follows_followerTousers")
+  friends_friends_friend1Tousers              friends[]         @relation("friends_friend1Tousers")
+  friends_friends_friend2Tousers              friends[]         @relation("friends_friend2Tousers")
+  message                                     message[]
+  participate                                 participate[]
+  playlist                                    playlist[]
+  private_message                             private_message[]
+  public_key                                  public_key?
+  room                                        room[]
+  search_history                              search_history[]
+  symmetric_key_symmetric_key_recieverTousers symmetric_key[]   @relation("symmetric_key_recieverTousers")
+  symmetric_key_symmetric_key_senderTousers   symmetric_key?    @relation("symmetric_key_senderTousers")
+  user_activity                               user_activity[]
+  vote                                        vote[]
 }
 
 model vote {
@@ -293,42 +333,4 @@ model vote {
   vote_time DateTime @default(now()) @db.Timestamptz(6)
   queue     queue    @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade, map: "queue_id")
   users     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user")
-}
-
-model room_previews {
-  room_id        String   @db.Uuid
-  user_id        String   @db.Uuid
-  date_previewed DateTime @default(now()) @db.Timestamptz(6)
-  preview_id     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-}
-
-model favorite_genres {
-  genre_id    String @db.Uuid
-  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id     String @db.Uuid
-  genre       genre  @relation(fields: [genre_id], references: [genre_id], onDelete: Cascade)
-  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-}
-
-model favorite_songs {
-  favorite_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  song_id     String @db.Uuid
-  user_id     String @db.Uuid
-  song        song   @relation(fields: [song_id], references: [song_id], onDelete: Cascade)
-  users       users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-}
-
-model child_room {
-  room_id                              String @id @db.Uuid
-  parent_room_id                       String @db.Uuid
-  room_child_room_parent_room_idToroom room   @relation("child_room_parent_room_idToroom", fields: [parent_room_id], references: [room_id], onDelete: Cascade)
-  room_child_room_room_idToroom        room   @relation("child_room_room_idToroom", fields: [room_id], references: [room_id], onDelete: Cascade)
-}
-
-model public_key {
-  sender                           String @id @db.Uuid
-  key                              String
-  reciever                         String @db.Uuid
-  users_public_key_recieverTousers users  @relation("public_key_recieverTousers", fields: [reciever], references: [user_id], onDelete: Cascade)
-  users_public_key_senderTousers   users  @relation("public_key_senderTousers", fields: [sender], references: [user_id], onDelete: Cascade, map: "public_key_user_id_fkey")
 }
