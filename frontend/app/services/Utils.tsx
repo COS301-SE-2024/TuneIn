@@ -1,6 +1,8 @@
 import localhost from "react-native-localhost";
 import { Buffer } from "buffer";
-import { USE_PRODUCTION_SERVER } from "react-native-dotenv";
+// import { USE_PRODUCTION_SERVER } from "react-native-dotenv";
+
+const USE_PRODUCTION_SERVER = "true";
 
 const shouldUseProductionServer =
 	USE_PRODUCTION_SERVER &&

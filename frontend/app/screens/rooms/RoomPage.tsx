@@ -17,9 +17,10 @@ import {
 	Alert,
 	ToastAndroid,
 	Platform,
+	ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import auth from "../../services/AuthManagement";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DevicePicker from "../../components/DevicePicker";
@@ -89,6 +90,11 @@ const RoomPage: React.FC = () => {
 	const [optimisticPlaybackState, setOptimisticPlaybackState] = useState(false);
 	const optimisticPlaybackStatIntervaleRef = useRef<NodeJS.Timeout>();
 	const [ownerPlaying, setOwnerPlaying] = useState(roomPlaying);
+
+	const syncWithRoom = () => {
+		// Placeholder function for syncing with the room
+		// console.log("Syncing with room... (functionality to be implemented)");
+	};
 
 	const getAndSetRoomInfo = useCallback(async () => {
 		console.log(`!thisRoom: ${!thisRoom}`);
@@ -480,11 +486,15 @@ const RoomPage: React.FC = () => {
 							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
 						>
+							{/* {loading ? (
+								<ActivityIndicator size={30} color="black" /> // Show loading indicator
+							) : ( */}
 							<FontAwesome5
 								name={userInRoom && ownerPlaying ? "pause" : "play"}
 								size={30}
 								color="black"
 							/>
+							{/* )} */}
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.controlButton}
@@ -494,7 +504,17 @@ const RoomPage: React.FC = () => {
 						</TouchableOpacity>
 					</View>
 				) : (
-					<View></View>
+					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
+						<TouchableOpacity
+							style={styles.joinLeaveButton}
+							onPress={syncWithRoom} // Function to sync with the room
+						>
+							<Text style={styles.buttonText}>
+								Sync
+								<MaterialIcons name="sync" size={18} color="white" />
+							</Text>
+						</TouchableOpacity>
+					</View>
 				)}
 			</View>
 			{/* <Animated.ScrollView
@@ -801,6 +821,12 @@ const styles = StyleSheet.create({
 	},
 	songRoomWidget: {
 		marginTop: -90,
+	},
+	buttonText: {
+		marginLeft: 5, // Space between icon and text
+		fontSize: 18, // Font size
+		color: "white", // Text color
+		fontWeight: "bold", // Make it bold
 	},
 });
 

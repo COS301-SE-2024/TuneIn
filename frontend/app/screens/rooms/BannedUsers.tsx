@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { colors } from "../../styles/colors";
 
 interface Participant {
 	id: string;
@@ -18,52 +18,33 @@ interface Participant {
 	profilePictureUrl: string;
 }
 
-interface ParticipantsPageProps {
-	participants: Participant[];
-}
-import { colors } from "../../styles/colors"; // Assuming colors file is available
-
-interface Participant {
-	id: string;
-	username: string;
-	profilePictureUrl: string;
+interface BannedUsersProps {
+	bannedUsers?: Participant[]; // Make bannedUsers optional
 }
 
-interface ParticipantsPageProps {
-	participants: Participant[];
-}
-
-const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
-	participants,
+const BannedUsers: React.FC<BannedUsersProps> = ({
+	bannedUsers = [
+		{
+			id: "1",
+			username: "john_doe_123",
+			profilePictureUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+		},
+		{
+			id: "2",
+			username: "jane_smith_456",
+			profilePictureUrl: "https://randomuser.me/api/portraits/women/2.jpg",
+		},
+		{
+			id: "3",
+			username: "sam_wilson_789",
+			profilePictureUrl: "https://randomuser.me/api/portraits/men/3.jpg",
+		},
+	],
 }) => {
-	const navigation = useRouter();
+	const navigation = useNavigation();
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
-
-	let _roomParticipants = useLocalSearchParams();
-	let roomParticipants = _roomParticipants.participants;
-	const participantsInRoom: Participant[] = [];
-	if (typeof roomParticipants === "string") {
-		const roomParticipantsArray = JSON.parse(roomParticipants);
-		roomParticipantsArray.forEach(
-			(participant: {
-				userID: string;
-				username: string;
-				profile_picture_url: string;
-			}) => {
-				participantsInRoom.push({
-					id: participant.userID,
-					username: participant.username,
-					profilePictureUrl: participant.profile_picture_url,
-				});
-			},
-		);
-	} else if (Array.isArray(roomParticipants)) {
-		roomParticipants.forEach((participant) => {
-			participantsInRoom.push(JSON.parse(participant));
-		});
-	}
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -75,59 +56,42 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		setSelectedParticipant(null);
 	};
 
-	const handleBanUser = () => {
-		console.log(`Banning user: ${selectedParticipant?.username}`);
+	const handleUnbanUser = () => {
+		// Perform the unban action here
+		console.log(`Unbanning user: ${selectedParticipant?.username}`);
+		// After unbanning, close the menu
 		handleCloseContextMenu();
 	};
 
-	const truncateUsername = (username: string) => {
-		return username.length > 20 ? `${username.slice(0, 17)}...` : username;
-	};
-
-	const navigateToProfile = (user: any) => {
-		console.log("Navigating to profile page for user:", user);
-		navigation.navigate(
-			`/screens/profile/ProfilePage?friend=${JSON.stringify({
-				profile_picture_url: user.profile_picture_url,
-				username: user.username,
-			})}&user=${user}`,
-		);
-	};
 	const renderItem = ({ item }: { item: Participant }) => {
-		// Truncate the username if it's longer than 20 characters
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
 				: item.username;
 
-		const participant: Participant = {
-			id: item.id, // Assuming userID maps to id
-			username: item.username,
-			profilePictureUrl: item.profilePictureUrl || "", // Fallback if profile_picture_url is missing
-		};
-
 		return (
 			<View style={styles.participantContainer}>
-				<TouchableOpacity
-					style={styles.profileInfoContainer}
-					onPress={navigateToProfile.bind(null, item)}
-				>
+				<TouchableOpacity style={styles.profileInfoContainer}>
 					<Image
 						source={
-							participant.profilePictureUrl
-								? { uri: participant.profilePictureUrl }
+							item.profilePictureUrl
+								? { uri: item.profilePictureUrl }
 								: require("../../assets/profile-icon.png")
 						}
 						style={styles.profilePicture}
 					/>
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
-
-				<TouchableOpacity
-					onPress={() => handleOpenContextMenu(participant)}
-					testID={`ellipsis-button-${participant.id}`}
-				>
+				{/* <TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
 					<Ionicons name="ellipsis-vertical" size={24} color="black" />
+				</TouchableOpacity> */}
+				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
+					<Ionicons
+						name="ellipsis-vertical"
+						size={24}
+						color="black"
+						testID={`ellipsis-${item.id}`}
+					/>
 				</TouchableOpacity>
 			</View>
 		);
@@ -138,44 +102,46 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 			<View style={styles.headerContainer}>
 				<TouchableOpacity
 					style={styles.backButton}
-					onPress={() => navigation.back()}
+					onPress={() => navigation.goBack()}
 					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
-				<Text style={styles.header}>Participants</Text>
+				<Text style={styles.header}>Banned Users</Text>
 			</View>
-			{(participantsInRoom.length === 0 && (
+
+			{bannedUsers.length === 0 ? (
 				<View style={styles.emptyQueueContainer}>
 					<Text style={styles.emptyQueueText}>
-						This room has no participants.
+						This room has no banned users.
 					</Text>
 				</View>
-			)) || (
+			) : (
 				<FlatList
-					data={participantsInRoom}
+					data={bannedUsers}
 					renderItem={renderItem}
-					keyExtractor={(item) => item.userID}
+					keyExtractor={(item) => item.id}
 				/>
 			)}
 
+			{/* Context Menu for Unban User */}
 			<Modal
-				animationType="slide"
-				transparent={true}
 				visible={contextMenuVisible}
+				transparent={true}
+				animationType="slide"
 				onRequestClose={handleCloseContextMenu}
 			>
 				<View style={styles.overlay}>
 					<View style={styles.modalView}>
 						<Text style={styles.modalTextHeader}>
-							Ban {truncateUsername(selectedParticipant?.username || "")}?
+							Unban {selectedParticipant?.username}?
 						</Text>
 						<View style={styles.buttonContainer}>
 							<TouchableOpacity
-								style={[styles.buttonModal, styles.banButton]}
-								onPress={handleBanUser}
+								style={[styles.buttonModal, styles.unbanButton]}
+								onPress={handleUnbanUser}
 							>
-								<Text style={styles.buttonText}>Ban User</Text>
+								<Text style={styles.buttonText}>Unban User</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								style={[styles.buttonModal, styles.cancelButton]}
@@ -190,6 +156,8 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		</View>
 	);
 };
+
+// Styles remain unchanged...
 
 const styles = StyleSheet.create({
 	container: {
@@ -241,6 +209,7 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 	},
 	username: {
+		flex: 1,
 		fontSize: 16,
 		color: "black",
 	},
@@ -267,7 +236,6 @@ const styles = StyleSheet.create({
 	},
 	modalTextHeader: {
 		fontSize: 19,
-		marginBottom: 0,
 		textAlign: "center",
 		fontWeight: "bold",
 	},
@@ -275,7 +243,7 @@ const styles = StyleSheet.create({
 		marginTop: 30,
 		flexDirection: "row",
 		justifyContent: "space-between", // Align buttons side by side
-		width: "100%", // Make sure it occupies the full width
+		width: "100%", // Full width
 	},
 	buttonModal: {
 		borderRadius: 5,
@@ -284,7 +252,7 @@ const styles = StyleSheet.create({
 		width: "48%", // Make buttons take up about half the width
 		alignItems: "center",
 	},
-	banButton: {
+	unbanButton: {
 		backgroundColor: colors.primary,
 		borderRadius: 25,
 	},
@@ -300,4 +268,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default ParticipantsPage;
+export default BannedUsers;
