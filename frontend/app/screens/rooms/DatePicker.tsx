@@ -101,7 +101,7 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 					selected={endDate}
 					onChange={(date) => setEndDate(date ?? undefined)}
 					showTimeSelect
-					dateFormat="MM/dd/yyyy h:mm aa"
+					dateFormat="dd MMMM yyyy - HH:mm"
 				/>
 			)}
 		</View>
