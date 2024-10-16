@@ -22,6 +22,10 @@ import {
 import CreateButton from "../../components/CreateButton";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
+import axios from "axios";
+import { get } from "http";
+import GenreAdder from "../../components/GenreAdder";
+import EditGenreBubble from "../../components/EditGenreBubble";
 
 type EditRoomRouteProp = RouteProp<{ params: { room: string } }, "params">;
 
@@ -32,7 +36,9 @@ const EditRoom: React.FC = () => {
 
 	// Memoize roomData to avoid re-parsing on each render
 	const roomData = useMemo(() => JSON.parse(params.room), [params.room]);
-
+	const [isGenreDialogVisible, setIsGenreDialogVisible] = useState(false);
+	const [genres, setGenres] = useState<string[]>([]);
+	const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 	const [changedImage, setChangedImage] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<Room>({
 		roomID: "",
@@ -47,6 +53,7 @@ const EditRoom: React.FC = () => {
 		isNsfw: false,
 		start_date: new Date(),
 		end_date: new Date(),
+		date_created: new Date(),
 	});
 	const [image, setImage] = useState<string | null>(null);
 
@@ -66,11 +73,53 @@ const EditRoom: React.FC = () => {
 				isExplicit: roomData.isExplicit,
 				isNsfw: roomData.isNsfw,
 			} as Room);
+			setSelectedGenres(
+				roomData.tags.filter((g: string) => genres.includes(g)),
+			);
 			setImage(roomData.backgroundImage as string);
 		};
 
 		loadRoomDetails();
+		getGenres();
 	}, [roomData]); // Only roomData is a dependency now
+
+	const getGenres = async () => {
+		try {
+			const token = await auth.getToken();
+
+			if (token) {
+				const response = await axios.get(`${utils.API_BASE_URL}/genres`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				console.log("Genre data", response.data);
+				setGenres(response.data);
+			}
+		} catch (error) {
+			console.log("Error fetching genres:", error);
+		}
+	};
+
+	const addGenres = (genresToAdd: string[]) => {
+		roomData.tags = [...roomData.tags, ...genresToAdd];
+		setGenres(genres.filter((g) => !genresToAdd.includes(g)));
+		setSelectedGenres([...selectedGenres, ...genresToAdd]);
+		setIsGenreDialogVisible(false);
+	};
+	const toggleGenreSelector = () => {
+		if (isGenreDialogVisible) {
+			setIsGenreDialogVisible(false);
+		} else {
+			setIsGenreDialogVisible(true);
+		}
+	};
+
+	const removeGenre = (genre: string) => {
+		roomData.tags = roomData.tags.filter((g: string) => g !== genre);
+		setGenres([...genres, genre]);
+		setSelectedGenres(selectedGenres.filter((g: string) => g !== genre));
+	};
 
 	const screenWidth = Dimensions.get("window").width;
 	const navigateToEditPlaylist = () => {
@@ -192,9 +241,38 @@ const EditRoom: React.FC = () => {
 						(value) => handleInputChange("description", value),
 						2,
 					)}
-					{buildInputField("Genre", roomDetails.genre ?? "", (value) =>
-						handleInputChange("genre", value),
-					)}
+					<View style={styles.chipsContainer}>
+						{selectedGenres?.map((genre, index) => (
+							<EditGenreBubble
+								key={index}
+								text={genre}
+								onPress={() => removeGenre(genre)}
+							/>
+						))}
+						{/* Render add genre button */}
+						<TouchableOpacity
+							onPress={toggleGenreSelector}
+							style={styles.addGenreButton}
+							testID="add-genre"
+						>
+							<Text
+								style={{
+									color: "black",
+									fontWeight: "500",
+									fontSize: 14,
+								}}
+							>
+								Add +
+							</Text>
+						</TouchableOpacity>
+						<GenreAdder
+							options={genres}
+							placeholder={"Search Genres"}
+							visible={isGenreDialogVisible}
+							onSelect={addGenres}
+							onClose={toggleGenreSelector}
+						/>
+					</View>
 					{buildInputField("Language", roomDetails.language ?? "", (value) =>
 						handleInputChange("language", value),
 					)}
@@ -296,6 +374,16 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		fontWeight: "bold",
 	},
+	addGenreButton: {
+		marginRight: 12,
+		marginBottom: 10,
+		paddingHorizontal: 14,
+		paddingVertical: 8,
+		backgroundColor: "rgba(232, 235, 242, 1)",
+		borderRadius: 10,
+		justifyContent: "center",
+		alignItems: "center",
+	},
 	headerSpacer: {
 		width: 20,
 	},
@@ -352,6 +440,11 @@ const styles = StyleSheet.create({
 	imagePreview: {
 		height: 200,
 		borderRadius: 10,
+	},
+	chipsContainer: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		marginTop: 10,
 	},
 	saveButton: {
 		backgroundColor: "#8B8FA8",
