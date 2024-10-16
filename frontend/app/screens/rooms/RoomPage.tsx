@@ -88,7 +88,8 @@ const RoomPage: React.FC = () => {
 
 	const syncWithRoom = () => {
 		// Placeholder function for syncing with the room
-		// console.log("Syncing with room... (functionality to be implemented)");
+		roomControls.playbackHandler.startPlayback();
+		console.log("Syncing with room...");
 	};
 
 	const getAndSetRoomInfo = useCallback(async () => {
@@ -184,7 +185,7 @@ const RoomPage: React.FC = () => {
 	const playPauseTrack = useCallback(
 		async (offset: number = 0) => {
 			if (userInRoom) {
-				console.log("playPauseTrack playPauseTrack playPauseTrack");
+				console.log("playPauseTrack");
 				if (roomControls.canControlRoom()) {
 					setIsLoadingPause(true);
 					setTimeout(() => {
@@ -521,35 +522,6 @@ const RoomPage: React.FC = () => {
 					<View></View>
 				)}
 			</View>
-			{/* <Animated.ScrollView
-				style={[styles.queueContainer, { maxHeight: queueHeight }]}
-				contentContainerStyle={{ flexGrow: 1 }}
-			>
-				{userInRoom &&
-					localQueue.map((song, index) => (
-						<TouchableOpacity
-							key={rs.getID(song)}
-							style={[
-								styles.track,
-								index === localCurrentSong?.song.index
-									? styles.currentTrack
-									: styles.queueTrack,
-							]}
-							onPress={() => playPauseTrack(0)}
-						>
-							<Image
-								source={{ uri: rs.getAlbumArtUrl(song) }}
-								style={styles.queueAlbumArt}
-							/>
-							<View style={styles.trackInfo}>
-								<Text style={styles.queueTrackName}>{rs.getTitle(song)}</Text>
-								<Text style={styles.queueTrackArtist}>
-									{rs.constructArtistString(song)}
-								</Text>
-							</View>
-						</TouchableOpacity>
-					))}
-			</Animated.ScrollView> */}
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
