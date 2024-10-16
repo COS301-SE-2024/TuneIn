@@ -20,12 +20,10 @@ const ChatItem: React.FC<ChatItemProps> = ({ message, otherUser, room }) => {
 			testID="chat-item-touchable"
 			style={styles.container}
 			onPress={() => {
-				console.log("pre enterDM");
 				if (socketHandshakes.dmJoined) {
 					leaveDM();
 				}
 				enterDM([otherUser.username]);
-				console.log("post enterDM");
 				router.push(
 					`/screens/messaging/ChatScreen?username=${otherUser.username}`,
 				);

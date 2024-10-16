@@ -79,7 +79,6 @@ function MyRoomTabs() {
 	}
 
 	roomData.mine = currentUser ? roomData.userID === currentUser.userID : false;
-
 	let roomID: string;
 	if (roomData.id !== undefined) {
 		roomID = roomData.id;
@@ -88,22 +87,6 @@ function MyRoomTabs() {
 	} else {
 		roomID = currentRoom?.roomID ?? "";
 	}
-
-	// const navigateBasedOnOwnership = () => {
-	// 	console.log("Room is mine? ", roomData.mine);
-	// 	if (roomData.mine) {
-	// 		router.navigate({
-	// 			pathname: "/screens/rooms/AdvancedSettings",
-	// 			params: { room: room },
-	// 		});
-	// 	} else {
-	// 		router.navigate({
-	// 			pathname: "/screens/rooms/RoomInfo",
-	// 			params: { room: room },
-	// 		});
-	// 	}
-	// };
-
 	const navigateBasedOnOwnership = () => {
 		setMenuVisible(true);
 	};
@@ -406,7 +389,11 @@ function MyRoomTabs() {
 
 				{/* Header Title */}
 
-				<Text style={styles.headerTitle}>{roomData.name}</Text>
+				<Text style={styles.headerTitle}>
+					{roomData.name.length > 20
+						? `${roomData.name.substring(0, 20)}...`
+						: roomData.name}
+				</Text>
 
 				{/* Menu Button */}
 				<TouchableOpacity

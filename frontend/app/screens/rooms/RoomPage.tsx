@@ -1,11 +1,4 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useCallback,
-	useContext,
-	useReducer,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
 	View,
 	Text,
@@ -36,7 +29,7 @@ import * as Spotify from "@spotify/web-api-ts-sdk";
 import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 
 // const MemoizedCommentWidget = memo(CommentWidget);
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 const isSmallScreen = height < 800;
 const OPTIMISTIC_PLAYBACK_STATE_TIMEOUT = 5000;
 
@@ -69,6 +62,8 @@ const RoomPage: React.FC = () => {
 	}
 
 	const router = useRouter();
+	const [isLoadingPause, setIsLoadingPause] = useState(false);
+	const [isLoadingNext, setIsLoadingNext] = useState(false);
 	const [isBookmarked, setIsBookmarked] = useState(false);
 	const [secondsPlayed, setSecondsPlayed] = useState(0); // Track the number of seconds played
 	const truncateUsername = (username: string) => {
@@ -93,7 +88,8 @@ const RoomPage: React.FC = () => {
 
 	const syncWithRoom = () => {
 		// Placeholder function for syncing with the room
-		// console.log("Syncing with room... (functionality to be implemented)");
+		roomControls.playbackHandler.syncUserPlayback();
+		console.log("Syncing with room...");
 	};
 
 	const getAndSetRoomInfo = useCallback(async () => {
@@ -143,9 +139,10 @@ const RoomPage: React.FC = () => {
 		rooms,
 		currentRoom,
 		localRoomPlaying,
-		optimisticPlaybackState,
 		ownerPlaying,
+		optimisticPlaybackState,
 		roomPlaying,
+		userInRoom,
 		fetchSongInfo,
 	]);
 
@@ -188,8 +185,12 @@ const RoomPage: React.FC = () => {
 	const playPauseTrack = useCallback(
 		async (offset: number = 0) => {
 			if (userInRoom) {
-				console.log("playPauseTrack playPauseTrack playPauseTrack");
+				console.log("playPauseTrack");
 				if (roomControls.canControlRoom()) {
+					setIsLoadingPause(true);
+					setTimeout(() => {
+						setIsLoadingPause(false);
+					}, 1000); // 1 second loader
 					if (!ownerPlaying) {
 						console.log("starting playback");
 						setOwnerPlaying(true); //set owner's request to play
@@ -223,20 +224,16 @@ const RoomPage: React.FC = () => {
 
 	const playNextTrack = useCallback(() => {
 		if (userInRoom) {
-			console.log("playNextTrack playNextTrack playNextTrack");
+			setIsLoadingNext(true);
+			setTimeout(() => {
+				setIsLoadingNext(false);
+			}, 1000); // 1 second loader
+			console.log("playNextTrack");
 			if (roomControls.canControlRoom()) {
 				roomControls.playbackHandler.nextTrack();
 			}
 		}
 	}, [roomControls, userInRoom]);
-
-	// const playPreviousTrack = () => {
-	// 	if (userInRoom) {
-	// 		if (roomControls.canControlRoom()) {
-	// 			roomControls.playbackHandler.prevTrack();
-	// 		}
-	// 	}
-	// };
 
 	const handleViewParticipants = () => {
 		router.navigate({
@@ -309,7 +306,7 @@ const RoomPage: React.FC = () => {
 			}
 		};
 		fetchParticipants();
-	}, [userInRoom]);
+	}, [roomID, userInRoom]);
 
 	useEffect(() => {
 		return () => {
@@ -408,7 +405,19 @@ const RoomPage: React.FC = () => {
 				}
 			}
 		}
-	}, [currentSong, roomQueue, currentRoom, roomPlaying]);
+	}, [
+		currentSong,
+		roomQueue,
+		currentRoom,
+		roomPlaying,
+		thisRoom,
+		roomID,
+		ownerPlaying,
+		localRoomPlaying,
+		optimisticPlaybackState,
+		localQueue,
+		fetchSongInfo,
+	]);
 
 	// on component mount
 	useEffect(() => {
@@ -468,43 +477,48 @@ const RoomPage: React.FC = () => {
 				<View style={styles.songRoomWidget}>
 					<SongRoomWidget song={userInRoom ? localCurrentSong : undefined} />
 				</View>
-				{/* <View style={styles.trackInfo}>
-					<Text style={styles.nowPlayingTrackName}>
-						{rs.getTitle(currentSong)}
-					</Text>
-					<Text>{rs.constructArtistString(currentSong)}</Text>
-				</View> */}
 
 				{roomControls.canControlRoom() ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
-						{/* <TouchableOpacity
+						<TouchableOpacity
 							style={styles.controlButton}
-							onPress={playPreviousTrack}
+							onPress={syncWithRoom} // Function to sync with the room
 						>
-							<FontAwesome5 name="step-backward" size={30} color="black" />
-						</TouchableOpacity> */}
+							<MaterialIcons name="sync" size={28} color="black" />
+						</TouchableOpacity>
+
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
+							disabled={isLoadingPause}
 						>
-							{/* {loading ? (
-								<ActivityIndicator size={30} color="black" /> // Show loading indicator
-							) : ( */}
-							<FontAwesome5
-								name={userInRoom && ownerPlaying ? "pause" : "play"}
-								size={30}
-								color="black"
-							/>
-							{/* )} */}
+							{isLoadingPause ? (
+								<ActivityIndicator size="small" color="black" /> // Show loader
+							) : (
+								<FontAwesome5
+									name={userInRoom && ownerPlaying ? "pause" : "play"}
+									size={30}
+									color="black"
+								/>
+							)}
 						</TouchableOpacity>
+
 						<TouchableOpacity
-							style={styles.controlButton}
-							onPress={playNextTrack}
+							style={[
+								styles.controlButton,
+								roomQueue.length <= 1 ? { opacity: 0.5 } : {},
+							]}
+							onPress={roomQueue.length > 1 ? playNextTrack : () => {}} // Provide an empty function instead of null
+							disabled={roomQueue.length <= 1} // Disable touch interaction
 						>
-							<FontAwesome5 name="step-forward" size={30} color="black" />
+							{isLoadingNext ? (
+								<ActivityIndicator size="small" color="black" /> // Show loader
+							) : (
+								<FontAwesome5 name="step-forward" size={30} color="black" />
+							)}
 						</TouchableOpacity>
 					</View>
-				) : (
+				) : userInRoom ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.joinLeaveButton}
@@ -516,37 +530,10 @@ const RoomPage: React.FC = () => {
 							</Text>
 						</TouchableOpacity>
 					</View>
+				) : (
+					<View></View>
 				)}
 			</View>
-			{/* <Animated.ScrollView
-				style={[styles.queueContainer, { maxHeight: queueHeight }]}
-				contentContainerStyle={{ flexGrow: 1 }}
-			>
-				{userInRoom &&
-					localQueue.map((song, index) => (
-						<TouchableOpacity
-							key={rs.getID(song)}
-							style={[
-								styles.track,
-								index === localCurrentSong?.song.index
-									? styles.currentTrack
-									: styles.queueTrack,
-							]}
-							onPress={() => playPauseTrack(0)}
-						>
-							<Image
-								source={{ uri: rs.getAlbumArtUrl(song) }}
-								style={styles.queueAlbumArt}
-							/>
-							<View style={styles.trackInfo}>
-								<Text style={styles.queueTrackName}>{rs.getTitle(song)}</Text>
-								<Text style={styles.queueTrackArtist}>
-									{rs.constructArtistString(song)}
-								</Text>
-							</View>
-						</TouchableOpacity>
-					))}
-			</Animated.ScrollView> */}
 
 			<View style={styles.sideBySideTwo}>
 				{/* Left side */}
