@@ -193,68 +193,6 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleRoomDtoFromRoom(
-		rooms: FullyQualifiedRoom[],
-	): Promise<RoomDto[]> {
-		if (rooms.length === 0) {
-			return [];
-		}
-		const userIDs: string[] = rooms.map((r) => r.room_creator);
-		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
-		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
-
-		const result: RoomDto[] = [];
-		for (let i = 0; i < rooms.length; i++) {
-			const r = rooms[i];
-			const u = userDtos.find((u) => u.userID === r.room_creator);
-			if (!u) {
-				throw new Error(
-					"Weird error. Got users from Rooms table but user (" +
-						r.room_creator +
-						") not found in Users table",
-				);
-			}
-			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
-			const scheduledRoom: {
-				start_date: Date | undefined;
-				end_date: Date | undefined;
-				is_scheduled: boolean;
-			} =
-				r.scheduled_room === null
-					? {
-							start_date: undefined,
-							end_date: undefined,
-							is_scheduled: false,
-					  }
-					: {
-							start_date: r.scheduled_room.start_date || undefined,
-							end_date: r.scheduled_room.end_date || undefined,
-							is_scheduled: true,
-					  };
-			const room: RoomDto = {
-				creator: u || new UserDto(),
-				roomID: r.room_id,
-				spotifyPlaylistID: r.playlist_id || "",
-				participant_count: r.participate.length,
-				room_name: r.name,
-				description: r.description || "",
-				is_temporary: r.is_temporary || false,
-				is_private: r.private_room !== null,
-				...scheduledRoom,
-				language: r.room_language || "",
-				has_explicit_content: r.explicit || false,
-				has_nsfw_content: r.nsfw || false,
-				room_image: r.playlist_photo || "",
-				tags: r.tags || [],
-				date_created: r.date_created,
-				childrenRoomIDs: childrenRooms.map((child) => child.room_id),
-				room_size: Number(r.room_size) || 50,
-			};
-			result.push(room);
-		}
-		return result;
-	}
-
 	async generateMultipleRoomDto(
 		roomIDs: string[],
 		userID: string | undefined = undefined,
@@ -379,6 +317,68 @@ export class DtoGenService {
 				};
 				result.push(room);
 			}
+		}
+		return result;
+	}
+
+	async generateMultipleRoomDtoFromRoom(
+		rooms: FullyQualifiedRoom[],
+	): Promise<RoomDto[]> {
+		if (rooms.length === 0) {
+			return [];
+		}
+		const userIDs: string[] = rooms.map((r) => r.room_creator);
+		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
+		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
+
+		const result: RoomDto[] = [];
+		for (let i = 0; i < rooms.length; i++) {
+			const r = rooms[i];
+			const u = userDtos.find((u) => u.userID === r.room_creator);
+			if (!u) {
+				throw new Error(
+					"Weird error. Got users from Rooms table but user (" +
+						r.room_creator +
+						") not found in Users table",
+				);
+			}
+			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
+			const scheduledRoom: {
+				start_date: Date | undefined;
+				end_date: Date | undefined;
+				is_scheduled: boolean;
+			} =
+				r.scheduled_room === null
+					? {
+							start_date: undefined,
+							end_date: undefined,
+							is_scheduled: false,
+					  }
+					: {
+							start_date: r.scheduled_room.start_date || undefined,
+							end_date: r.scheduled_room.end_date || undefined,
+							is_scheduled: true,
+					  };
+			const room: RoomDto = {
+				creator: u || new UserDto(),
+				roomID: r.room_id,
+				spotifyPlaylistID: r.playlist_id || "",
+				participant_count: r.participate.length,
+				room_name: r.name,
+				description: r.description || "",
+				is_temporary: r.is_temporary || false,
+				is_private: r.private_room !== null,
+				...scheduledRoom,
+				language: r.room_language || "",
+				has_explicit_content: r.explicit || false,
+				has_nsfw_content: r.nsfw || false,
+				room_image: r.playlist_photo || "",
+				tags: r.tags || [],
+				date_created: r.date_created,
+				childrenRoomIDs: childrenRooms.map((child) => child.room_id),
+				room_size: Number(r.room_size) || 50,
+			};
+			result.push(room);
 		}
 		return result;
 	}
