@@ -23,7 +23,6 @@ import CreateButton from "../../components/CreateButton";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 import axios from "axios";
-import { get } from "http";
 import GenreAdder from "../../components/GenreAdder";
 import EditGenreBubble from "../../components/EditGenreBubble";
 
