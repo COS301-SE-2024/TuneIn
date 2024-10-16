@@ -375,12 +375,6 @@ export function useRoomControls({
 						console.log(`Offset: ${offsetMs}`);
 					}
 
-					console.table({
-						deviceID: device.id,
-						playlistURI: playlistURI,
-						position: position,
-						offsetMs: offsetMs,
-					});
 					await spotify.player
 						.startResumePlayback(
 							device.id,
@@ -995,10 +989,6 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.ENQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: enqueueSongs");
-			// socket.volatile
-			// 	.timeout(1000)
-			// 	.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			// console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, socket],
 	);
@@ -1030,8 +1020,6 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.DEQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: dequeueSongs");
-			// socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			// console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, setRoomQueue, socket],
 	);
