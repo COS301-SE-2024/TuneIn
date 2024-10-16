@@ -25,6 +25,7 @@ export interface Room {
 	start_date: Date | undefined;
 	end_date: Date | undefined;
 	childrenRoomIDs: string[];
+	isTemporary?: boolean;
 }
 
 export const formatRoomData = (room: any): Room => {
@@ -51,5 +52,6 @@ export const formatRoomData = (room: any): Room => {
 		playlist: room.playlist,
 		isPrivate: room.is_private,
 		date_created: room.date_created,
+		isTemporary: room.is_temporary,
 	};
 };
