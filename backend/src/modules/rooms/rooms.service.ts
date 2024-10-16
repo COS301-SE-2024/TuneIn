@@ -175,6 +175,15 @@ export class RoomsService {
 			updatedRoom.playlist_photo = updateRoomDto.room_image;
 		}
 
+		if (updateRoomDto.room_size !== undefined) {
+			updatedRoom.room_size =
+				updateRoomDto.room_size as unknown as Prisma.Decimal;
+		}
+
+		if (updateRoomDto.tags !== undefined) {
+			updatedRoom.tags = updateRoomDto.tags;
+		}
+
 		if (updateRoomDto.has_explicit_content !== undefined) {
 			updatedRoom.explicit = updateRoomDto.has_explicit_content;
 		}
