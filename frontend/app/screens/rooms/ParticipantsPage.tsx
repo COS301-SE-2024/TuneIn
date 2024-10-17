@@ -14,6 +14,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { colors } from "../../styles/colors";
 import * as utils from "../../services/Utils";
 import auth from "../../services/AuthManagement";
+import { Room } from "../../models/Room";
+import { useLive } from "../../LiveContext";
 
 interface Participant {
 	id: string;
@@ -32,37 +34,37 @@ interface Participant {
 }
 
 interface ParticipantsPageProps {
-	participants: Participant[];
+	setParticipants?: (participants: Participant[]) => void;
 }
 
-const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
-	participants,
-}) => {
+const ParticipantsPage: React.FC<ParticipantsPageProps> = () => {
 	const navigation = useRouter();
+	const { currentUser } = useLive();
+	if (currentUser === undefined) {
+		throw new Error("currentUser is undefined");
+	}
+	console.log("currentUser", currentUser);
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
-
-	const { participantsFr, roomID } = useLocalSearchParams();
-	console.log("participantsFr", participantsFr, "roomID", roomID);
-	let roomParticipants = JSON.parse(participantsFr as string);
-	const [participantsInRoom, setParticipantsInRoom] = useState<Participant[]>(
-		[],
+	const { participantsFr, room, setParticipants } = useLocalSearchParams();
+	console.log("setParticipants", setParticipants);
+	const roomData: Room = JSON.parse(room as string);
+	console.log(
+		"participantsFr",
+		JSON.parse(participantsFr as string),
+		"roomID",
+		roomData.mine,
 	);
-
-	const roomParticipantsArray = roomParticipants;
-	roomParticipantsArray.forEach(
-		(participant: {
-			userID: string;
-			username: string;
-			profile_picture_url: string;
-		}) => {
-			participantsInRoom.push({
+	// let roomParticipants: Participant[] = JSON.parse(participantsFr as string);
+	const [participantsInRoom, setParticipantsInRoom] = useState<Participant[]>(
+		JSON.parse(participantsFr as string).map((participant: any) => {
+			return {
 				id: participant.userID,
 				username: participant.username,
 				profilePictureUrl: participant.profile_picture_url,
-			});
-		},
+			};
+		}),
 	);
 
 	const handleOpenContextMenu = (participant: Participant) => {
@@ -83,7 +85,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 			return;
 		}
 		const response = await fetch(
-			`${utils.API_BASE_URL}/rooms/${roomID}/banned`,
+			`${utils.API_BASE_URL}/rooms/${roomData.roomID}/banned`,
 			{
 				method: "POST",
 				headers: {
@@ -101,8 +103,8 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 		}
 		console.log("User banned successfully");
 		setParticipantsInRoom(
-			participantsInRoom.filter(() => {
-				return selectedParticipant?.id;
+			participantsInRoom.filter((participant) => {
+				return participant.id !== selectedParticipant?.id;
 			}),
 		);
 		handleCloseContextMenu();
@@ -123,6 +125,7 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 	};
 	const renderItem = ({ item }: { item: Participant }) => {
 		// Truncate the username if it's longer than 20 characters
+		const showMenu: boolean = currentUser.userID !== item.id && roomData.mine;
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
@@ -150,13 +153,14 @@ const ParticipantsPage: React.FC<ParticipantsPageProps> = ({
 					/>
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
-
-				<TouchableOpacity
-					onPress={() => handleOpenContextMenu(participant)}
-					testID={`ellipsis-button-${participant.id}`}
-				>
-					<Ionicons name="ellipsis-vertical" size={24} color="black" />
-				</TouchableOpacity>
+				{showMenu && (
+					<TouchableOpacity
+						onPress={() => handleOpenContextMenu(participant)}
+						testID={`ellipsis-button-${participant.id}`}
+					>
+						<Ionicons name="ellipsis-vertical" size={24} color="black" />
+					</TouchableOpacity>
+				)}
 			</View>
 		);
 	};
