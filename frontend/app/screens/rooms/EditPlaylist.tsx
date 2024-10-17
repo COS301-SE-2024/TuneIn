@@ -49,7 +49,7 @@ const EditPlaylist: React.FC = () => {
 	// }, []);
 
 	useEffect(() => {
-		if (searchQuery.length > 3) {
+		if (searchQuery.length > 2) {
 			handleSearch(searchQuery);
 		}
 	}, [searchQuery]);
@@ -288,21 +288,22 @@ const EditPlaylist: React.FC = () => {
 				))}
 			</ScrollView>
 
-			{/* Clear Button */}
-			{currentRoom?.creator.userID === currentUser?.userID && (
-				<TouchableOpacity style={styles.clearButton} onPress={clearQueue}>
-					<Text style={styles.buttonText}>Clear Queue</Text>
-				</TouchableOpacity>
-			)}
+			{/* Button Row for Clear and Save */}
+			<View style={styles.buttonRow}>
+				{currentRoom?.creator.userID === currentUser?.userID && (
+					<TouchableOpacity style={styles.clearButton} onPress={clearQueue}>
+						<Text style={styles.buttonText}>Clear Queue</Text>
+					</TouchableOpacity>
+				)}
 
-			{/* Save Button */}
-			<TouchableOpacity
-				style={styles.saveButton}
-				onPress={savePlaylist}
-				disabled={!unsavedChanges}
-			>
-				<Text style={styles.buttonText}>Save Playlist</Text>
-			</TouchableOpacity>
+				<TouchableOpacity
+					style={[styles.saveButton, !unsavedChanges && styles.disabledButton]}
+					onPress={savePlaylist}
+					disabled={!unsavedChanges}
+				>
+					<Text style={styles.buttonText}>Save Playlist</Text>
+				</TouchableOpacity>
+			</View>
 		</View>
 	);
 };
@@ -316,7 +317,7 @@ const styles = StyleSheet.create({
 	headerContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginBottom: 20,
+		// marginBottom: 20,
 	},
 	backButton: {
 		marginRight: 10,
@@ -382,6 +383,11 @@ const styles = StyleSheet.create({
 	searchIcon: {
 		marginLeft: 10,
 	},
+	buttonRow: {
+		flexDirection: "row", // Align buttons in a row
+		justifyContent: "space-between", // Evenly space the buttons
+		marginTop: 10,
+	},
 	clearButton: {
 		backgroundColor: colors.secondary,
 		borderRadius: 30,
@@ -389,7 +395,9 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		elevation: 5,
-		marginTop: 10,
+		paddingHorizontal: 20, // Added padding for better spacing
+		flex: 1, // Take up equal space as save button
+		marginRight: 10,
 	},
 	saveButton: {
 		backgroundColor: colors.primary,
@@ -398,7 +406,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		elevation: 5,
-		marginTop: 10,
+		paddingHorizontal: 20, // Added padding for better spacing
+		flex: 1, // Take up equal space
+	},
+	disabledButton: {
+		backgroundColor: "#cccccc", // Lighter background for disabled state
 	},
 	removeButton: {
 		backgroundColor: "black",
