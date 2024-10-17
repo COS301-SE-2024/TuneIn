@@ -1,3 +1,4 @@
+import { CognitoUserPool } from "amazon-cognito-identity-js";
 import { RoomDto, RoomsApi, UsersApi } from "../../api";
 import { RequiredError } from "../../api/base";
 
@@ -13,38 +14,36 @@ class BookmarkService {
 
 	getBookmarks = async (users: UsersApi): Promise<RoomDto[]> => {
 		let result: RoomDto[] = [];
-		users
-			.getBookmarks()
-			.then((response) => {
-				console.log("getBookmarks response: " + response);
-				if (response.status === 201) {
-					//Created
-					//Room bookmarked successfully
-					console.log("Room bookmarked successfully");
-					result = response.data;
-				} else if (response.status === 401) {
-					//Unauthorized
-					//Auth header is either missing or invalid
-					throw new Error("Cannot bookmark room for unauthorized user");
-				} else if (response.status === 404) {
-					//Not Found
-					//Room not found
-					throw new Error("Cannot bookmark room that does not exist");
-				} else if (response.status === 500) {
-					//Internal Server Error
-					//Something went wrong in the backend (unlikely lmao)
-					throw new Error("Internal server error");
-				} else {
-					throw new Error("Unknown error");
-				}
-			})
-			.catch((error) => {
-				if (error instanceof RequiredError) {
-					// a required field is missing
-				} else {
-					// some other error
-				}
-			});
+		try {
+			const response = await users.getBookmarks();
+			if (response.status === 200) {
+				//Created
+				//Room bookmarked successfully
+				console.log("Bookmarks withing body: ", result);
+				return response.data;
+			} else if (response.status === 401) {
+				//Unauthorized
+				//Auth header is either missing or invalid
+				throw new Error("Cannot bookmark room for unauthorized user");
+			} else if (response.status === 404) {
+				//Not Found
+				//Room not found
+				throw new Error("Cannot bookmark room that does not exist");
+			} else if (response.status === 500) {
+				//Internal Server Error
+				//Something went wrong in the backend (unlikely lmao)
+				throw new Error("Internal server error");
+			} else {
+				throw new Error("Unknown error");
+			}
+		} catch (error) {
+			if (error instanceof RequiredError) {
+				// a required field is missing
+			} else {
+				// some other error
+			}
+		}
+		console.log("Bookmarks outside body: ", result);
 		return result;
 	};
 

@@ -131,12 +131,24 @@ const ChatScreen = () => {
 					<Ionicons name="chevron-back" size={24} color="black" />
 				</TouchableOpacity>
 				{dmParticipants[0] && dmParticipants[0].profile_picture_url && (
-					<Image
-						source={{
-							uri: dmParticipants[0].profile_picture_url,
+					<TouchableOpacity
+						onPress={() => {
+							router.push(
+								`/screens/profile/ProfilePage?friend=${JSON.stringify({
+									username: dmParticipants[0].username,
+									profile_picture_url: dmParticipants[0].profile_picture_url,
+									userID: dmParticipants[0].userID,
+								})}&user=${dmParticipants[0].username}`,
+							);
 						}}
-						style={styles.avatar}
-					/>
+					>
+						<Image
+							source={{
+								uri: dmParticipants[0].profile_picture_url,
+							}}
+							style={styles.avatar}
+						/>
+					</TouchableOpacity>
 				)}
 				<Text style={styles.headerTitle}>
 					{dmError ? "Failed" : dmParticipants[0]?.profile_name || "Loading..."}

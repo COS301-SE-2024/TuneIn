@@ -18,10 +18,10 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 const groupRoomsByMonth = (rooms: Room[]) => {
 	return rooms.reduce(
 		(groups, room) => {
-			const createdAt = room.start_date ? new Date(room.start_date) : null;
+			const createdAt = room.date_created ? new Date(room.date_created) : null;
 
 			if (!createdAt || isNaN(createdAt.getTime())) {
-				console.warn("Invalid start_date for room:", room.roomID);
+				console.warn("Invalid date_created for room:", room.roomID);
 				return groups;
 			}
 
@@ -44,35 +44,50 @@ const MyRooms: React.FC = () => {
 	const router = useRouter(); // Initialize router
 	const [groupedRooms, setGroupedRooms] = useState<Record<string, Room[]>>({});
 	const [loading, setLoading] = useState(true);
-	const [sortBy, setSortBy] = useState<"start_date" | "end_date">("start_date");
+	const [sortBy, setSortBy] = useState<"date_created" | "name">("date_created");
 	const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 	const [sortLoading, setSortLoading] = useState(false);
+	console.log(" myRooms", JSON.parse(myRooms as string));
 
 	// Sorting function for rooms
 	const sortRooms = useCallback(
 		(rooms: Room[]) => {
-			return rooms.sort((a, b) => {
-				const dateA = new Date(a[sortBy] as Date).getTime();
-				const dateB = new Date(b[sortBy] as Date).getTime();
-
-				if (sortDirection === "asc") {
-					return dateA - dateB;
-				} else {
-					return dateB - dateA;
-				}
-			});
+			if (sortBy === "date_created") {
+				return rooms.sort((a, b) => {
+					if (sortDirection === "asc") {
+						return (
+							new Date(a.date_created).getTime() -
+							new Date(b.date_created).getTime()
+						);
+					} else {
+						return (
+							new Date(b.date_created).getTime() -
+							new Date(a.date_created).getTime()
+						);
+					}
+				});
+			} else {
+				return rooms.sort((a, b) => {
+					if (sortDirection === "asc") {
+						return a.name.localeCompare(b.name);
+					} else {
+						return b.name.localeCompare(a.name);
+					}
+				});
+			}
 		},
 		[sortBy, sortDirection],
 	);
 
 	useEffect(() => {
+		console.log("MyRooms.tsx: myRooms", myRooms);
 		if (myRooms) {
 			try {
 				const parsedRooms: Room[] = JSON.parse(myRooms as string).map(
 					(room: Room) => ({
 						...room,
-						start_date: room.start_date ? new Date(room.start_date) : null,
-						end_date: room.end_date ? new Date(room.end_date) : null,
+						start_date: room.start_date ? room.start_date : null,
+						end_date: room.end_date ? room.end_date : null,
 					}),
 				);
 
@@ -89,6 +104,7 @@ const MyRooms: React.FC = () => {
 
 	// Effect to handle sorting when sortBy or sortDirection changes
 	useEffect(() => {
+		console.log("The rooms i am in", myRooms);
 		if (!myRooms) return;
 		setSortLoading(true);
 		try {
@@ -113,8 +129,9 @@ const MyRooms: React.FC = () => {
 		<View style={styles.container}>
 			<View style={styles.titleContainer}>
 				<TouchableOpacity
-					onPress={() => router.back()}
 					style={styles.backButton}
+					onPress={() => router.back()}
+					testID="back-button"
 				>
 					<Ionicons name="chevron-back" size={24} color="#000" />
 				</TouchableOpacity>
@@ -131,17 +148,17 @@ const MyRooms: React.FC = () => {
 				</TouchableOpacity>
 			</View>
 
-			{/* <View style={styles.sortContainer}>
+			<View style={styles.sortContainer}>
 				<Picker
 					testID="dropdown"
 					selectedValue={sortBy}
 					style={styles.dropdown}
 					onValueChange={(itemValue) =>
-						setSortBy(itemValue as "start_date" | "end_date")
+						setSortBy(itemValue as "date_created" | "name")
 					}
 				>
-					<Picker.Item label="Sort by Start Date" value="start_date" />
-					<Picker.Item label="Sort by End Date" value="end_date" />
+					<Picker.Item label="Sort by Creation Date" value="date_created" />
+					<Picker.Item label="Sort by Name" value="name" />
 				</Picker>
 
 				<TouchableOpacity
@@ -157,10 +174,10 @@ const MyRooms: React.FC = () => {
 						color={colors.primaryText}
 					/>
 				</TouchableOpacity>
-			</View> */}
+			</View>
 
 			<ScrollView contentContainerStyle={styles.scrollViewContent}>
-				{loading || sortLoading ? (
+				{false ? (
 					<ActivityIndicator
 						testID="loading-indicator"
 						size={60}
@@ -187,6 +204,10 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: colors.backgroundColor,
 	},
+	backButton: {
+		position: "absolute",
+		left: 10,
+	},
 	titleContainer: {
 		flexDirection: "row",
 		justifyContent: "center", // Center the title
@@ -195,10 +216,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 10,
 		position: "relative", // Allows absolute positioning of the button
 		paddingBottom: 20,
-	},
-	backButton: {
-		position: "absolute",
-		left: 10,
 	},
 	addButton: {
 		position: "absolute",

@@ -77,10 +77,12 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 				if (currentRoom.start_date) {
 					start = new Date(currentRoom.start_date);
 				}
-				let end: Date = new Date(0);
+				let end: Date = new Date(Number.POSITIVE_INFINITY);
 				if (currentRoom.end_date) {
 					end = new Date(currentRoom.end_date);
 				}
+				console.log("currentSong", currentSong);
+				console.log("currentTrack", currentTrack);
 				const title: string =
 					currentSong && currentTrack !== null
 						? getTitle({ song: currentSong, track: currentTrack })
@@ -96,6 +98,7 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 					songName: title,
 					artistName: artist,
 					description: currentRoom.room_image,
+					userProfile: currentRoom.creator.profile_picture_url,
 					// userProfile?:
 					userID: currentRoom.creator.userID,
 					username: currentRoom.creator.username,
@@ -109,6 +112,7 @@ const PlayerContextProvider: React.FC<PlayerContextProviderProps> = ({
 					isNsfw: currentRoom.has_nsfw_content,
 					start_date: start,
 					end_date: end,
+					date_created: new Date(),
 				});
 			}
 		}

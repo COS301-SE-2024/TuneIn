@@ -16,6 +16,7 @@ import { IsNumber } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { RecommendationsService } from "../../recommendations/recommendations.service";
 import { SongInfoDto } from "../rooms/dto/songinfo.dto";
+import { MailerService } from "@nestjs-modules/mailer";
 
 export class UserListeningStatsDto {
 	@ApiProperty({
@@ -35,7 +36,48 @@ export class UsersService {
 		private readonly dbUtils: DbUtilsService,
 		private readonly dtogen: DtoGenService,
 		private recommender: RecommendationsService,
+		private readonly mailerService: MailerService,
 	) {}
+
+	async sendEmail(userID: string, message: string): Promise<void> {
+		// const mailerService = new MailerService();
+		const user = await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+		if (!user) {
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+		}
+		const email = user.email;
+		console.log(
+			"Email: ",
+			email,
+			"Message: ",
+			message,
+			"Port: ",
+			process.env.EMAIL_PORT,
+		);
+		if (!email) {
+			throw new HttpException(
+				"User does not have an email address",
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		try {
+			await this.mailerService.sendMail({
+				to: process.env.EMAIL_ADDRESS ?? "",
+				from: email,
+				subject: "TuneIn Feedback",
+				text: message,
+			});
+		} catch (e) {
+			console.error(e);
+			throw new HttpException(
+				"Failed to send email",
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
+		throw new HttpException("Email sent successfully", HttpStatus.OK);
+	}
 
 	// Tutorial CRUD operations
 	create(createUserDto: Partial<UserDto>) {
@@ -103,9 +145,9 @@ export class UsersService {
 			where: { username: username },
 		});
 		if (user === null) {
-			throw new HttpException("Username not found", HttpStatus.NOT_FOUND);
+			throw new HttpException("Username available", HttpStatus.OK);
 		}
-		throw new HttpException("Username found", HttpStatus.OK);
+		throw new HttpException("Username unavailable", HttpStatus.BAD_REQUEST);
 	}
 
 	async updateProfile(
@@ -350,9 +392,12 @@ export class UsersService {
 				HttpStatus.NOT_FOUND,
 			);
 		} else {
-			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto([
-				userData.user_id,
-			]);
+			console.log("User data: ", userData);
+			const [user]: UserDto[] = await this.dtogen.generateMultipleUserDto(
+				[userData.user_id],
+				undefined,
+				true,
+			);
 			return user;
 		}
 	}
@@ -492,11 +537,23 @@ export class UsersService {
 			throw new Error("User has no friends");
 		}
 		const friendIDs = friends.map((friend) => friend.user_id);
-		const rooms: RoomDto[] = [];
-		for (const friendID of friendIDs) {
-			const friendRooms = await this.getUserRooms(friendID);
-			rooms.push(...friendRooms);
-		}
+		const friendRooms: FullyQualifiedRoom[] = await this.prisma.room.findMany({
+			where: {
+				room_creator: {
+					in: friendIDs,
+				},
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
+		});
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDtoFromRoom(
+			friendRooms,
+		);
 		return rooms;
 	}
 
@@ -505,12 +562,23 @@ export class UsersService {
 		if (!following) {
 			throw new Error("User is not following anyone");
 		}
-		const followingIDs = following.map((follow) => follow.user_id);
-		const rooms: RoomDto[] = [];
-		for (const followID of followingIDs) {
-			const followRooms = await this.getUserRooms(followID);
-			rooms.push(...followRooms);
-		}
+		const followingIDs = following
+			.map((follow) => follow.user_id)
+			.filter((id) => id !== userID);
+		const followingRoomsIDs = await this.prisma.room.findMany({
+			where: {
+				room_creator: {
+					in: followingIDs,
+				},
+			},
+			select: {
+				room_id: true,
+			},
+		});
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
+			followingRoomsIDs.map((room) => room.room_id),
+			userID,
+		);
 		return rooms;
 	}
 	async getUserRooms(userID: string): Promise<RoomDto[]> {
@@ -531,7 +599,7 @@ export class UsersService {
 		}
 
 		const ids: string[] = rooms.map((room) => room.room_id);
-		const r = await this.dtogen.generateMultipleRoomDto(ids);
+		const r = await this.dtogen.generateMultipleRoomDto(ids, userID);
 		return r;
 	}
 
@@ -551,18 +619,20 @@ export class UsersService {
 		};
 		if (createRoomDto.description)
 			newRoom.description = createRoomDto.description;
-		if (createRoomDto.is_temporary)
+		if (createRoomDto.is_temporary !== undefined)
 			newRoom.is_temporary = createRoomDto.is_temporary;
 
-		/*
-		if (createRoomDto.language) newRoom.language = createRoomDto.language;
-		*/
-		if (createRoomDto.has_explicit_content)
+		if (createRoomDto.language !== undefined)
+			newRoom.room_language = createRoomDto.language;
+		if (createRoomDto.has_explicit_content !== undefined)
 			newRoom.explicit = createRoomDto.has_explicit_content;
-		if (createRoomDto.has_nsfw_content)
+		if (createRoomDto.has_nsfw_content !== undefined)
 			newRoom.nsfw = createRoomDto.has_nsfw_content;
-		if (createRoomDto.room_image)
+		if (createRoomDto.room_image !== undefined)
 			newRoom.playlist_photo = createRoomDto.room_image;
+		if (createRoomDto.room_size !== undefined)
+			newRoom.room_size = createRoomDto.room_size;
+		if (createRoomDto.tags !== undefined) newRoom.tags = createRoomDto.tags;
 
 		/*
 		if (createRoomDto.current_song)
@@ -575,8 +645,6 @@ export class UsersService {
 		if (!room) {
 			throw new Error("Something went wrong while creating the room");
 		}
-
-		//for is_private, we will need to add the roomID to the private_room tbale
 		const r: FullyQualifiedRoom = {
 			...room,
 			child_room_child_room_parent_room_idToroom: [],
@@ -596,6 +664,11 @@ export class UsersService {
 			const privRoomResult = await this.prisma.private_room.create({
 				data: privRoom,
 			});
+			if (!privRoomResult || privRoomResult === null) {
+				throw new Error(
+					"An unknown error occurred while creating private room. Received null.",
+				);
+			}
 			r.private_room = privRoomResult;
 		} else {
 			const pubRoom: Prisma.public_roomCreateInput = {
@@ -608,21 +681,36 @@ export class UsersService {
 			const pubRoomResult = await this.prisma.public_room.create({
 				data: pubRoom,
 			});
+			if (!pubRoomResult || pubRoomResult === null) {
+				throw new Error(
+					"An unknown error occurred while creating public room. Received null.",
+				);
+			}
 			r.public_room = pubRoomResult;
 		}
 
-		//TODO: implement scheduled room creation
-		/*
-		if (createRoomDto.start_date) newRoom.start_date = createRoomDto.start_date;
-		if (createRoomDto.end_date) newRoom.end_date = createRoomDto.end_date;
 		if (createRoomDto.is_scheduled) {
-			newRoom.
-				connect: {
-					roomID: createRoomDto.roomID,
+			const newScheduledRoom: Prisma.scheduled_roomCreateInput = {
+				start_date: createRoomDto.start_date ?? null,
+				end_date: createRoomDto.end_date ?? null,
+				room: {
+					connect: {
+						room_id: room.room_id,
+					},
 				},
 			};
+
+			const scheduledRoom = await this.prisma.scheduled_room.create({
+				data: newScheduledRoom,
+			});
+			if (!scheduledRoom || scheduledRoom === null) {
+				throw new Error(
+					"An unknown error occurred while creating scheduled room. Received null.",
+				);
+			}
+			r.scheduled_room = scheduledRoom;
 		}
-		*/
+
 		const rooms = await this.dtogen.generateMultipleRoomDtoFromRoom([r]);
 		if (rooms.length === 0) {
 			throw new Error(
@@ -662,6 +750,7 @@ export class UsersService {
 		const recent_rooms =
 			(await this.dtogen.generateMultipleRoomDto(
 				recentRooms.map((room) => room.room_id),
+				u.user_id,
 			)) || [];
 
 		return recent_rooms;
@@ -723,6 +812,7 @@ export class UsersService {
 			const randomRooms = roomsWithSongs.sort(() => Math.random() - 0.5);
 			const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
 				randomRooms.map((room: PrismaTypes.room) => room.room_id),
+				userID,
 			);
 			return r === null ? [] : r;
 		}
@@ -739,7 +829,7 @@ export class UsersService {
 		const ids: string[] = recommendedRooms.map(
 			(room: { playlist: string; score: number }) => room.playlist,
 		);
-		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids);
+		const r: RoomDto[] = await this.dtogen.generateMultipleRoomDto(ids, userID);
 		return r;
 	}
 
@@ -838,7 +928,10 @@ export class UsersService {
 			});
 
 		const roomIDs: string[] = bookmarks.map((bookmark) => bookmark.room_id);
-		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(roomIDs);
+		const rooms: RoomDto[] = await this.dtogen.generateMultipleRoomDto(
+			roomIDs,
+			u.user_id,
+		);
 		return rooms;
 	}
 
@@ -1588,8 +1681,22 @@ export class UsersService {
 		}
 		// unfriend and unfollow user
 		try {
-			await this.unfollowUser(userID, usernameToBlock);
-			await this.unfriendUser(userID, usernameToBlock);
+			await this.prisma.friends.deleteMany({
+				where: {
+					OR: [
+						{ friend1: userID, friend2: user.user_id },
+						{ friend1: user.user_id, friend2: userID },
+					],
+				},
+			});
+			await this.prisma.follows.deleteMany({
+				where: {
+					OR: [
+						{ follower: userID, followee: user.user_id },
+						{ follower: user.user_id, followee: userID },
+					],
+				},
+			});
 		} catch (e) {
 			console.log(e);
 		}

@@ -62,11 +62,28 @@ export class DtoGenService {
 
 	async generateMultipleUserDto(
 		userIDs: string[],
+		userID: string | undefined = undefined,
 		fully_qualify = false,
 	): Promise<UserDto[]> {
-		//check if userID exists
+		let blocked: PrismaTypes.blocked[] = [];
+		if (userID && userID !== null) {
+			blocked = await this.prisma.blocked.findMany({
+				where: { OR: [{ blockee: userID }, { blocker: userID }] },
+			});
+		}
+		// create a an array of all the blocker and blockee ids and only include unique
+		const blocked_ids: string[] = [
+			...new Set([
+				...blocked.map((b) => b.blocker),
+				...blocked.map((b) => b.blockee),
+			]),
+		];
+		// exclude userID from the blocked_ids
+		const blocked_id = blocked_ids.filter((id) => id !== userID);
 		const users = await this.prisma.users.findMany({
-			where: { user_id: { in: userIDs } },
+			where: {
+				AND: [{ user_id: { in: userIDs } }, { user_id: { notIn: blocked_id } }],
+			},
 			include: {
 				authentication: true,
 				favorite_genres: {
@@ -176,12 +193,81 @@ export class DtoGenService {
 		return result;
 	}
 
-	async generateMultipleRoomDto(roomIDs: string[]): Promise<RoomDto[]> {
+	async generateMultipleRoomDto(
+		roomIDs: string[],
+		userID: string | undefined = undefined,
+	): Promise<RoomDto[]> {
 		if (roomIDs.length === 0) {
 			return [];
 		}
-		const rooms: FullyQualifiedRoom[] =
-			await this.dbUtils.getFullyQualifiedRooms(roomIDs);
+
+		//
+		let blocked: PrismaTypes.blocked[] = [];
+		if (userID && userID !== null) {
+			blocked = await this.prisma.blocked.findMany({
+				where: { OR: [{ blockee: userID }, { blocker: userID }] },
+			});
+		}
+		// create a an array of all the blocker and blockee ids and only include unique
+		const blocked_ids: string[] = [
+			...new Set([
+				...blocked.map((b) => b.blocker),
+				...blocked.map((b) => b.blockee),
+			]),
+		];
+
+		// get private rooms from users who aren't friends with the user then exclude them
+		let nonFriends: PrismaTypes.friends[] = [];
+		if (userID) {
+			nonFriends = await this.prisma.friends.findMany({
+				where: {
+					OR: [
+						{ friend1: userID, is_pending: false },
+						{ friend2: userID, is_pending: false },
+					],
+				},
+			});
+		}
+		console.log("nonFriends: " + JSON.stringify(nonFriends));
+		const friendIDs: string[] = nonFriends.map((f) =>
+			f.friend1 === userID ? f.friend2 : f.friend1,
+		);
+		if (userID) {
+			friendIDs.push(userID);
+		}
+		// get private rooms from users who aren't friends with the user then exclude them
+		const nonFriendPrivateRooms = await this.prisma.private_room.findMany({
+			where: {
+				room_id: { in: roomIDs },
+			}, // include rooms with room_creator not in friendIDs
+			include: { room: true },
+		});
+		// filter out the private rooms that are not created by friends, then just return the room_id
+		const nonFriendPrivateRoomIDs = nonFriendPrivateRooms
+			.filter((r) => !friendIDs.includes(r.room.room_creator))
+			.map((r) => r.room_id);
+		// remove private rooms from the room_ids
+		const nonPrivateRoomIDs = roomIDs.filter(
+			(id) => !nonFriendPrivateRoomIDs.includes(id),
+		);
+		// exclude userID from the blocked_ids
+		const blocked_id = blocked_ids.filter((id) => id !== userID);
+		const rooms: FullyQualifiedRoom[] = await this.prisma.room.findMany({
+			where: {
+				AND: [
+					{ room_id: { in: nonPrivateRoomIDs } },
+					{ room_creator: { notIn: blocked_id } },
+				],
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
+		});
+
 		const userIDs: string[] = rooms.map((r) => r.room_creator);
 		const users: UserWithAuth[] = await this.dbUtils.getUsersWithAuth(userIDs);
 		const userDtos: UserDto[] = users.map((u) => this.generateBriefUserDto(u));
@@ -189,35 +275,48 @@ export class DtoGenService {
 		const result: RoomDto[] = [];
 		for (let i = 0; i < rooms.length; i++) {
 			const r = rooms[i];
-			const u = userDtos.find((u) => u.userID === r.room_creator);
-			if (!u) {
-				throw new Error(
-					"Weird error. Got users from Rooms table but user (" +
-						r.room_creator +
-						") not found in Users table",
+			if (r && r !== null) {
+				const u = userDtos.find((u) => u.userID === r.room_creator);
+				if (!u || u === null) {
+					throw new Error(
+						"Weird error. Got users from Rooms table but user (" +
+							r.room_creator +
+							") not found in Users table",
+					);
+				}
+				const childrenRooms = r.child_room_child_room_parent_room_idToroom.map(
+					(r) => r.room_id,
 				);
+				const sRoom = r.scheduled_room;
+				const scheduledRoom = sRoom
+					? {
+							start_date: sRoom.start_date || undefined,
+							end_date: sRoom.end_date || undefined,
+							is_scheduled: true,
+					  }
+					: { start_date: undefined, end_date: undefined, is_scheduled: false };
+				const pRoom = r.private_room;
+				const room: RoomDto = {
+					creator: u || new UserDto(),
+					roomID: r.room_id,
+					participant_count: r.participate.length,
+					room_name: r.name,
+					description: r.description || "",
+					is_temporary: r.is_temporary || false,
+					is_private: pRoom !== undefined ? true : false,
+					language: r.room_language || "",
+					has_explicit_content: r.explicit || false,
+					has_nsfw_content: r.nsfw || false,
+					room_image: r.playlist_photo || "",
+					tags: r.tags || [],
+					spotifyPlaylistID: r.playlist_id || "",
+					childrenRoomIDs: childrenRooms,
+					date_created: r.date_created,
+					...scheduledRoom,
+					room_size: Number(r.room_size) || 50,
+				};
+				result.push(room);
 			}
-			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
-			const room: RoomDto = {
-				creator: u || new UserDto(),
-				roomID: r.room_id,
-				spotifyPlaylistID: r.playlist_id || "",
-				participant_count: r.participate.length,
-				room_name: r.name,
-				description: r.description || "",
-				is_temporary: r.is_temporary || false,
-				is_private: r.private_room !== null,
-				is_scheduled: r.scheduled_room !== null,
-				start_date: new Date(),
-				end_date: new Date(),
-				language: r.room_language || "",
-				has_explicit_content: r.explicit || false,
-				has_nsfw_content: r.nsfw || false,
-				room_image: r.playlist_photo || "",
-				tags: r.tags || [],
-				childrenRoomIDs: childrenRooms.map((r) => r.room_id),
-			};
-			result.push(room);
 		}
 		return result;
 	}
@@ -244,6 +343,22 @@ export class DtoGenService {
 				);
 			}
 			const childrenRooms = r.child_room_child_room_parent_room_idToroom;
+			const scheduledRoom: {
+				start_date: Date | undefined;
+				end_date: Date | undefined;
+				is_scheduled: boolean;
+			} =
+				r.scheduled_room === null
+					? {
+							start_date: undefined,
+							end_date: undefined,
+							is_scheduled: false,
+					  }
+					: {
+							start_date: r.scheduled_room.start_date || undefined,
+							end_date: r.scheduled_room.end_date || undefined,
+							is_scheduled: true,
+					  };
 			const room: RoomDto = {
 				creator: u || new UserDto(),
 				roomID: r.room_id,
@@ -253,15 +368,15 @@ export class DtoGenService {
 				description: r.description || "",
 				is_temporary: r.is_temporary || false,
 				is_private: r.private_room !== null,
-				is_scheduled: r.scheduled_room !== null,
-				start_date: new Date(),
-				end_date: new Date(),
+				...scheduledRoom,
 				language: r.room_language || "",
 				has_explicit_content: r.explicit || false,
 				has_nsfw_content: r.nsfw || false,
 				room_image: r.playlist_photo || "",
 				tags: r.tags || [],
+				date_created: r.date_created,
 				childrenRoomIDs: childrenRooms.map((child) => child.room_id),
+				room_size: Number(r.room_size) || 50,
 			};
 			result.push(room);
 		}
