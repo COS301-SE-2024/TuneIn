@@ -853,7 +853,7 @@ export class ActiveRoom {
 		);
 		await this.updateQueue(murLockService);
 		await spotify.addSongsToRoomPlaylist(
-			this.room.spotifyPlaylistID,
+			this.room,
 			songs.map((s) => s.spotifyID),
 		);
 		return result;
@@ -928,7 +928,7 @@ export class ActiveRoom {
 			}
 		}
 		await spotify.replaceSongsFromRoomPlaylist(
-			this.room.spotifyPlaylistID,
+			this.room,
 			i,
 			roomSongs.slice(i).map((s) => s.spotifyID),
 		);

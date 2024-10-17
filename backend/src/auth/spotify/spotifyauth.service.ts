@@ -84,7 +84,7 @@ export class SpotifyAuthService {
 	private clientSecret: string;
 	// private redirectUri: string;
 	private authHeader: string;
-	private selfAuthorisedAPI: Spotify.SpotifyApi;
+	// private selfAuthorisedAPI: Spotify.SpotifyApi;
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -117,10 +117,10 @@ export class SpotifyAuthService {
 			`${this.clientId}:${this.clientSecret}`,
 		).toString("base64");
 
-		this.selfAuthorisedAPI = Spotify.SpotifyApi.withClientCredentials(
-			this.clientId,
-			this.clientSecret,
-		);
+		// this.selfAuthorisedAPI = Spotify.SpotifyApi.withClientCredentials(
+		// 	this.clientId,
+		// 	this.clientSecret,
+		// );
 	}
 
 	//how state is constructed in frontend
@@ -305,29 +305,22 @@ export class SpotifyAuthService {
 	}
 
 	async createUser(tk: SpotifyTokenPair): Promise<PrismaTypes.users> {
-		//get user
 		if (tk.epoch_expiry < Date.now()) {
-			throw new Error("Token has expired");
+			tk.tokens = await this.refreshAccessToken(tk.tokens);
 		}
 
 		const spotifyUser: Spotify.UserProfile = await this.getSelf(tk.tokens);
+		const users: PrismaTypes.users[] = await this.prisma.users.findMany();
 
-		let existingUser: PrismaTypes.users | null =
-			await this.prisma.users.findFirst({
-				where: { email: spotifyUser.email },
-			});
-		if (!existingUser || existingUser === null) {
+		let existingUser: PrismaTypes.users | undefined = users.find(
+			(user) => user.email === spotifyUser.email,
+		);
+		if (!existingUser) {
 			//try to find by username
-			existingUser = await this.prisma.users.findFirst({
-				where: { username: spotifyUser.id },
-			});
-			if (!existingUser) {
-				throw new Error("Failed to find user");
-			}
+			existingUser = users.find((user) => user.username === spotifyUser.id);
 		}
 		if (existingUser) {
-			const e = existingUser as PrismaTypes.users;
-			return e;
+			return existingUser;
 		}
 
 		const user: Prisma.usersCreateInput = {
@@ -384,6 +377,7 @@ export class SpotifyAuthService {
 	async saveUserSpotifyTokens(tk: SpotifyTokenPair, userID: string) {
 		const user = await this.prisma.users.findFirst({
 			where: { user_id: userID },
+			include: { authentication: true },
 		});
 
 		if (!user) {
@@ -391,18 +385,7 @@ export class SpotifyAuthService {
 		}
 
 		try {
-			const existingTokens: PrismaTypes.authentication[] | null =
-				await this.prisma.authentication.findMany({
-					where: { user_id: user.user_id },
-				});
-
-			if (!existingTokens || existingTokens === null) {
-				throw new Error(
-					"A database error occurred while checking if the user's tokens exist",
-				);
-			}
-
-			if (existingTokens.length > 0) {
+			if (user.authentication !== null) {
 				await this.prisma.authentication.update({
 					where: { user_id: user.user_id },
 					data: {
@@ -443,10 +426,6 @@ export class SpotifyAuthService {
 			await this.saveUserSpotifyTokens(newPair, userID);
 			return newPair;
 		}
-		return JSON.parse(tokens.token) as SpotifyTokenPair;
-	}
-
-	getUserlessAPI(): Spotify.SpotifyApi {
-		return this.selfAuthorisedAPI;
+		return tk;
 	}
 }
