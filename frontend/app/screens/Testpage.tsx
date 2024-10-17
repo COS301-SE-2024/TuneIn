@@ -1,152 +1,176 @@
 import React, { useState } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { formatRoomData } from "../models/Room"; // Adjust the path to where formatRoomData is located
-import SplittingPopUp from "../components/rooms/SplittingRoomPopUp"; // Import the SplittingPopUp component
+import {
+	View,
+	Text,
+	TextInput,
+	Button,
+	StyleSheet,
+	ScrollView,
+} from "react-native";
+import forge from "node-forge";
+import { colors } from "../styles/colors";
 
-// Example room and queue data
-const testRooms = [
-	{
-		id: "1",
-		backgroundImage:
-			"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmCy16nhIbV3pI1qLYHMJKwbH2458oiC9EmA&s",
-		name: "Test Room One",
-		description: "This is a description for Test Room One.",
-		userID: "user1",
-		username: "User One",
-		tags: ["chill", "jazz"],
-		genre: "Jazz",
-		language: "English",
-		roomSize: 10,
-		isExplicit: false,
-		isNsfw: false,
-	},
-	{
-		id: "2",
-		name: "Test Room Two",
-		description: "This is a description for Test Room Two.",
-		userID: "user2",
-		username: "User Two",
-		tags: ["pop", "party"],
-		genre: "Pop",
-		language: "English",
-		roomSize: 20,
-		isExplicit: true,
-		isNsfw: false,
-	},
-];
+const EncryptionTestScreen = () => {
+	const [privateKey, setPrivateKey] = useState("");
+	const [publicKey, setPublicKey] = useState("");
+	const [user1Message, setUser1Message] = useState("");
+	const [user2Message, setUser2Message] = useState("");
+	const [encryptedMessage, setEncryptedMessage] = useState("");
+	const [decryptedMessage, setDecryptedMessage] = useState("");
 
-const testQueues = [
-	[
-		{
-			id: 1,
-			name: "Track One",
-			artists: [{ name: "Artist A" }],
-			album: { images: [{ url: "https://example.com/album1.jpg" }] },
-			explicit: false,
-			preview_url: "https://example.com/preview1.mp3",
-			uri: "spotify:track:1",
-			duration_ms: 210000,
-		},
-		{
-			id: 2,
-			name: "Track Two",
-			artists: [{ name: "Artist B" }],
-			album: { images: [{ url: "https://example.com/album2.jpg" }] },
-			explicit: true,
-			preview_url: "https://example.com/preview2.mp3",
-			uri: "spotify:track:2",
-			duration_ms: 180000,
-		},
-	],
-	[
-		{
-			id: 3,
-			name: "Track Three",
-			artists: [{ name: "Artist C" }],
-			album: { images: [{ url: "https://example.com/album3.jpg" }] },
-			explicit: false,
-			preview_url: "https://example.com/preview3.mp3",
-			uri: "spotify:track:3",
-			duration_ms: 200000,
-		},
-		{
-			id: 4,
-			name: "Track Four",
-			artists: [{ name: "Artist D" }],
-			album: { images: [{ url: "https://example.com/album4.jpg" }] },
-			explicit: true,
-			preview_url: "https://example.com/preview4.mp3",
-			uri: "spotify:track:4",
-			duration_ms: 240000,
-		},
-	],
-];
+	// Function to ensure proper PEM formatting (trim extra spaces and check headers/footers)
+	const formatKey = (key: string, type: "private" | "public") => {
+		const trimmedKey = key.trim();
 
-const TestPage: React.FC = () => {
-	const [isPopupVisible, setPopupVisible] = useState(false);
-	const router = useRouter();
+		if (
+			type === "private" &&
+			!trimmedKey.startsWith("-----BEGIN PRIVATE KEY-----")
+		) {
+			return `-----BEGIN PRIVATE KEY-----\n${trimmedKey}\n-----END PRIVATE KEY-----`;
+		}
 
-	const navigateToSplittingRoom = () => {
-		router.navigate({
-			pathname: "/screens/rooms/SplittingRoom",
-			params: {
-				rooms: JSON.stringify(testRooms),
-				queues: JSON.stringify(testQueues),
-			},
-		});
+		if (
+			type === "public" &&
+			!trimmedKey.startsWith("-----BEGIN PUBLIC KEY-----")
+		) {
+			return `-----BEGIN PUBLIC KEY-----\n${trimmedKey}\n-----END PUBLIC KEY-----`;
+		}
+
+		return trimmedKey; // Return key if already properly formatted
 	};
 
-	const handleOpenPopup = () => {
-		setPopupVisible(true);
-	};
-
-	const handleClosePopup = () => {
-		setPopupVisible(false);
-	};
-
-	// Handle confirmation from the popup
-	const handleConfirmPopup = async (choice: boolean) => {
-		console.log("User choice:", choice ? "Yes" : "No");
-		if (choice) {
-			// Navigate to splitting room or handle "Yes" action
-			navigateToSplittingRoom();
-		} else {
-			// Handle "No" action (cancel)
-			handleClosePopup();
+	const handleEncrypt = () => {
+		try {
+			const { pki, util } = forge;
+			const formattedPublicKey = formatKey(publicKey, "public"); // Format the public key
+			const publicKeyObj = pki.publicKeyFromPem(formattedPublicKey);
+			const encrypted = publicKeyObj.encrypt(util.encodeUtf8(user2Message));
+			setEncryptedMessage(forge.util.encode64(encrypted));
+		} catch (error) {
+			console.error("Encryption error:", error);
 		}
 	};
 
-	const sampleRoomData = formatRoomData(testRooms[0]); // Use one of the sample rooms for demonstration
+	const handleDecrypt = () => {
+		try {
+			const { pki, util } = forge;
+			const formattedPrivateKey = formatKey(privateKey, "private"); // Format the private key
+			const privateKeyObj = pki.privateKeyFromPem(formattedPrivateKey);
+			const decrypted = privateKeyObj.decrypt(
+				forge.util.decode64(encryptedMessage),
+			);
+			setDecryptedMessage(util.decodeUtf8(decrypted));
+		} catch (error) {
+			console.error("Decryption error:", error);
+		}
+	};
 
 	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>Test Page</Text>
-			<Button title="Go to SplittingRoom" onPress={navigateToSplittingRoom} />
-			{/* Button to open the popup */}
-			<Button title="Test Popup" onPress={handleOpenPopup} />
-			{/* Popup component */}
-			<SplittingPopUp
-				isVisible={isPopupVisible}
-				onClose={handleClosePopup}
-				onConfirm={handleConfirmPopup}
+		<ScrollView
+			contentContainerStyle={[
+				styles.container,
+				{ backgroundColor: colors.backgroundColor },
+			]}
+		>
+			<Text style={[styles.title, { color: colors.primary }]}>
+				Encryption Test
+			</Text>
+			{/* User 1 (Private Key) */}
+			<Text style={[styles.subtitle, { color: colors.primaryText }]}>
+				User 1 (Private Key)
+			</Text>
+			<TextInput
+				style={[
+					styles.keyInput,
+					{ color: colors.primaryText, borderColor: colors.primary },
+				]}
+				value={privateKey}
+				onChangeText={setPrivateKey}
+				placeholder="Enter Private Key"
+				multiline
 			/>
-		</View>
+			<TextInput
+				style={[
+					styles.messageInput,
+					{ color: colors.primaryText, borderColor: colors.primary },
+				]}
+				value={user1Message}
+				onChangeText={setUser1Message}
+				placeholder="Message to decrypt"
+			/>
+			<Button title="Decrypt" color={colors.primary} onPress={handleDecrypt} />
+			{decryptedMessage ? (
+				<Text style={[styles.resultText, { color: colors.primaryText }]}>
+					Decrypted Message: {decryptedMessage}
+				</Text>
+			) : null}
+
+			{/* User 2 (Public Key) */}
+			<Text style={[styles.subtitle, { color: colors.primaryText }]}>
+				User 2 (Public Key)
+			</Text>
+			<TextInput
+				style={[
+					styles.keyInput,
+					{ color: colors.primaryText, borderColor: colors.primary },
+				]}
+				value={publicKey}
+				onChangeText={setPublicKey}
+				placeholder="Enter Public Key"
+				multiline
+			/>
+			<TextInput
+				style={[
+					styles.messageInput,
+					{ color: colors.primaryText, borderColor: colors.primary },
+				]}
+				value={user2Message}
+				onChangeText={setUser2Message}
+				placeholder="Message to encrypt"
+			/>
+			<Button title="Encrypt" color={colors.primary} onPress={handleEncrypt} />
+			{encryptedMessage ? (
+				<Text style={[styles.resultText, { color: colors.primaryText }]}>
+					Encrypted Message: {encryptedMessage}
+				</Text>
+			) : null}
+		</ScrollView>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
+		padding: 20,
+		flexGrow: 1,
 		justifyContent: "center",
-		alignItems: "center",
-		backgroundColor: "#fff",
 	},
 	title: {
 		fontSize: 24,
 		fontWeight: "bold",
 		marginBottom: 20,
 	},
+	subtitle: {
+		fontSize: 20,
+		marginBottom: 10,
+	},
+	keyInput: {
+		height: 100,
+		borderWidth: 1,
+		borderRadius: 10,
+		padding: 10,
+		marginBottom: 20,
+	},
+	messageInput: {
+		height: 50,
+		borderWidth: 1,
+		borderRadius: 10,
+		padding: 10,
+		marginBottom: 20,
+	},
+	resultText: {
+		fontSize: 16,
+		marginTop: 20,
+	},
 });
 
-export default TestPage;
+export default EncryptionTestScreen;
