@@ -66,8 +66,10 @@ const AdvancedSettings = () => {
 			setRoomData(formattedRoom);
 			setToggle1(formattedRoom.isPrivate);
 			setToggle2(
-				(formattedRoom.start_date !== undefined ||
-					formattedRoom.end_date !== undefined) as boolean,
+				((formattedRoom.start_date !== undefined &&
+					formattedRoom.start_date !== null) ||
+					(formattedRoom.end_date !== undefined &&
+						formattedRoom.end_date !== null)) as boolean,
 			);
 			setToggle3(formattedRoom.isTemporary);
 			setStartDate(
