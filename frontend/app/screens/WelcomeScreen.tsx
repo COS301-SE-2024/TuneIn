@@ -88,7 +88,7 @@ const WelcomeScreen: React.FC = () => {
 			state: state,
 			extraParams: {
 				// use the "show_dialog" parameter to force the user to approve the app again
-				show_dialog: true,
+				show_dialog: "true",
 			},
 		},
 		discovery,
