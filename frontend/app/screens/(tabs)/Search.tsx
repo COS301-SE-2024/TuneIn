@@ -173,7 +173,6 @@ const Search: React.FC = () => {
 									language: item.language,
 									userProfile: item.creator.profile_picture_url,
 									mine: false, //this was making the edit button appear on the room card
-									mine: false,
 									songName: item.current_song ? item.current_song.title : null,
 									childrenRoomIDs: item.childrenRoomIDs,
 								} as Room,
