@@ -19,12 +19,12 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({ room }) => {
 	const isScheduled: boolean =
 		(room.start_date !== undefined && room.start_date !== null) ||
 		(room.end_date !== undefined && room.end_date !== null);
-	const startDate: string | Date = room.start_date
+	const startDate: undefined | Date = room.start_date
 		? new Date(room.start_date)
-		: " ... ";
-	const endDate: string | Date = room.end_date
+		: undefined;
+	const endDate: undefined | Date = room.end_date
 		? new Date(room.end_date)
-		: " ... ";
+		: undefined;
 
 	return (
 		<View style={styles.container}>
@@ -57,15 +57,20 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({ room }) => {
 				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>Schedule</Text>
 					<View style={styles.scheduledDatesContainer}>
-						<Text style={styles.scheduledDates}>
-							{typeof startDate === "string"
-								? startDate
-								: formatDate(startDate.toISOString())}{" "}
-							-{" "}
-							{typeof endDate === "string"
-								? endDate
-								: formatDate(endDate.toISOString())}
-						</Text>
+						{startDate && (
+							<Text style={styles.scheduledDates}>
+								{typeof startDate === "string"
+									? startDate
+									: "Start Date - " + formatDate(startDate.toISOString())}
+							</Text>
+						)}
+						{endDate && (
+							<Text style={styles.scheduledDates}>
+								{typeof endDate === "string"
+									? endDate
+									: "End Date - " + formatDate(endDate.toISOString())}
+							</Text>
+						)}
 					</View>
 				</View>
 			)}
