@@ -50,21 +50,30 @@ const CreateRoomScreen: React.FC = () => {
 			if (!startDate && !endDate) {
 				Platform.OS === "web"
 					? alert("Please select a start or end date")
-					: ToastAndroid.show("Please select a start or end date", ToastAndroid.SHORT);
+					: ToastAndroid.show(
+							"Please select a start or end date",
+							ToastAndroid.SHORT,
+						);
 				return;
 			}
 
 			if (startDate && endDate && startDate >= endDate) {
 				Platform.OS === "web"
 					? alert("Start date must be before end date")
-					: ToastAndroid.show("Start date must be before end date", ToastAndroid.SHORT);
+					: ToastAndroid.show(
+							"Start date must be before end date",
+							ToastAndroid.SHORT,
+						);
 				return;
 			}
 
 			if (startDate && startDate < new Date()) {
 				Platform.OS === "web"
 					? alert("Start date must be in the future")
-					: ToastAndroid.show("Start date must be in the future", ToastAndroid.SHORT);
+					: ToastAndroid.show(
+							"Start date must be in the future",
+							ToastAndroid.SHORT,
+						);
 				return;
 			}
 
