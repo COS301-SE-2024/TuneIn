@@ -31,6 +31,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 	onSeeChildRooms,
 	room, // Use room in the component
 }) => {
+	console.log("room in context: " + room);
 	const [isShareSheetVisible, setIsShareSheetVisible] = useState(false);
 
 	const handleSharePress = () => {
@@ -72,7 +73,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 							</TouchableOpacity>
 						)}
 
-						<TouchableOpacity
+						{/* <TouchableOpacity
 							onPress={handleSharePress} // Use handleSharePress here
 							style={styles.menuItem}
 						>
@@ -81,7 +82,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 								{"  "}
 								Share
 							</Text>
-						</TouchableOpacity>
+						</TouchableOpacity> */}
 
 						<TouchableOpacity onPress={onSavePlaylist} style={styles.menuItem}>
 							<Text style={styles.menuText}>

@@ -303,9 +303,12 @@ export function useRoomControls({
 		): Promise<void> {
 			try {
 				console.log(`call handlePlayback`);
+
 				if (!spotifyTokens) {
 					throw new Error("Spotify tokens not found");
 				}
+
+				const { tokens } = spotifyTokens; // Access tokens from SpotifyTokenPair
 
 				if (!spotify) {
 					throw new Error(
@@ -375,23 +378,43 @@ export function useRoomControls({
 						console.log(`Offset: ${offsetMs}`);
 					}
 
-					await spotify.player
-						.startResumePlayback(
-							device.id,
-							playlistURI,
-							undefined,
-							{ position: position },
-							offsetMs,
-						)
-						.catch((err) => {
-							console.error("An error occurred while starting playback", err);
-							alert("An error occurred while starting playback: " + err);
-							throw err;
-						});
+					// Construct the request payload
+					const payload = {
+						context_uri: playlistURI,
+						offset: {
+							position: position,
+						},
+						position_ms: offsetMs - 5000,
+					};
+
+					// Fetch request to the Spotify API
+					const response = await fetch(
+						`https://api.spotify.com/v1/me/player/play`,
+						{
+							method: "PUT",
+							headers: {
+								Authorization: `Bearer ${tokens.access_token}`, // Use the access token
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify(payload),
+						},
+					);
+
+					if (!response.ok) {
+						const errorText = await response.text();
+						console.error(
+							"An error occurred while starting playback",
+							errorText,
+						);
+						alert("An error occurred while starting playback: " + errorText);
+						throw new Error(errorText);
+					}
+
 					console.log("Playback action (PLAY) successful");
 					return;
 				}
 
+				// Handle other actions
 				try {
 					switch (action) {
 						case "pause":
@@ -416,7 +439,7 @@ export function useRoomControls({
 			}
 		},
 		[
-			spotifyTokens,
+			spotifyTokens, // Add spotifyTokenPair as a dependency
 			spotify,
 			activeDevice,
 			spotifyDevices.devices.length,

@@ -28,7 +28,7 @@ import * as utils from "../../services/Utils";
 import RoomModal from "../../components/RoomModal";
 import BannedModal from "../../components/BannedModal";
 import NsfwModal from "../../components/NsfwModal";
-import { Room } from "../../models/Room";
+import { formatRoomData, Room } from "../../models/Room";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -420,6 +420,7 @@ function MyRoomTabs() {
 							? handleNavigateToChildRooms
 							: undefined
 					}
+					room={formatRoomData(roomData)}
 				/>
 			</View>
 

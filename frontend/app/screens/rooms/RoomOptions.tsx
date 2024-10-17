@@ -122,12 +122,12 @@ const RoomOptions = () => {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity style={styles.button}>
+			{/* <TouchableOpacity style={styles.button}>
 				<View style={styles.buttonContent}>
 					<Entypo name="share" size={20} color="black" />
 					<Text style={styles.buttonText}>Share room</Text>
 				</View>
-			</TouchableOpacity>
+			</TouchableOpacity> */}
 
 			<TouchableOpacity style={styles.playlistContainer} onPress={goToHome}>
 				<View style={styles.buttonContent}>
