@@ -13,6 +13,7 @@ import { Room } from "../../models/Room";
 import { useRouter } from "expo-router";
 import { colors } from "../../styles/colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { BlurView } from "expo-blur";
 
 interface RoomCardWidgetProps {
 	roomCard: Room;
@@ -144,14 +145,17 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 					imageStyle={styles.imageBackgroundStyle}
 					testID="room-card-background"
 				>
-					<View
+					{/* <View
 						style={[
 							styles.overlay,
 							isBeforeStartDate || isAfterEndDate ? styles.greyOverlay : {},
 						]}
-					/>
+					/> */}
 					{(isBeforeStartDate || isAfterEndDate) && (
-						<Text style={styles.overlayText}>{renderOverlayText()}</Text>
+						// <Text style={styles.overlayText}>{renderOverlayText()}</Text>
+						<BlurView intensity={20} style={styles.blurOverlay} tint="dark">
+							{renderOverlayText()}
+						</BlurView>
 					)}
 					<View style={styles.textContainer}>
 						<Text style={styles.roomName}>
@@ -160,12 +164,12 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 						{renderSongInfo()}
 					</View>
 					<View style={styles.contentContainer}>
-						{/* {!isBeforeStartDate && !isAfterEndDate && (
-	
-						)} */}
-						<Text style={styles.description}>
-							{truncateText(roomCard.description, 100)}
-						</Text>
+						{!isBeforeStartDate && !isAfterEndDate && (
+							// Render the description if the room is available
+							<Text style={styles.description}>
+								{truncateText(roomCard.description, 100)}
+							</Text>
+						)}
 						{roomCard.mine ? (
 							<View style={styles.actionsContainer}>
 								<TouchableOpacity
@@ -226,6 +230,16 @@ const RoomCardWidget: React.FC<RoomCardWidgetProps> = ({ roomCard }) => {
 							/>
 						)}
 					</View>
+					{/* <View style={styles.iconContainer}>
+						{roomCard.isPrivate && (
+							<MaterialIcons
+								name="private-connectivity"
+								size={28}
+								color="white"
+								style={styles.explicitIcon}
+							/>
+						)}
+					</View> */}
 				</ImageBackground>
 			</Animated.View>
 		</TouchableOpacity>
@@ -260,6 +274,13 @@ const styles = StyleSheet.create({
 	},
 	greyOverlay: {
 		backgroundColor: "rgba(128, 128, 128, 0.95)", // Grey overlay
+	},
+	blurOverlay: {
+		position: "absolute",
+		top: 0,
+		bottom: 0,
+		left: 0,
+		right: 0,
 	},
 	overlayTextContainer: {
 		alignItems: "center",

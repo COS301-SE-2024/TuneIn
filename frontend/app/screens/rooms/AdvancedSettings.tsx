@@ -66,10 +66,12 @@ const AdvancedSettings = () => {
 			setRoomData(formattedRoom);
 			setToggle1(formattedRoom.isPrivate);
 			setToggle2(
-				(formattedRoom.start_date !== undefined ||
-					formattedRoom.end_date !== undefined) as boolean,
+				((formattedRoom.start_date !== undefined &&
+					formattedRoom.start_date !== null) ||
+					(formattedRoom.end_date !== undefined &&
+						formattedRoom.end_date !== null)) as boolean,
 			);
-			setToggle3(formattedRoom.isTemporary ?? false);
+			setToggle3(formattedRoom.isTemporary);
 			setStartDate(
 				formattedRoom.start_date
 					? new Date(formattedRoom.start_date)
@@ -359,54 +361,56 @@ const AdvancedSettings = () => {
 			const token = await auth.getToken();
 			if (roomData) {
 				const roomID = roomData.id ?? roomData.roomID;
-				if (startDate === undefined && endDate === undefined) {
-					// alert message based on the OS
-					if (Platform.OS === "web") {
-						alert("Please select a start or end date");
-					} else {
-						ToastAndroid.show(
-							"Please select a start or end date",
-							ToastAndroid.SHORT,
-						);
+				if (toggle2) {
+					if (startDate === undefined && endDate === undefined) {
+						// alert message based on the OS
+						if (Platform.OS === "web") {
+							alert("Please select a start or end date");
+						} else {
+							ToastAndroid.show(
+								"Please select a start or end date",
+								ToastAndroid.SHORT,
+							);
+						}
+						return;
 					}
-					return;
-				}
-				// check if the dates make sense
-				if (startDate && endDate && startDate >= endDate) {
-					// alert message based on the OS
-					if (Platform.OS === "web") {
-						alert("Start date must be before end date");
-					} else {
-						ToastAndroid.show(
-							"Start date must be before end date",
-							ToastAndroid.SHORT,
-						);
+					// check if the dates make sense
+					if (startDate && endDate && startDate >= endDate) {
+						// alert message based on the OS
+						if (Platform.OS === "web") {
+							alert("Start date must be before end date");
+						} else {
+							ToastAndroid.show(
+								"Start date must be before end date",
+								ToastAndroid.SHORT,
+							);
+						}
+						return;
 					}
-					return;
-				}
-				// check if the start date is in the past
-				if (startDate && startDate < new Date()) {
-					if (Platform.OS === "web") {
-						alert("Start date must be in the future");
-					} else {
-						ToastAndroid.show(
-							"Start date must be in the future",
-							ToastAndroid.SHORT,
-						);
+					// check if the start date is in the past
+					if (startDate && startDate < new Date()) {
+						if (Platform.OS === "web") {
+							alert("Start date must be in the future");
+						} else {
+							ToastAndroid.show(
+								"Start date must be in the future",
+								ToastAndroid.SHORT,
+							);
+						}
+						return;
 					}
-					return;
-				}
-				// check if the end date is in the past
-				if (endDate && endDate < new Date()) {
-					alert("End date must be in the future");
-					return;
+					// check if the end date is in the past
+					if (endDate && endDate < new Date()) {
+						alert("End date must be in the future");
+						return;
+					}
 				}
 				const data = {
 					is_private: toggle1,
 					is_scheduled: toggle2,
 					is_temporary: toggle3,
-					start_date: startDate,
-					end_date: endDate,
+					start_date: startDate ?? null,
+					end_date: endDate ?? null,
 				};
 				console.log("Room data to save: ", data, token);
 				const response = await axios(`${utils.API_BASE_URL}/rooms/${roomID}`, {
@@ -549,13 +553,20 @@ const AdvancedSettings = () => {
 									setStartDate={setStartDate}
 									setEndDate={setEndDate}
 								></DateTimePickerComponent>
+								{/* <TouchableOpacity
+									onPress={() => {
+										setStartDate(undefined);
+										setEndDate(undefined);
+									}}
+								> */}
 								<TouchableOpacity
+									style={styles.clearDatesButton} // Make it a button
 									onPress={() => {
 										setStartDate(undefined);
 										setEndDate(undefined);
 									}}
 								>
-									<Text style={styles.clearDatesButton}>Clear dates</Text>
+									<Text style={styles.clearDatesButtonText}>Clear dates</Text>
 								</TouchableOpacity>
 							</>
 						)}
@@ -680,10 +691,18 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 	},
 	clearDatesButton: {
-		padding: 10,
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		backgroundColor: colors.primary,
+		borderRadius: 5,
+		marginTop: 10,
+		alignSelf: "center", // Center the button
+	},
+	clearDatesButtonText: {
+		color: "#fff",
+		fontWeight: "bold",
 		fontSize: 16,
 		textAlign: "center",
-		flex: 1,
 	},
 	header: {
 		flexDirection: "row",

@@ -142,9 +142,14 @@ export class RoomsService {
 			throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
 		}
 
-		const r: PrismaTypes.room | null = await this.prisma.room.findFirst({
+		const r = await this.prisma.room.findFirst({
 			where: {
 				room_id: roomID,
+			},
+			include: {
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
 			},
 		});
 
@@ -215,17 +220,21 @@ export class RoomsService {
 					},
 				};
 			} else {
-				updatedRoom.scheduled_room = {
-					delete: true,
-				};
+				if (r.scheduled_room) {
+					updatedRoom.scheduled_room = {
+						delete: true,
+					};
+				}
 			}
 		}
 
 		if (updateRoomDto.is_private !== undefined) {
 			if (updateRoomDto.is_private) {
-				updatedRoom.public_room = {
-					delete: true,
-				};
+				if (r.public_room) {
+					updatedRoom.public_room = {
+						delete: true,
+					};
+				}
 				updatedRoom.private_room = {
 					upsert: {
 						create: {},
@@ -233,9 +242,11 @@ export class RoomsService {
 					},
 				};
 			} else {
-				updatedRoom.private_room = {
-					delete: true,
-				};
+				if (r.private_room) {
+					updatedRoom.private_room = {
+						delete: true,
+					};
+				}
 				updatedRoom.public_room = {
 					upsert: {
 						create: {},
@@ -298,6 +309,7 @@ export class RoomsService {
 				},
 				include: {
 					participate: true,
+					banned: true,
 				},
 			});
 			if (!_room || _room === null) {
@@ -306,6 +318,13 @@ export class RoomsService {
 			// check if room is at capacity
 			if (_room.participate.length >= Number(_room.room_size)) {
 				throw new HttpException("Room is at capacity", HttpStatus.FORBIDDEN);
+			}
+
+			if (_room.banned.find((banned) => banned.user_id === user_id)) {
+				throw new HttpException(
+					"User is banned from joining the room",
+					HttpStatus.FORBIDDEN,
+				);
 			}
 			const blocked = await this.prisma.blocked.findFirst({
 				where: {

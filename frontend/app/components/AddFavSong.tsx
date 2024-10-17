@@ -50,8 +50,11 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 	const [sResults, setSResults] = useState<SimplifiedTrack[]>(searchResults);
 
 	useEffect(() => {
-		setSResults(searchResults);
-	}, [searchResults]);
+		// Trigger search when query changes
+		if (searchQuery.length > 1) {
+			handleSearch(searchQuery);
+		}
+	}, [searchQuery]);
 
 	const addToPlaylist = (track: Track) => {
 		const simplifiedTrack: SimplifiedTrack = {
@@ -105,29 +108,23 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 			testID="song-dialog"
 		>
 			<View style={styles.container}>
-				<View>
+				<View style={styles.headerContainer}>
 					<TouchableOpacity
 						style={styles.backButton}
 						onPress={() => router.back()}
-						testID="back"
 					>
 						<Ionicons name="chevron-back" size={24} color="black" />
 					</TouchableOpacity>
+					<View style={styles.searchContainer}>
+						<TextInput
+							style={styles.input}
+							placeholder="Search for songs..."
+							value={searchQuery}
+							onChangeText={setSearchQuery}
+						/>
+						<Ionicons name="search" size={24} color={colors.primary} />
+					</View>
 				</View>
-				<br />
-
-				<TextInput
-					style={styles.input}
-					placeholder="Search for songs..."
-					value={searchQuery}
-					onChangeText={setSearchQuery}
-				/>
-				<TouchableOpacity
-					style={styles.searchButton}
-					onPress={() => handleSearch(searchQuery)}
-				>
-					<Text style={styles.buttonText}>Search</Text>
-				</TouchableOpacity>
 
 				{/* Selected Playlist Section */}
 				<ScrollView style={styles.selectedContainer}>
@@ -157,7 +154,7 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 
 				{/* Search Results Section */}
 				<ScrollView style={styles.resultsContainer}>
-					{sResults.map((track) => (
+					{searchResults.map((track) => (
 						<SongCard
 							key={track.id}
 							track={track}
@@ -191,16 +188,27 @@ const styles = StyleSheet.create({
 		backgroundColor: "#fff",
 		marginTop: 20,
 	},
-	input: {
-		marginTop: 25,
-		borderWidth: 1,
+	headerContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 20,
+		paddingTop: 25,
+	},
+	searchContainer: {
+		flex: 1,
+		flexDirection: "row",
+		alignItems: "center",
 		borderColor: "#ccc",
-		borderRadius: 20,
-		padding: 10,
-		marginBottom: 15,
+		borderWidth: 1,
+		borderRadius: 56,
+		paddingHorizontal: 15,
+	},
+	input: {
+		flex: 1,
+		height: 40,
 	},
 	selectedContainer: {
-		maxHeight: 200,
+		maxHeight: "35%",
 		marginBottom: 10,
 		borderColor: "#ddd",
 		borderWidth: 1,
@@ -275,10 +283,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	backButton: {
-		position: "absolute",
-		left: 0,
-		// top: -10,
-		marginBottom: 30,
+		marginRight: 10,
 	},
 });
 

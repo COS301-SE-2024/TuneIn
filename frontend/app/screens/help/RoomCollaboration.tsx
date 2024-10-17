@@ -92,7 +92,7 @@ export default function RoomCollaboration() {
 				</View>
 			</TouchableOpacity>
 
-			<TouchableOpacity style={styles.card}>
+			{/* <TouchableOpacity style={styles.card}>
 				<View style={styles.cardContent}>
 					<MaterialIcons
 						name="how-to-vote"
@@ -114,7 +114,7 @@ export default function RoomCollaboration() {
 						</Text>
 					</View>
 				</View>
-			</TouchableOpacity>
+			</TouchableOpacity> */}
 		</ScrollView>
 	);
 }
