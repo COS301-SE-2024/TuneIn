@@ -84,7 +84,7 @@ export class SpotifyAuthService {
 	private clientSecret: string;
 	// private redirectUri: string;
 	private authHeader: string;
-	private selfAuthorisedAPI: Spotify.SpotifyApi;
+	// private selfAuthorisedAPI: Spotify.SpotifyApi;
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -117,10 +117,10 @@ export class SpotifyAuthService {
 			`${this.clientId}:${this.clientSecret}`,
 		).toString("base64");
 
-		this.selfAuthorisedAPI = Spotify.SpotifyApi.withClientCredentials(
-			this.clientId,
-			this.clientSecret,
-		);
+		// this.selfAuthorisedAPI = Spotify.SpotifyApi.withClientCredentials(
+		// 	this.clientId,
+		// 	this.clientSecret,
+		// );
 	}
 
 	//how state is constructed in frontend
@@ -426,10 +426,6 @@ export class SpotifyAuthService {
 			await this.saveUserSpotifyTokens(newPair, userID);
 			return newPair;
 		}
-		return JSON.parse(tokens.token) as SpotifyTokenPair;
-	}
-
-	getUserlessAPI(): Spotify.SpotifyApi {
-		return this.selfAuthorisedAPI;
+		return tk;
 	}
 }
