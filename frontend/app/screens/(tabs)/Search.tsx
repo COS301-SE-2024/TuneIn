@@ -379,17 +379,25 @@ const Search: React.FC = () => {
 									description: item.description,
 									userID: item.creator.userID,
 									username: item.creator.username,
+									date_created: new Date(item.date_created),
+									start_date: item.start_date
+										? new Date(item.start_date)
+										: undefined,
+									end_date: item.end_date ? new Date(item.end_date) : undefined,
+									roomSize: item.room_size,
+									isPrivate: item.is_private,
+									isScheduled: item.is_scheduled,
+									isTemporary: item.is_temporary,
 									tags: item.tags,
 									backgroundImage: item.room_image,
 									isExplicit: item.has_explicit_content,
 									isNsfw: item.has_nsfw_content,
 									language: item.language,
-									roomSize: "50",
 									userProfile: item.creator.profile_picture_url,
-									mine: true,
+									mine: false,
 									songName: item.current_song ? item.current_song.title : null,
 									childrenRoomIDs: item.childrenRoomIDs,
-								},
+								} as Room,
 							}),
 						);
 
