@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, Modal } from "react-native";
 import Foundation from "@expo/vector-icons/Foundation";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import RoomShareSheet from "./messaging/RoomShareSheet";
+import { Room } from "../models/Room";
 
 // Define the prop types using an interface
 interface ContextMenuProps {
@@ -14,6 +16,7 @@ interface ContextMenuProps {
 	onSavePlaylist: () => void;
 	isHost: boolean;
 	onSeeChildRooms?: () => void;
+	room: Room; // Add room prop to pass it to RoomShareSheet
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = ({
@@ -26,82 +29,99 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 	onSavePlaylist,
 	isHost,
 	onSeeChildRooms,
+	room, // Use room in the component
 }) => {
+	const [isShareSheetVisible, setIsShareSheetVisible] = useState(false);
+
+	const handleSharePress = () => {
+		setIsShareSheetVisible(true);
+	};
+
+	const handleCloseShareSheet = () => {
+		setIsShareSheetVisible(false);
+	};
+
 	return (
-		<Modal transparent visible={isVisible} animationType="fade">
-			<TouchableOpacity
-				style={styles.overlay}
-				onPress={onClose}
-				testID="overlay"
-			>
-				<View style={styles.menuContainer}>
-					{/* Conditional rendering based on user ownership */}
-					{/* {isHost ? (
+		<>
+			<Modal transparent visible={isVisible} animationType="fade">
+				<TouchableOpacity
+					style={styles.overlay}
+					onPress={onClose}
+					testID="overlay"
+				>
+					<View style={styles.menuContainer}>
+						{isHost ? (
+							<>
+								<TouchableOpacity
+									onPress={onAdvancedSettings}
+									style={styles.menuItem}
+								>
+									<Text style={styles.menuText}>Advanced Settings</Text>
+								</TouchableOpacity>
+
+								<TouchableOpacity
+									onPress={onBanUserList}
+									style={styles.menuItem}
+								>
+									<Text style={styles.menuText}>Banned Users</Text>
+								</TouchableOpacity>
+							</>
+						) : (
+							<TouchableOpacity onPress={onRoomInfo} style={styles.menuItem}>
+								<Text style={styles.menuText}>Room Info</Text>
+							</TouchableOpacity>
+						)}
+
 						<TouchableOpacity
-							onPress={onAdvancedSettings}
+							onPress={handleSharePress} // Use handleSharePress here
 							style={styles.menuItem}
 						>
-							<Text style={styles.menuText}>Advanced Settings</Text>
+							<Text style={styles.menuText}>
+								<Foundation name="share" size={16} color="black" />
+								{"  "}
+								Share
+							</Text>
 						</TouchableOpacity>
-					) : (
-						<TouchableOpacity onPress={onRoomInfo} style={styles.menuItem}>
-							<Text style={styles.menuText}>Room Info</Text>
-						</TouchableOpacity>
-					)} */}
-					{isHost ? (
-						<>
-							<TouchableOpacity
-								onPress={onAdvancedSettings}
-								style={styles.menuItem}
-							>
-								<Text style={styles.menuText}>Advanced Settings</Text>
-							</TouchableOpacity>
 
-							<TouchableOpacity onPress={onBanUserList} style={styles.menuItem}>
-								<Text style={styles.menuText}>Banned Users</Text>
-							</TouchableOpacity>
-						</>
-					) : (
-						<TouchableOpacity onPress={onRoomInfo} style={styles.menuItem}>
-							<Text style={styles.menuText}>Room Info</Text>
-						</TouchableOpacity>
-					)}
-
-					<TouchableOpacity onPress={onShareRoom} style={styles.menuItem}>
-						<Text style={styles.menuText}>
-							<Foundation name="share" size={16} color="black" />
-							{"  "}
-							Share
-						</Text>
-					</TouchableOpacity>
-					<TouchableOpacity onPress={onSavePlaylist} style={styles.menuItem}>
-						<Text style={styles.menuText}>
-							{/* <MaterialIcons name="save-alt" size={24} color="black" /> */}
-							<MaterialCommunityIcons
-								name="playlist-plus"
-								size={24}
-								color="black"
-							/>
-							{"  "}
-							Save Playlist
-						</Text>
-					</TouchableOpacity>
-					{onSeeChildRooms && (
-						<TouchableOpacity onPress={onSeeChildRooms} style={styles.menuItem}>
+						<TouchableOpacity onPress={onSavePlaylist} style={styles.menuItem}>
 							<Text style={styles.menuText}>
 								<MaterialCommunityIcons
-									name="link-variant"
+									name="playlist-plus"
 									size={24}
 									color="black"
 								/>
 								{"  "}
-								Sub-Rooms
+								Save Playlist
 							</Text>
 						</TouchableOpacity>
-					)}
-				</View>
-			</TouchableOpacity>
-		</Modal>
+
+						{onSeeChildRooms && (
+							<TouchableOpacity
+								onPress={onSeeChildRooms}
+								style={styles.menuItem}
+							>
+								<Text style={styles.menuText}>
+									<MaterialCommunityIcons
+										name="link-variant"
+										size={24}
+										color="black"
+									/>
+									{"  "}
+									Sub-Rooms
+								</Text>
+							</TouchableOpacity>
+						)}
+					</View>
+				</TouchableOpacity>
+			</Modal>
+
+			{/* RoomShareSheet component for sharing the room */}
+			<RoomShareSheet
+				room={room}
+				isVisible={isShareSheetVisible}
+				onClose={handleCloseShareSheet}
+			/>
+		</>
 	);
 };
 
