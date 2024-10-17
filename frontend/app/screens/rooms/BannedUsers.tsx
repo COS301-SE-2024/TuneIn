@@ -13,7 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 import * as utils from "../../services/Utils";
 import auth from "../../services/AuthManagement";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLive } from "../../LiveContext";
 
 interface Participant {
 	id: string;
@@ -27,12 +28,14 @@ interface BannedUsersProps {
 
 const BannedUsers: React.FC<BannedUsersProps> = () => {
 	const navigation = useNavigation();
+	const navigator = useRouter();
 	const router = useLocalSearchParams();
 	const { room } = router;
 	const [bannedUsersArray, setBannedUsersarray] = useState<Participant[]>([]);
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
+	const { currentUser } = useLive();
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -113,16 +116,28 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 		};
 		getBannedUsers();
 	}, []);
+	const navigateToProfile = (user: any) => {
+		console.log("Navigating to profile page for user:", user);
+		navigator.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: user.profile_picture_url,
+				username: user.username,
+			})}&user=${user}`,
+		);
+	};
 
 	const renderItem = ({ item }: { item: Participant }) => {
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
 				: item.username;
-
+		const isMine = currentUser?.username === item.username;
 		return (
 			<View style={styles.participantContainer}>
-				<TouchableOpacity style={styles.profileInfoContainer}>
+				<TouchableOpacity
+					style={styles.profileInfoContainer}
+					onPress={navigateToProfile.bind(null, item)}
+				>
 					<Image
 						source={
 							item.profilePictureUrl
@@ -133,17 +148,16 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 					/>
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
-				{/* <TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
-					<Ionicons name="ellipsis-vertical" size={24} color="black" />
-				</TouchableOpacity> */}
-				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
-					<Ionicons
-						name="ellipsis-vertical"
-						size={24}
-						color="black"
-						testID={`ellipsis-${item.id}`}
-					/>
-				</TouchableOpacity>
+				{isMine && (
+					<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
+						<Ionicons
+							name="ellipsis-vertical"
+							size={24}
+							color="black"
+							testID={`ellipsis-${item.id}`}
+						/>
+					</TouchableOpacity>
+				)}
 			</View>
 		);
 	};
