@@ -117,9 +117,9 @@ function MyRoomTabs() {
 
 	const handleShareRoom = () => {
 		setMenuVisible(false);
-		throw new Error(
-			"This is not implemented and this error is to notify our devs.",
-		);
+		// throw new Error(
+		// 	"This is not implemented and this error is to notify our devs.",
+		// );
 		// const userIDs: string[];
 		// rooms.shareRoom(roomID, userIDs)
 		// 	.then((response) => {
@@ -284,6 +284,7 @@ function MyRoomTabs() {
 						queues: JSON.stringify(childRoomQueueData),
 					},
 				});
+				setShowModal(false);
 			}
 		} catch (error) {
 			console.log("Error getting child rooms: ", error);

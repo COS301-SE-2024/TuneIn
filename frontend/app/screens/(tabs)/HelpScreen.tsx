@@ -67,7 +67,6 @@ const menuItems = [
 				title: "Add To The Playlist",
 				screen: "screens/help/RoomCollaboration",
 			},
-			{ title: "Voting", screen: "screens/help/RoomCollaboration" },
 		],
 		route: "screens/help/RoomCollaboration",
 	},

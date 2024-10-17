@@ -126,10 +126,11 @@ const ProfileScreen: React.FC = () => {
 	) {
 		ownsProfile = true;
 	}
-	const preFormatRoomData = (room: any, mine: boolean) => {
+	const preFormatRoomData = (room: any, mine: boolean): Room => {
 		// console.log("Preparing room data: " + JSON.stringify(room));
 		return {
 			id: room.roomID,
+			roomID: room.roomID,
 			backgroundImage: room.room_image
 				? room.room_image
 				: "https://images.pexels.com/photos/255379/pexels-photo-255379.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -145,12 +146,18 @@ const ProfileScreen: React.FC = () => {
 				? room.creator.profile_picture_url
 				: require("../../../assets/profile-icon.png"),
 			username: room.creator ? room.creator.username : "Unknown",
-			roomSize: 50,
+			roomSize: room.room_size,
+			isPrivate: room.is_private,
+			isTemporary: room.is_temporary,
+			date_created: room.date_created,
+			start_date: room.start_date,
+			end_date: room.end_date,
+			childrenRoomIDs: room.childrenRoomIDs,
 			tags: room.tags ? room.tags : [],
 			mine: mine,
 			isNsfw: room.has_nsfw_content,
 			isExplicit: room.has_explicit_content,
-		};
+		} as Room;
 	};
 
 	const ownsRoom = async (roomID: string): Promise<boolean> => {

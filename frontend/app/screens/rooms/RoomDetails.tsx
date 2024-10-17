@@ -245,7 +245,7 @@ const RoomDetails: React.FC = () => {
 						(value) => handleInputChange("description", value),
 						2,
 					)}
-					<Text style={{ fontSize: 16, fontWeight: "bold", paddingBottom: 10 }}>
+					<Text style={{ fontSize: 16, fontWeight: "bold", paddingBottom: 0 }}>
 						Genres
 					</Text>
 					<View style={styles.chipsContainer}>
@@ -365,7 +365,12 @@ const buildToggle = (
 	return (
 		<View style={styles.toggleContainer}>
 			<Text style={styles.toggleLabel}>{labelText}</Text>
-			<Switch value={value} onValueChange={onChange} />
+			<Switch
+				value={value}
+				onValueChange={onChange}
+				thumbColor={value ? "#fffff" : "#ffffff"} // Thumb color when active/inactive
+				trackColor={{ false: "#767577", true: colors.primary }} // Track color for false/true
+			/>
 		</View>
 	);
 };
