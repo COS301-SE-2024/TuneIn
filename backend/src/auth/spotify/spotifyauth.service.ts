@@ -377,6 +377,7 @@ export class SpotifyAuthService {
 	async saveUserSpotifyTokens(tk: SpotifyTokenPair, userID: string) {
 		const user = await this.prisma.users.findFirst({
 			where: { user_id: userID },
+			include: { authentication: true },
 		});
 
 		if (!user) {
@@ -384,18 +385,7 @@ export class SpotifyAuthService {
 		}
 
 		try {
-			const existingTokens: PrismaTypes.authentication[] | null =
-				await this.prisma.authentication.findMany({
-					where: { user_id: user.user_id },
-				});
-
-			if (!existingTokens || existingTokens === null) {
-				throw new Error(
-					"A database error occurred while checking if the user's tokens exist",
-				);
-			}
-
-			if (existingTokens.length > 0) {
+			if (user.authentication !== null) {
 				await this.prisma.authentication.update({
 					where: { user_id: user.user_id },
 					data: {
