@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TuneIn Security Report</title>
+<link
+	href="2024-10-17-ZAP-Report-tunein.co.za/normalize/normalize.css" rel="stylesheet">
+<link
+	href="2024-10-17-ZAP-Report-tunein.co.za/themes/original/main.css" rel="stylesheet">
+<link
+	href="2024-10-17-ZAP-Report-tunein.co.za/themes/original/colors.css" rel="stylesheet">
+</head>
+<body>
+	<header>
+		<h1>TuneIn Security Report</h1>
+		<p>
+			<span>Generated with</span> <a href="https://zaproxy.org"><img
+				src="2024-10-17-ZAP-Report-tunein.co.za/zap32x32.png" alt="The ZAP logo" class="zap-logo">ZAP</a>
+			<span>on Thu 17 Oct 2024, at 21:23:07</span>
+		</p>
+		<p>ZAP Version: 2.15.0</p>
+		<p>
+			ZAP by <a href="https://checkmarx.com/">Checkmarx</a>
+		</p>
+	</header>
+
+	<main>
+
+		<section id="contents" class="contents">
+			<h2>Contents</h2>
+			<nav>
+				<ol>
+					<li><a
+						href="#about-this-report">About this report</a>
+						<ol>
+							
+							<li><a
+								href="#report-parameters">Report parameters</a></li>
+						</ol></li>
+					<data-th-block>
+					<li><a
+						href="#summaries">Summaries</a>
+						<ol>
+							<li><a
+								href="#risk-confidence-counts">Alert counts by risk and confidence</a></li>
+							<li><a
+								href="#site-risk-counts">Alert counts by site and risk</a></li>
+							<li><a
+								href="#alert-type-counts">Alert counts by alert type</a></li>
+						</ol></li>
+					<li><a
+						href="#alerts">Alerts</a>
+						<ol>
+							
+							
+							
+							
+							
+							<li><a
+								href="#alerts--risk-3-confidence-3"><span>Risk</span>=<span
+									class="risk-level">High</span>, <span>Confidence</span>=<span
+									class="confidence-level">High</span> <span>(1)</span></a></li>
+							
+							
+							
+							
+							  
+							
+							
+							
+							
+							
+							
+							<li><a
+								href="#alerts--risk-2-confidence-2"><span>Risk</span>=<span
+									class="risk-level">Medium</span>, <span>Confidence</span>=<span
+									class="confidence-level">Medium</span> <span>(1)</span></a></li>
+							
+							
+							  
+							
+							
+							
+							
+							<li><a
+								href="#alerts--risk-1-confidence-3"><span>Risk</span>=<span
+									class="risk-level">Low</span>, <span>Confidence</span>=<span
+									class="confidence-level">High</span> <span>(1)</span></a></li>
+							
+							<li><a
+								href="#alerts--risk-1-confidence-2"><span>Risk</span>=<span
+									class="risk-level">Low</span>, <span>Confidence</span>=<span
+									class="confidence-level">Medium</span> <span>(2)</span></a></li>
+							
+							
+							  
+							
+							
+							
+							
+							
+							
+							<li><a
+								href="#alerts--risk-0-confidence-2"><span>Risk</span>=<span
+									class="risk-level">Informational</span>, <span>Confidence</span>=<span
+									class="confidence-level">Medium</span> <span>(1)</span></a></li>
+							
+							<li><a
+								href="#alerts--risk-0-confidence-1"><span>Risk</span>=<span
+									class="risk-level">Informational</span>, <span>Confidence</span>=<span
+									class="confidence-level">Low</span> <span>(1)</span></a></li>
+							  
+						</ol></li>
+					<li><a
+						href="#appendix">Appendix</a>
+						<ol>
+							<li><a
+								href="#alert-types">Alert types</a></li>
+						</ol></li>
+					</data-th-block>
+				</ol>
+			</nav>
+		</section>
+
+		<section
+			id="about-this-report" class="about-this-report">
+			<h2>About this report</h2>
+
+			
+
+			<section
+				id="report-parameters">
+				<h3>Report parameters</h3>
+				<div class="report-parameters--container">
+					<h4>Contexts</h4>
+					
+					
+					<p>No contexts were selected, so all contexts were included by default.</p>
+					  
+
+					<h4>Sites</h4>
+					
+					<p>The following sites were included:</p>
+					<ul class="sites-list">
+						<li><span class="site">https://tunein.co.za:3000</span></li>
+					</ul>
+					
+					<p>(If no sites were selected, all sites were included by default.)</p>
+					<p>An included site must also be within one of the included contexts for its data to be included in the report.</p>
+
+					<h4>Risk levels</h4>
+					<p>
+						<span>Included</span>:
+						 
+						<span class="included-risk-codes"><span class="risk-level">High</span>, <span class="risk-level">Medium</span>, <span class="risk-level">Low</span>, <span class="risk-level">Informational</span></span>
+					</p>
+					<p>
+						<span>Excluded</span>:
+						 <span>None</span>
+						
+					</p>
+
+					<h4>Confidence levels</h4>
+					<p>
+						<span>Included</span>:
+						
+						
+						<span class="included-confidence-codes"><span class="confidence-level">User Confirmed</span>, <span class="confidence-level">High</span>, <span class="confidence-level">Medium</span>, <span class="confidence-level">Low</span></span>
+					</p>
+					<p>
+						<span>Excluded</span>:
+						
+						
+						<span class="included-confidence-codes"> <span class="confidence-level">User Confirmed</span>, <span class="confidence-level">High</span>, <span class="confidence-level">Medium</span>, <span class="confidence-level">Low</span>, <span class="confidence-level">False Positive</span></span>
+					</p>
+				</div>
+			</section>
+		</section>
+
+		
+		<section>
+			
+		</section>
+		
+		<section id="summaries" class="summaries">
+			<h2>Summaries</h2>
+
+			<section
+				id="risk-confidence-counts">
+				<h3>Alert counts by risk and confidence</h3>
+				<table class="risk-confidence-counts-table">
+					<caption>
+						<p>This table shows the number of alerts for each level of risk and confidence included in the report.</p>
+						<p>(The percentages in brackets represent the count as a percentage of the total number of alerts included in the report, rounded to one decimal place.)</p>
+					</caption>
+					<colgroup>
+						<col>
+						<col>
+					</colgroup>
+					<colgroup>
+						<col
+							style="width: 14.0%"><col
+							style="width: 14.0%"><col
+							style="width: 14.0%"><col
+							style="width: 14.0%">
+						<col style="width: 14.0%">
+					</colgroup>
+					<thead>
+						<tr>
+							<td colspan="2" rowspan="2"></td>
+							<th scope="colgroup"
+								colspan="5">Confidence</th>
+						</tr>
+						<tr>
+							<th scope="col">User Confirmed</th>
+							<th scope="col">High</th>
+							<th scope="col">Medium</th>
+							<th scope="col">Low</th>
+							<th scope="col">Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="rowgroup"
+								rowspan="5">Risk</th>
+							<th scope="row">High</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(14.3%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span class="additional-info-percentages">(14.3%)</span></td>
+						</tr>
+						<tr>
+							
+							<th scope="row">Medium</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(14.3%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span class="additional-info-percentages">(14.3%)</span></td>
+						</tr>
+						<tr>
+							
+							<th scope="row">Low</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(14.3%)</span></td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(28.6%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>3</span><br> <span class="additional-info-percentages">(42.9%)</span></td>
+						</tr>
+						<tr>
+							
+							<th scope="row">Informational</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(14.3%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(14.3%)</span></td>
+							<td><span>2</span><br> <span class="additional-info-percentages">(28.6%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row">Total</th>
+							<td><span>0</span><br> <span
+								class="additional-info-percentages">(0.0%)</span></td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(28.6%)</span></td>
+							<td><span>4</span><br> <span
+								class="additional-info-percentages">(57.1%)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(14.3%)</span></td>
+							<td><span>7</span><br> <span
+								class="additional-info-percentages">(100%)</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section
+				id="site-risk-counts">
+				<h3>Alert counts by site and risk</h3>
+				<table class="site-risk-counts-table">
+					<caption>
+						<p>This table shows, for each site for which one or more alerts were raised, the number of alerts raised at each risk level.</p>
+						<p>Alerts with a confidence level of &quot;False Positive&quot; have been excluded from these counts.</p>
+						<p>(The numbers in brackets are the number of alerts raised for the site at or above that risk level.)</p>
+					</caption>
+					<colgroup>
+						<col>
+						<col>
+					</colgroup>
+					<colgroup>
+						<col
+							style="width: 16.25%"><col
+							style="width: 16.25%"><col
+							style="width: 16.25%"><col
+							style="width: 16.25%">
+					</colgroup>
+					<thead>
+						<tr>
+							<td colspan="2" rowspan="2"></td>
+							<th scope="colgroup" colspan="4">Risk</th>
+						</tr>
+						<tr>
+							<th scope="col">
+								<span>High</span><br>  <span
+									class="additional-info-percentages">(= High)</span>  
+							</th>
+							<th scope="col">
+								<span>Medium</span><br>   <span
+									class="additional-info-percentages">(&gt;= Medium)</span> 
+							</th>
+							<th scope="col">
+								<span>Low</span><br>   <span
+									class="additional-info-percentages">(&gt;= Low)</span> 
+							</th>
+							<th scope="col">
+								<span>Informational</span><br>   <span
+									class="additional-info-percentages">(&gt;= Informational)</span> 
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="rowgroup"
+								rowspan="1">Site</th>
+							<th scope="row">https://tunein.co.za:3000</th>
+							
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(1)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(2)</span></td>
+							<td><span>2</span><br> <span
+								class="additional-info-percentages">(4)</span></td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(5)</span></td>
+							
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section
+				id="alert-type-counts">
+				<h3>Alert counts by alert type</h3>
+				<table class="alert-type-counts-table">
+					<caption>
+						<p>This table shows the number of alerts of each alert type, together with the alert type&#39;s risk level.</p>
+						<p>(The percentages in brackets represent each count as a percentage, rounded to one decimal place, of the total number of alerts included in this report.)</p>
+					</caption>
+					<thead>
+						<tr>
+							<th scope="col">Alert type</th>
+							<th scope="col">Risk</th>
+							<th scope="col">Count</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-0">Personally Identifiable Information via WebSocket</a></th>
+							<td class="risk-level">High</td>
+							<td><span>3</span><br> <span
+								class="additional-info-percentages">(42.9%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-1">Cross-Domain Misconfiguration</a></th>
+							<td class="risk-level">Medium</td>
+							<td><span>113</span><br> <span
+								class="additional-info-percentages">(1,614.3%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-2">Server Leaks Information via &quot;X-Powered-By&quot; HTTP Response Header Field(s)</a></th>
+							<td class="risk-level">Low</td>
+							<td><span>112</span><br> <span
+								class="additional-info-percentages">(1,600.0%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-3">Strict-Transport-Security Header Not Set</a></th>
+							<td class="risk-level">Low</td>
+							<td><span>113</span><br> <span
+								class="additional-info-percentages">(1,614.3%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-4">X-Content-Type-Options Header Missing</a></th>
+							<td class="risk-level">Low</td>
+							<td><span>50</span><br> <span
+								class="additional-info-percentages">(714.3%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-5">Re-examine Cache-control Directives</a></th>
+							<td class="risk-level">Informational</td>
+							<td><span>48</span><br> <span
+								class="additional-info-percentages">(685.7%)</span></td>
+						</tr>
+						<tr>
+							<th scope="row"><a
+								href="#alert-type-6">Session Management Response Identified</a></th>
+							<td class="risk-level">Informational</td>
+							<td><span>1</span><br> <span
+								class="additional-info-percentages">(14.3%)</span></td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th scope="row">Total</th>
+							<td></td>
+							<td>7</td>
+						</tr>
+					</tfoot>
+				</table>
+			</section>
+		</section>
+
+		<section id="alerts" class="alerts">
+			<h2>Alerts</h2>
+			<ol>
+				
+				 
+				
+				
+				<li id="alerts--risk-3-confidence-3">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">High</span>, <span>Confidence</span>=<span
+							class="confidence-level">High</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://tunein.co.za:3000</span> <span>(1)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-0">Personally Identifiable Information via WebSocket</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://tunein.co.za:3000/socket.io/?EIO=4&amp;transport=websocket</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The response contains Personally Identifiable Information, such as CC number. Credit Card type detected: undefined.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Other info</th>
+		<td> 
+<p>[WebSocket Message] 42/live,[&quot;liveChatHistory&quot;,[{&quot;messageID&quot;:&quot;e1b5f77e-9e55-4e52-b792-8f90d1c4a2f0&quot;,&quot;messageBody&quot;:&quot;The beats are on point!&quot;,&quot;sender&quot;:{&quot;profile_name&quot;:&quot;Thabiso Matau&quot;,&quot;userID&quot;:&quot;711c5238-3081-7008-9055-510a6bebc7e9&quot;,&quot;username&quot;:&quot;8xbbie&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:6,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:8,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:3,&quot;data&quot;:{&quot;instagram&quot;:[&quot;instagram.com/thabiso&quot;,&quot;https://www.instagram.com/8xbbie&quot;],&quot;tiktok&quot;:[&quot;tiktok.com/thabiso&quot;]}},&quot;bio&quot;:&quot;Pure OPIUM🔥&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:1,&quot;data&quot;:[&quot;hip pop&quot;]},&quot;fav_songs&quot;:{&quot;count&quot;:100,&quot;data&quot;:[{&quot;songID&quot;:&quot;1cbc13a5-6503-415e-9207-8f57e2f1101c&quot;,&quot;title&quot;:&quot;Piano Concerto No. 3 in D Minor, Op. 30: III. Finale. Alla breve&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;James Levine&quot;,&quot;Berliner Philharmoniker&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;4BJqT0PrAfrxzMOxytFOIz&quot;,&quot;duration&quot;:832},{&quot;songID&quot;:&quot;85cb4cc4-7e7e-483d-9abb-245f1289513b&quot;,&quot;title&quot;:&quot;Clancy Lowered the Boom&quot;,&quot;artists&quot;:[&quot;Dennis Day&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;7xPhfUan2yNtyFG0cUWkt8&quot;,&quot;duration&quot;:181},{&quot;songID&quot;:&quot;c473ab33-aca7-489f-b5b7-f36c53481fcc&quot;,&quot;title&quot;:&quot;Gati Bali&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1o6I8BglA6ylDMrIELygv1&quot;,&quot;duration&quot;:500},{&quot;songID&quot;:&quot;b72f488d-7f1c-42f5-9356-0f48abb4b76c&quot;,&quot;title&quot;:&quot;Danny Boy&quot;,&quot;artists&quot;:[&quot;Frank Parker&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3ftBPsC5vPBKxYSee08FDH&quot;,&quot;duration&quot;:210},{&quot;songID&quot;:&quot;81cbb9eb-505c-4e57-a894-d6891a5975ca&quot;,&quot;title&quot;:&quot;When Irish Eyes Are Smiling&quot;,&quot;artists&quot;:[&quot;Phil Regan&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;4d6HGyGT8e121BsdKmw9v6&quot;,&quot;duration&quot;:167},{&quot;songID&quot;:&quot;cbe7e798-d817-4289-abc7-28f573ab75d8&quot;,&quot;title&quot;:&quot;Gati Mardika&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;4pyw9DVHGStUre4J6hPngr&quot;,&quot;duration&quot;:395},{&quot;songID&quot;:&quot;10db0fdf-4497-4c01-8898-ecf396be9f65&quot;,&quot;title&quot;:&quot;The Wearing of the Green&quot;,&quot;artists&quot;:[&quot;John McCormack&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;5uNZnElqOS3W4fRmRYPk4T&quot;,&quot;duration&quot;:160},{&quot;songID&quot;:&quot;f6f2594f-869e-4936-b319-0719101b7ec0&quot;,&quot;title&quot;:&quot;Morceaux de fantaisie, Op. 3: No. 2, Prélude in C-Sharp Minor. Lento&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;02GDntOXexBFUvSgaXLPkd&quot;,&quot;duration&quot;:219},{&quot;songID&quot;:&quot;d994f04d-1a14-4544-ad70-e9a4bd8dfa74&quot;,&quot;title&quot;:&quot;La Mañanita - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;05xDjWH9ub67nJJk82yfGf&quot;,&quot;duration&quot;:162},{&quot;songID&quot;:&quot;5054070d-83eb-46bd-955b-4941b80f1913&quot;,&quot;title&quot;:&quot;Il Etait Syndiqué&quot;,&quot;artists&quot;:[&quot;Fortugé&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;08zfJvRLp7pjAb94MA9JmF&quot;,&quot;duration&quot;:197},{&quot;songID&quot;:&quot;172f2dbb-76cd-47e2-ac49-32cbc3880128&quot;,&quot;title&quot;:&quot;Dans La Vie Faut Pas S&#39;en Faire&quot;,&quot;artists&quot;:[&quot;Maurice Chevalier&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0BMkRpQtDoKjcgzCpnqLNa&quot;,&quot;duration&quot;:147},{&quot;songID&quot;:&quot;32f58574-34c4-4823-b21d-47600cd11ac8&quot;,&quot;title&quot;:&quot;Por Que Me Dejaste - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0F30WM8qRpO8kdolepZqdM&quot;,&quot;duration&quot;:155},{&quot;songID&quot;:&quot;2ba676f4-b5d4-4995-b1fa-9253442e2f90&quot;,&quot;title&quot;:&quot;La Vipère&quot;,&quot;artists&quot;:[&quot;Georgel&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0H3k2CvJvHULnWChlbeFgx&quot;,&quot;duration&quot;:191},{&quot;songID&quot;:&quot;2f41c8b7-f850-40e2-b703-a8097ab2931c&quot;,&quot;title&quot;:&quot;Ud Taksimi&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0LcXzABeA84EgudqpNUN1I&quot;,&quot;duration&quot;:185},{&quot;songID&quot;:&quot;4fe3395f-1864-48f4-a6d4-170b52cee8b5&quot;,&quot;title&quot;:&quot;Power Is Power&quot;,&quot;artists&quot;:[&quot;Zay Gatsby&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0MJZ4hh60zwsYleWWxT5yW&quot;,&quot;duration&quot;:205},{&quot;songID&quot;:&quot;35747422-4f7f-4862-af97-9d6d1bad4a5e&quot;,&quot;title&quot;:&quot;10 Préludes, Op. 23: No. 5 in G Minor. Alla marcia&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Ruth Laredo&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0NFeJgmTAV1kDfzSQNK41Z&quot;,&quot;duration&quot;:221},{&quot;songID&quot;:&quot;a11df4c1-ec5b-4b84-b87a-3f70c6df9bfa&quot;,&quot;title&quot;:&quot;Come Back To Erin&quot;,&quot;artists&quot;:[&quot;Phil Regan&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0Nk5f07H3JaEunGrYfbqHM&quot;,&quot;duration&quot;:186},{&quot;songID&quot;:&quot;a4881208-6ea2-43b4-962e-e1884d87ff7f&quot;,&quot;title&quot;:&quot;Rákóczy March&quot;,&quot;artists&quot;:[&quot;Hector Berlioz&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0POO8XaUgW5Qjbv9sbDy8W&quot;,&quot;duration&quot;:251},{&quot;songID&quot;:&quot;2b4ad557-e4ba-4506-beb7-0c94a37db8ed&quot;,&quot;title&quot;:&quot;When We Die&quot;,&quot;artists&quot;:[&quot;THE GUY&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0QQmUf4aPFaN9U2yRko595&quot;,&quot;duration&quot;:205},{&quot;songID&quot;:&quot;2dd33cf8-0a31-4937-960a-05f4b8938ab4&quot;,&quot;title&quot;:&quot;A Ballynure Ballad&quot;,&quot;artists&quot;:[&quot;Christopher Lynch&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0QU5xT6Mik4vpyt1ItsRXK&quot;,&quot;duration&quot;:122},{&quot;songID&quot;:&quot;d23f0272-3704-4b3e-8235-fdc9e49216d6&quot;,&quot;title&quot;:&quot;Je Suis Toujours La&quot;,&quot;artists&quot;:[&quot;Fortugé&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0QvUUTHYUQQhSXLwffzjL7&quot;,&quot;duration&quot;:191},{&quot;songID&quot;:&quot;0e04c3e3-b4af-4c15-be6b-e6ec2888bc0b&quot;,&quot;title&quot;:&quot;Mother Machree&quot;,&quot;artists&quot;:[&quot;John McCormack&quot;,&quot;Edwin Schneider&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0RPKAq5yhbom6hXQz5qo6L&quot;,&quot;duration&quot;:187},{&quot;songID&quot;:&quot;013264bb-91ec-4c20-92b9-974154703de9&quot;,&quot;title&quot;:&quot;Flor Marchita - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0SK1upzAP6NvIgF0uGh6z2&quot;,&quot;duration&quot;:154},{&quot;songID&quot;:&quot;e754e026-04b3-4134-b9b8-1a9e8c43615c&quot;,&quot;title&quot;:&quot;İmtidadı Aşkıma&quot;,&quot;artists&quot;:[&quot;Hanende İbrahim Efendi&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0UqiUmGDlhL0A0pmLxafn4&quot;,&quot;duration&quot;:159},{&quot;songID&quot;:&quot;01e722be-ee43-4840-9414-a0acd49210a2&quot;,&quot;title&quot;:&quot;Ney Taksimi&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0VhIFYGSpY0Z8IAIA3C6bX&quot;,&quot;duration&quot;:87},{&quot;songID&quot;:&quot;b0f3521c-0a6c-4f1e-bcbf-933fc8ca1cc9&quot;,&quot;title&quot;:&quot;Morceaux de fantaisie, Op. 3: No. 2, Prélude in C-Sharp Minor. Lento&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0eQsdik7GTEy7M3UytCbSN&quot;,&quot;duration&quot;:219},{&quot;songID&quot;:&quot;4b3fdbab-aa20-47ac-b56e-b5e882b49d6a&quot;,&quot;title&quot;:&quot;Je M&#39;donne&quot;,&quot;artists&quot;:[&quot;Maurice Chevalier&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0i7MdVu0tNEyUdgpCBilKe&quot;,&quot;duration&quot;:182},{&quot;songID&quot;:&quot;00dfa753-b207-460b-83bf-3909e25f80b7&quot;,&quot;title&quot;:&quot;Korkma Sönmez&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0osXBirvQzPRfKSUDzHPCv&quot;,&quot;duration&quot;:155},{&quot;songID&quot;:&quot;b55a3bfc-ddc1-44bd-ad4c-2b56f839abc2&quot;,&quot;title&quot;:&quot;La Victoire De La Madelon&quot;,&quot;artists&quot;:[&quot;Fortugé&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0qt9g8zf2ZiQhy3FIx89xA&quot;,&quot;duration&quot;:204},{&quot;songID&quot;:&quot;4377b50a-fc71-449f-b491-aa107ff1e02d&quot;,&quot;title&quot;:&quot;Por Ella - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0sIGoVO1yuIfpikLaKqqVY&quot;,&quot;duration&quot;:130},{&quot;songID&quot;:&quot;f6f8e272-eab2-49f2-9983-4b0172f6f352&quot;,&quot;title&quot;:&quot;A Mi Palomita - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0y3F8OUDFuB5bpWpXnQi7n&quot;,&quot;duration&quot;:167},{&quot;songID&quot;:&quot;f22971f6-eec4-4e84-bef5-3b366e70b1d2&quot;,&quot;title&quot;:&quot;Amurado Me Dejaste - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0yKcdafy64xX9n1ant34Ry&quot;,&quot;duration&quot;:159},{&quot;songID&quot;:&quot;f342e66e-8a60-432c-9c93-a777162811b5&quot;,&quot;title&quot;:&quot;Raja Manggala&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;0yxeAe7MlS0UWZVdNZVZWw&quot;,&quot;duration&quot;:687},{&quot;songID&quot;:&quot;d0b6f81a-0606-4749-bc27-6d82efed909a&quot;,&quot;title&quot;:&quot;Eşin Var âşiyâ Var&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;107JTiqeqxj5P0ocypagMK&quot;,&quot;duration&quot;:338},{&quot;songID&quot;:&quot;879e57c1-6917-4e39-8af7-307c3f430a69&quot;,&quot;title&quot;:&quot;Bir Zamanlar Bizde Millet&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;17gxBcWBIkEFUZA0vN5khu&quot;,&quot;duration&quot;:188},{&quot;songID&quot;:&quot;26bc803a-4c8b-4242-97bc-5f30bcb64deb&quot;,&quot;title&quot;:&quot;Overture&quot;,&quot;artists&quot;:[&quot;Ermanno Wolf-Ferrari&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;18BvzCRC1jeAsj1U70YuRy&quot;,&quot;duration&quot;:151},{&quot;songID&quot;:&quot;a740abdb-e46b-49bb-83d9-c12b5e4590df&quot;,&quot;title&quot;:&quot;Gati Main-main&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1OicZEUVSwpiAosSQm16D8&quot;,&quot;duration&quot;:401},{&quot;songID&quot;:&quot;6e628954-f9bb-43c3-9853-32902a8a1092&quot;,&quot;title&quot;:&quot;6 Songs, Op. 38: No. 3, Daisies (Version for Piano)&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Ruth Laredo&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1Pb4ebTZ4t8erRbLPPb8Pk&quot;,&quot;duration&quot;:117},{&quot;songID&quot;:&quot;fa1f3d9e-b7f0-46d6-8cbf-ed52ce9204b6&quot;,&quot;title&quot;:&quot;Je N&#39;peux Pas Vivre Sans Amour&quot;,&quot;artists&quot;:[&quot;Maurice Chevalier&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1RgXfAX9PrSfTKTFvOQxPR&quot;,&quot;duration&quot;:171},{&quot;songID&quot;:&quot;ed25c91a-037c-4e84-9432-d6fbb54aab7e&quot;,&quot;title&quot;:&quot;Piano Concerto No. 3 in D Minor, Op. 30: III. Finale. Alla breve&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;James Levine&quot;,&quot;Berliner Philharmoniker&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1SCWBjhk5WmXPxhDduD3HM&quot;,&quot;duration&quot;:832},{&quot;songID&quot;:&quot;c005f650-d734-483f-879c-31884ba2cea3&quot;,&quot;title&quot;:&quot;Love for Guns&quot;,&quot;artists&quot;:[&quot;THE GUY&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1T2NGVgAoXjQPEjxTGFRZV&quot;,&quot;duration&quot;:404},{&quot;songID&quot;:&quot;76a90685-93ae-4ae2-8e9a-866d6cf932f6&quot;,&quot;title&quot;:&quot;Just A Little Bit Of Heaven&quot;,&quot;artists&quot;:[&quot;Christopher Lynch&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1W2ONoo3OZW5opytgqpYdE&quot;,&quot;duration&quot;:120},{&quot;songID&quot;:&quot;6140f993-ee6d-42f3-8b85-af47668bed9c&quot;,&quot;title&quot;:&quot;Ey Bülbül-i Ter Zebân-i İrf&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1WOXWCjKZzJJRSMJcrLrK1&quot;,&quot;duration&quot;:145},{&quot;songID&quot;:&quot;f39dba2a-95ac-46e7-9fc7-93c08d2aaf4b&quot;,&quot;title&quot;:&quot;Doksan Senelik Ömre İlâhi&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1Wy1BuvVlkZWsfSge0dp9Q&quot;,&quot;duration&quot;:257},{&quot;songID&quot;:&quot;4ba836bf-70f5-4a69-8066-9b74d317aa35&quot;,&quot;title&quot;:&quot;Galway Bay&quot;,&quot;artists&quot;:[&quot;Dennis Day&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1Ybjz5mMnE0hJbkB8n7V80&quot;,&quot;duration&quot;:177},{&quot;songID&quot;:&quot;53d7b219-cbfd-439a-a118-a0bd8ea7da93&quot;,&quot;title&quot;:&quot;Symphony No. 39 in E-Flat Major, K. 543: III. Menuetto&quot;,&quot;artists&quot;:[&quot;Wolfgang Amadeus Mozart&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1oOI1MEkrpbnMCRSK5vGZ1&quot;,&quot;duration&quot;:249},{&quot;songID&quot;:&quot;5807fd3d-8ef1-461c-937c-ccdd1eee3be7&quot;,&quot;title&quot;:&quot;Kasr-ı Gülşen&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1qmXkw1WhSvvIL5IqBnW82&quot;,&quot;duration&quot;:250},{&quot;songID&quot;:&quot;79b2de2c-96be-4ef4-b63e-e5b68bee12ce&quot;,&quot;title&quot;:&quot;Un Lamento - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1s6QwBiqGcedNZnld0OIJV&quot;,&quot;duration&quot;:198},{&quot;songID&quot;:&quot;e8daaf15-aad9-47c8-bf1e-0853c5365181&quot;,&quot;title&quot;:&quot;No. 14, Vocalise&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Yuri Temirkanov&quot;,&quot;St. Petersburg Philharmonic Orchestra&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1xGx91Ks3RQFqyam0Fdrky&quot;,&quot;duration&quot;:538},{&quot;songID&quot;:&quot;982d6693-c4f1-4453-9507-b7ee3a009202&quot;,&quot;title&quot;:&quot;Yâ Râb Bu Uğursuz Gecenin Yok mu Sabahı -&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;1zBcLIHAqpBlL8gAJ5Cxa7&quot;,&quot;duration&quot;:125},{&quot;songID&quot;:&quot;2e4ae69e-3223-4e06-8684-abd916ef7026&quot;,&quot;title&quot;:&quot;A Midsummer Night&#39;s Dream, Op. 61: Scherzo&quot;,&quot;artists&quot;:[&quot;Felix Mendelssohn&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;273hgBmjqe8KSxmWHyyPAD&quot;,&quot;duration&quot;:270},{&quot;songID&quot;:&quot;95173b9f-f358-4442-876f-b25d8e4f3945&quot;,&quot;title&quot;:&quot;Mis Harapos - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;27LYINFAjaKGMWQc6EfAtT&quot;,&quot;duration&quot;:178},{&quot;songID&quot;:&quot;92776506-1814-4f66-8bf0-3cdda1face53&quot;,&quot;title&quot;:&quot;The Rose Of Tralee&quot;,&quot;artists&quot;:[&quot;Christopher Lynch&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2Bj1dMObcYNFt75znIEtWa&quot;,&quot;duration&quot;:191},{&quot;songID&quot;:&quot;95079ced-ac76-4b5d-b50e-1791f28b562a&quot;,&quot;title&quot;:&quot;Rhapsody on a Theme of Paganini, Op. 43: Var. XVIII, Andante cantabile&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Zubin Mehta&quot;,&quot;Vladimir Feltsman&quot;,&quot;Israel Philharmonic Orchestra&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2Cfk7LOOiTLVxe9BNoGGCL&quot;,&quot;duration&quot;:168},{&quot;songID&quot;:&quot;528b73b3-1e53-4aec-8842-e8d4e8a0f3be&quot;,&quot;title&quot;:&quot;Where The River Shannon Flows&quot;,&quot;artists&quot;:[&quot;Morton Downey&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2CkM2wcBtqG796dZeZJhPk&quot;,&quot;duration&quot;:164},{&quot;songID&quot;:&quot;0919fa80-cd7a-4bcb-b75c-4e1f96d75615&quot;,&quot;title&quot;:&quot;Une Canne Et Des Gants&quot;,&quot;artists&quot;:[&quot;Louis Boucot&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2EV71z9RFz15SDR8WezEXG&quot;,&quot;duration&quot;:169},{&quot;songID&quot;:&quot;abfb466b-da6a-44f6-849a-5ec36e10afa1&quot;,&quot;title&quot;:&quot;Lamento - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2F9giG3Sziq3kJJl9n0GJi&quot;,&quot;duration&quot;:156},{&quot;songID&quot;:&quot;58a4bac0-6bdd-4d3a-b39a-0e84eca72c79&quot;,&quot;title&quot;:&quot;Al Pie de la Reja - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2GdUG0kUEGNkM4J3scYyu8&quot;,&quot;duration&quot;:175},{&quot;songID&quot;:&quot;5c0e79c6-b618-4494-8ee1-4978cae494e5&quot;,&quot;title&quot;:&quot;Şu Boğaz Harbi Nedir&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2MtcWKwc16dqFqdM7v1WST&quot;,&quot;duration&quot;:159},{&quot;songID&quot;:&quot;f3015d3e-5406-4547-b600-837ef6ee6d18&quot;,&quot;title&quot;:&quot;April Showers&quot;,&quot;artists&quot;:[&quot;Thomas Hallsten Paine&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2OE3f5tu6Pd9beS0WWmQ7Z&quot;,&quot;duration&quot;:141},{&quot;songID&quot;:&quot;7ef6857c-f28d-46bc-a6cc-f67d15ee6d57&quot;,&quot;title&quot;:&quot;Gati Hendrakusuma&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2OlwTxNQ9kSkbPFC7tQN5x&quot;,&quot;duration&quot;:378},{&quot;songID&quot;:&quot;17181d7c-d03e-4d5e-9ae6-9e79b607ec0e&quot;,&quot;title&quot;:&quot;II. Le quai du porte de Famagouste&quot;,&quot;artists&quot;:[&quot;Ildebrando Pizzetti&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2WlMjnZIthzqfwYVHh6zbj&quot;,&quot;duration&quot;:208},{&quot;songID&quot;:&quot;6645fa0b-9f2c-465e-ad78-a5f04a73fdfb&quot;,&quot;title&quot;:&quot;Tedhak Saking&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2X6BN8RXjr4ArIEhjGa6QV&quot;,&quot;duration&quot;:301},{&quot;songID&quot;:&quot;5a7c6a44-2f1a-41b3-ac80-318c95d24cee&quot;,&quot;title&quot;:&quot;Si J&#39;avais Su&quot;,&quot;artists&quot;:[&quot;Alice Cocéa&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2aCCdTBcNmbcplMO66UAvU&quot;,&quot;duration&quot;:172},{&quot;songID&quot;:&quot;4655d6ca-3c57-4ae3-af02-9e17bd84c6e9&quot;,&quot;title&quot;:&quot;12 Songs, Op. 21: No. 5, Lilacs (Version for Piano)&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Ruth Laredo&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2aMQAP0h9Qww5KAkMdag3L&quot;,&quot;duration&quot;:132},{&quot;songID&quot;:&quot;68700035-1470-4883-ae25-e82d1ee7c7f1&quot;,&quot;title&quot;:&quot;Gati Mares&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2c6cN8mcYzqvFbLnzuPI4K&quot;,&quot;duration&quot;:414},{&quot;songID&quot;:&quot;ef5efe99-e7bb-4bb3-8103-c589711f8057&quot;,&quot;title&quot;:&quot;Elle Porte Un Nom Charmant&quot;,&quot;artists&quot;:[&quot;André Urban&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2ikGmgf43Y10bp5J7IF9QU&quot;,&quot;duration&quot;:178},{&quot;songID&quot;:&quot;102f3317-48c5-4f24-be85-a13715e2a7ea&quot;,&quot;title&quot;:&quot;Overture&quot;,&quot;artists&quot;:[&quot;Gaetano Donizetti&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2jy7vkWNflSApGQ7b6ziA6&quot;,&quot;duration&quot;:389},{&quot;songID&quot;:&quot;7f526fb9-e4e3-445e-990d-238457a350c8&quot;,&quot;title&quot;:&quot;Bakma Kabristanın Saha-i Medhûşuna&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2koVN4vxAXOmaqILK5Kbbs&quot;,&quot;duration&quot;:325},{&quot;songID&quot;:&quot;6183f92e-467b-49cc-8de2-76fa6f3c8465&quot;,&quot;title&quot;:&quot;The Minstrel Boy&quot;,&quot;artists&quot;:[&quot;Christopher Lynch&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2ksYHAsGBLxAupsni2QeNw&quot;,&quot;duration&quot;:152},{&quot;songID&quot;:&quot;42b84d59-e922-484d-a8b6-4f5316c64273&quot;,&quot;title&quot;:&quot;Une Femme Qui Passe&quot;,&quot;artists&quot;:[&quot;Mistinguett&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2lgAz3rSTLcqyVj2fJsIzo&quot;,&quot;duration&quot;:160},{&quot;songID&quot;:&quot;d976f4f8-15cc-4505-af9e-71d752fa069d&quot;,&quot;title&quot;:&quot;My Wild Irish Rose&quot;,&quot;artists&quot;:[&quot;Morton Downey&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2oWQOXbtHpvswlcWeJYe7P&quot;,&quot;duration&quot;:187},{&quot;songID&quot;:&quot;8a5eabb4-c59f-4e3c-ad84-9468da01eb35&quot;,&quot;title&quot;:&quot;Şehnaz Longa&quot;,&quot;artists&quot;:[&quot;Darüttalim-i Musiki Heyeti&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2t5UabjiPwVUXJtcpRHreq&quot;,&quot;duration&quot;:193},{&quot;songID&quot;:&quot;7a5ae804-d7c5-4db7-9a9c-0a56c15f2dd8&quot;,&quot;title&quot;:&quot;Gati Kridha&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2tDwnNWXjupxNEjTTb9qDQ&quot;,&quot;duration&quot;:494},{&quot;songID&quot;:&quot;f06dfc0a-3738-4a36-8fdd-f9e85a435646&quot;,&quot;title&quot;:&quot;Gati Padasih&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2xJPXDxhBbcI8d4KraRJmT&quot;,&quot;duration&quot;:416},{&quot;songID&quot;:&quot;13a7db9c-4adf-466e-ab21-f11323ba18b8&quot;,&quot;title&quot;:&quot;Gati Harjuna Mangsah&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2xMpQnfWIgRFjzrRXOl4zT&quot;,&quot;duration&quot;:544},{&quot;songID&quot;:&quot;77837d15-f7e3-4593-98d5-ddb25ee7c9cb&quot;,&quot;title&quot;:&quot;Prabu Mataram&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2xRAzeh9R6zNdXdVhCXMxj&quot;,&quot;duration&quot;:546},{&quot;songID&quot;:&quot;995efbe2-1d82-460f-acdf-5054aa26e8d9&quot;,&quot;title&quot;:&quot;Sri Kondur&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;35eVH8c7u6LGwyksBGMQCp&quot;,&quot;duration&quot;:255},{&quot;songID&quot;:&quot;86bdce9a-1920-4930-ba6a-b02bfeee7e49&quot;,&quot;title&quot;:&quot;Ne İçin Mahzun&quot;,&quot;artists&quot;:[&quot;Hanende İbrahim Efendi&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;38iWg7IcG1EXrxbibvq8Ox&quot;,&quot;duration&quot;:156},{&quot;songID&quot;:&quot;71e8f4f0-648d-448b-933d-570104394754&quot;,&quot;title&quot;:&quot;Pour Bien Reussir Dans La Chaussure&quot;,&quot;artists&quot;:[&quot;Maurice Chevalier&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;39ZYlUAoqyE05y7rsfeivo&quot;,&quot;duration&quot;:169},{&quot;songID&quot;:&quot;c63a1e5a-b043-4662-93ed-d11997e74826&quot;,&quot;title&quot;:&quot;Gati Kumencar&quot;,&quot;artists&quot;:[&quot;KHP Kridhamardawa Karaton Ngayogyakarta Hadiningrat&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3C8IMx8BgWGiQE9bIuqCvP&quot;,&quot;duration&quot;:460},{&quot;songID&quot;:&quot;8eb1d2b4-a1e5-407c-9faf-0ea107b7def0&quot;,&quot;title&quot;:&quot;III. Allegro scherzando&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Michael Tilson Thomas&quot;,&quot;Barry Douglas&quot;,&quot;London Symphony Orchestra&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3Dx6MiHU13YcyVf6FADqjC&quot;,&quot;duration&quot;:674},{&quot;songID&quot;:&quot;ea4d458b-96b3-4e98-84e4-919995a37573&quot;,&quot;title&quot;:&quot;Recordando - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3EOZYPETcAbvpB270WnGIx&quot;,&quot;duration&quot;:163},{&quot;songID&quot;:&quot;c2615fe9-0c90-4d54-b3b2-c9857e99e468&quot;,&quot;title&quot;:&quot;La Chanson Des Yeux Clos&quot;,&quot;artists&quot;:[&quot;Marcelly&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3I8393MR3DWSprtxgpZMoy&quot;,&quot;duration&quot;:159},{&quot;songID&quot;:&quot;ab93575f-26ac-4d9e-adea-38efeda0d7a5&quot;,&quot;title&quot;:&quot;6 Songs, Op. 38: No. 3, Daisies (Version for Piano)&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Ruth Laredo&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3Jsx93Aim5jr96396tgDt7&quot;,&quot;duration&quot;:117},{&quot;songID&quot;:&quot;f2a868f5-0527-4a88-b6ca-88f579599332&quot;,&quot;title&quot;:&quot;Kathleen Mavourneen&quot;,&quot;artists&quot;:[&quot;John McCormack&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3Po8aZhKXPvBlWZFevIrI5&quot;,&quot;duration&quot;:256},{&quot;songID&quot;:&quot;df2145e7-29ed-4e81-a61a-bbee29934702&quot;,&quot;title&quot;:&quot;IV. Allegro&quot;,&quot;artists&quot;:[&quot;Ludwig van Beethoven&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3WV2AlpIn96bzLkkZ7RNob&quot;,&quot;duration&quot;:523},{&quot;songID&quot;:&quot;fd9ec3da-871f-48f2-80a2-d0ca8d4fdd5d&quot;,&quot;title&quot;:&quot;10 Préludes, Op. 23: No. 5 in G Minor. Alla marcia&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Ruth Laredo&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3XooVMkWzhrHdPQyi46sl6&quot;,&quot;duration&quot;:221},{&quot;songID&quot;:&quot;9ee348c7-ba99-4e95-a630-6a221f7cd319&quot;,&quot;title&quot;:&quot;Tigers&quot;,&quot;artists&quot;:[&quot;THE GUY&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3YVy92W44JmU6KeF6UMldm&quot;,&quot;duration&quot;:324},{&quot;songID&quot;:&quot;1ab77d5e-40c5-40ba-9855-fabce1519ead&quot;,&quot;title&quot;:&quot;IV. Finale. Adagio - Allegro molto e vivace&quot;,&quot;artists&quot;:[&quot;Ludwig van Beethoven&quot;,&quot;Arturo Toscanini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3YWrfsNGrZNsC270jMiBad&quot;,&quot;duration&quot;:270},{&quot;songID&quot;:&quot;21cbf756-ddc6-4be8-9239-519ad05c3131&quot;,&quot;title&quot;:&quot;Un Agent Courait&quot;,&quot;artists&quot;:[&quot;Georgius&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3ZlvfjWLxFqfOGK2FTR2ph&quot;,&quot;duration&quot;:158},{&quot;songID&quot;:&quot;dc507df4-53ad-4254-bef4-82e533000bad&quot;,&quot;title&quot;:&quot;Tortolita y Chingolo - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3d3nDmLDOck1Nucaflpoqt&quot;,&quot;duration&quot;:197},{&quot;songID&quot;:&quot;78b81204-bed5-46bf-9531-cfd16d0f36c1&quot;,&quot;title&quot;:&quot;Santos Vega - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3g6M4eAkVgMnFeJdWUSavX&quot;,&quot;duration&quot;:166},{&quot;songID&quot;:&quot;acb893e0-cec2-48a2-869b-76e56e17b62a&quot;,&quot;title&quot;:&quot;III. Adagio&quot;,&quot;artists&quot;:[&quot;Sergei Rachmaninoff&quot;,&quot;Yuri Temirkanov&quot;,&quot;St. Petersburg Philharmonic Orchestra&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3ifqMMzDlh6wLRzjLOMTdQ&quot;,&quot;duration&quot;:805},{&quot;songID&quot;:&quot;aca88830-5fa3-476a-89ac-56c6aba4bc6c&quot;,&quot;title&quot;:&quot;Pobre Mi China - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3nX4gFJqhxKT61sYkB029F&quot;,&quot;duration&quot;:171},{&quot;songID&quot;:&quot;6121c611-9c8c-471d-822c-e6a979af06df&quot;,&quot;title&quot;:&quot;That&#39;s How You Spell Ireland&quot;,&quot;artists&quot;:[&quot;Morton Downey&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;3tEwdlwf8ZrxpksJorI5Tc&quot;,&quot;duration&quot;:170},{&quot;songID&quot;:&quot;901630c7-9d67-445b-b78e-03dd20f60f77&quot;,&quot;title&quot;:&quot;Şühedâ Gövdesi Bir Baksana Dağlar Taşlar&quot;,&quot;artists&quot;:[&quot;Mehmet Kemiksiz&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;47LO5zrjx6ShMymLqp80ef&quot;,&quot;duration&quot;:396},{&quot;songID&quot;:&quot;6f80727d-dff3-4890-84af-4a694dde86db&quot;,&quot;title&quot;:&quot;It&#39;s the Same Old Shillelegh&quot;,&quot;artists&quot;:[&quot;Morton Downey&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;4BWXQSxvAa73YTLVLlMtGp&quot;,&quot;duration&quot;:154},{&quot;songID&quot;:&quot;6a2ac02d-cc9b-4fa8-8666-7b90f50996ed&quot;,&quot;title&quot;:&quot;China Hereje - Remasterizado&quot;,&quot;artists&quot;:[&quot;Ignacio Corsini&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;4Rv29R4ydhHN9tYPfrZxTz&quot;,&quot;duration&quot;:168},{&quot;songID&quot;:&quot;c538503d-547e-4b44-ab9a-c5f7229b2544&quot;,&quot;title&quot;:&quot;Don&#39;t Run&quot;,&quot;artists&quot;:[&quot;THE GUY&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;4SU8RBlxrOtlHjkUxkpDCY&quot;,&quot;duration&quot;:279}]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},&quot;roomID&quot;:&quot;9aaff1d1-c1f2-4422-80e5-71a66d5225f2&quot;,&quot;dateCreated&quot;:&quot;2024-08-01T14:42:59.189Z&quot;},{&quot;messageID&quot;:&quot;5a16b62a-7374-489e-8258-164769b96d66&quot;,&quot;messageBody&quot;:&quot;this is not the right room for that though&quot;,&quot;sender&quot;:{&quot;profile_name&quot;:&quot;Jaden&quot;,&quot;userID&quot;:&quot;30632924-5ff1-46b2-b600-29feb729636d&quot;,&quot;username&quot;:&quot;31ei22eeupwfjyaj4ejmnhapkx3m&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:2,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:1,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:1,&quot;data&quot;:{&quot;spotify&quot;:[&quot;https://open.spotify.com/user/31ei22eeupwfjyaj4ejmnhapkx3m&quot;]}},&quot;bio&quot;:&quot;&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},&quot;roomID&quot;:&quot;9aaff1d1-c1f2-4422-80e5-71a66d5225f2&quot;,&quot;dateCreated&quot;:&quot;2024-09-12T16:49:22.362Z&quot;},{&quot;messageID&quot;:&quot;105c1b4b-c7fa-44d7-a0df-9f856205bca9&quot;,&quot;messageBody&quot;:&quot;says who? you?&quot;,&quot;sender&quot;:{&quot;profile_name&quot;:&quot;Jaden&quot;,&quot;userID&quot;:&quot;30632924-5ff1-46b2-b600-29feb729636d&quot;,&quot;username&quot;:&quot;31ei22eeupwfjyaj4ejmnhapkx3m&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:2,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:1,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:1,&quot;data&quot;:{&quot;spotify&quot;:[&quot;https://open.spotify.com/user/31ei22eeupwfjyaj4ejmnhapkx3m&quot;]}},&quot;bio&quot;:&quot;&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},&quot;roomID&quot;:&quot;9aaff1d1-c1f2-4422-80e5-71a66d5225f2&quot;,&quot;dateCreated&quot;:&quot;2024-09-12T16:50:24.103Z&quot;},{&quot;messageID&quot;:&quot;9b77bb85-7929-45de-b08e-3f2fe111d98e&quot;,&quot;messageBody&quot;:&quot;wild stuff ngl&quot;,&quot;sender&quot;:{&quot;profile_name&quot;:&quot;Jaden&quot;,&quot;userID&quot;:&quot;30632924-5ff1-46b2-b600-29feb729636d&quot;,&quot;username&quot;:&quot;31ei22eeupwfjyaj4ejmnhapkx3m&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:2,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:1,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:1,&quot;data&quot;:{&quot;spotify&quot;:[&quot;https://open.spotify.com/user/31ei22eeupwfjyaj4ejmnhapkx3m&quot;]}},&quot;bio&quot;:&quot;&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},&quot;roomID&quot;:&quot;9aaff1d1-c1f2-4422-80e5-71a66d5225f2&quot;,&quot;dateCreated&quot;:&quot;2024-09-12T16:50:58.307Z&quot;},{&quot;messageID&quot;:&quot;2bafe32e-b96b-4ef2-b2ae-4f964c8f96f8&quot;,&quot;messageBody&quot;:&quot;nerina, kick this dum nigga out&quot;,&quot;sender&quot;:{&quot;profile_name&quot;:&quot;Jaden&quot;,&quot;userID&quot;:&quot;30632924-5ff1-46b2-b600-29feb729636d&quot;,&quot;username&quot;:&quot;31ei22eeupwfjyaj4ejmnhapkx3m&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:2,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:1,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:1,&quot;data&quot;:{&quot;spotify&quot;:[&quot;https://open.spotify.com/user/31ei22eeupwfjyaj4ejmnhapkx3m&quot;]}},&quot;bio&quot;:&quot;&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},&quot;roomID&quot;:&quot;9aaff1d1-c1f2-4422-80e5-71a66d5225f2&quot;,&quot;dateCreated&quot;:&quot;2024-09-12T16:51:19.959Z&quot;},{&quot;messageID&quot;:&quot;fd8e97e9-9588-43fe-911a-5301d0d28429&quot;,&quot;messageBody&quot;:&quot;good. lil dum nigg got kicked out&quot;,&quot;sender&quot;:{&quot;profile_name&quot;:&quot;Jaden&quot;,&quot;userID&quot;:&quot;30632924-5ff1-46b2-b600-29feb729636d&quot;,&quot;username&quot;:&quot;31ei22eeupwfjyaj4ejmnhapkx3m&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:2,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:1,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:1,&quot;data&quot;:{&quot;spotify&quot;:[&quot;https://open.spotify.com/user/31ei22eeupwfjyaj4ejmnhapkx3m&quot;]}},&quot;bio&quot;:&quot;&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},&quot;roomID&quot;:&quot;9aaff1d1-c1f2-4422-80e5-71a66d5225f2&quot;,&quot;dateCreated&quot;:&quot;2024-09-28T08:54:35.160Z&quot;},{&quot;messageID&quot;:&quot;a1d36df3-a243-4702-948c-1b15ce9a594c&quot;,&quot;messageBody&quot;:&quot;hello\n&quot;,&quot;sender&quot;:{&quot;profile_name&quot;:&quot;Jaden&quot;,&quot;userID&quot;:&quot;30632924-5ff1-46b2-b600-29feb729636d&quot;,&quot;username&quot;:&quot;31ei22eeupwfjyaj4ejmnhapkx3m&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:2,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:1,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:1,&quot;data&quot;:{&quot;spotify&quot;:[&quot;https://open.spotify.com/user/31ei22eeupwfjyaj4ejmnhapkx3m&quot;]}},&quot;bio&quot;:&quot;&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},&quot;roomID&quot;:&quot;9aaff1d1-c1f2-4422-80e5-71a66d5225f2&quot;,&quot;dateCreated&quot;:&quot;2024-09-29T17:56:31.447Z&quot;}]]</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (469 bytes)</summary>
+				
+				<pre><code>GET https://tunein.co.za:3000/socket.io/?EIO=4&amp;transport=websocket HTTP/1.1
+host: tunein.co.za:3000
+Connection: Upgrade
+Pragma: no-cache
+Cache-Control: no-cache
+User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36
+Upgrade: websocket
+Origin: http://localhost:8081
+Sec-WebSocket-Version: 13
+Accept-Language: en-US,en;q=0.9
+Sec-WebSocket-Key: UHxMbvopKhlX3AuyS/E4jQ==
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (161 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: LqTnPU35Fv2r5GnBTODcEXkQw7w=
+Access-Control-Allow-Origin: *
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>570104394754</code></pre></td>
+	</tr>
+	
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				
+				
+				
+				
+				  
+				 
+				
+				
+				
+				
+				<li id="alerts--risk-2-confidence-2">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Medium</span>, <span>Confidence</span>=<span
+							class="confidence-level">Medium</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://tunein.co.za:3000</span> <span>(1)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-1">Cross-Domain Misconfiguration</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">OPTIONS https://tunein.co.za:3000/auth/refresh</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A5_2017-Broken_Access_Control.html">OWASP_2017_A05</a></span> 
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/264.html">CWE-264</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/A01_2021-Broken_Access_Control/">OWASP_2021_A01</a></span> 
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>Web browser data loading may be possible, due to a Cross Origin Resource Sharing (CORS) misconfiguration on the web server.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Other info</th>
+		<td> 
+<p>The CORS misconfiguration on the web server permits cross-domain read requests from arbitrary third party domains, using unauthenticated APIs on this domain. Web browser implementations do not permit arbitrary third parties to read the response from authenticated APIs, however. This reduces the risk somewhat. This misconfiguration could be used by an attacker to access data that is available in an unauthenticated manner, but which uses some other form of security, such as IP address white-listing.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (562 bytes)</summary>
+				
+				<pre><code>OPTIONS https://tunein.co.za:3000/auth/refresh HTTP/1.1
+host: tunein.co.za:3000
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+Accept: */*
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type
+Origin: http://localhost:8081
+User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Sec-Fetch-Dest: empty
+Referer: http://localhost:8081/
+Accept-Language: en-US,en;q=0.9
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (329 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 204 No Content
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Vary: Access-Control-Request-Headers
+Access-Control-Allow-Headers: content-type
+Content-Length: 0
+Date: Thu, 17 Oct 2024 19:07:56 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>Access-Control-Allow-Origin: *</code></pre></td>
+	</tr>
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Ensure that sensitive data is not available in an unauthenticated manner (using IP address white-listing, for instance).</p>
+
+<p>Configure the &quot;Access-Control-Allow-Origin&quot; HTTP header to a more restrictive set of domains, or remove all CORS headers entirely, to allow the web browser to enforce the Same Origin Policy (SOP) in a more restrictive manner.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				
+				
+				  
+				 
+				
+				
+				<li id="alerts--risk-1-confidence-3">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Low</span>, <span>Confidence</span>=<span
+							class="confidence-level">High</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						
+						
+					</ol>
+				</li>
+				
+				<li id="alerts--risk-1-confidence-2">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Low</span>, <span>Confidence</span>=<span
+							class="confidence-level">Medium</span> <span>(2)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://tunein.co.za:3000</span> <span>(2)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-2">Server Leaks Information via &quot;X-Powered-By&quot; HTTP Response Header Field(s)</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">OPTIONS https://tunein.co.za:3000/auth/refresh</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/Top10/A01_2021-Broken_Access_Control/">OWASP_2021_A01</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure.html">OWASP_2017_A03</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework">WSTG-v42-INFO-08</a></span> 
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/200.html">CWE-200</a></span> 
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The web/application server is leaking information via one or more &quot;X-Powered-By&quot; HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>
+ </td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (562 bytes)</summary>
+				
+				<pre><code>OPTIONS https://tunein.co.za:3000/auth/refresh HTTP/1.1
+host: tunein.co.za:3000
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+Accept: */*
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type
+Origin: http://localhost:8081
+User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Sec-Fetch-Dest: empty
+Referer: http://localhost:8081/
+Accept-Language: en-US,en;q=0.9
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (329 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 204 No Content
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Vary: Access-Control-Request-Headers
+Access-Control-Allow-Headers: content-type
+Content-Length: 0
+Date: Thu, 17 Oct 2024 19:07:56 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Evidence</th>
+		<td><pre><code>X-Powered-By: Express</code></pre></td>
+	</tr>
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Ensure that your web server, application server, load balancer, etc. is configured to suppress &quot;X-Powered-By&quot; headers.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-4">X-Content-Type-Options Header Missing</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">POST https://tunein.co.za:3000/auth/refresh</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/693.html">CWE-693</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">OWASP_2021_A05</a></span> 
+				</li>
+				<li>
+					<span><a href="https://owasp.org/www-project-top-ten/2017/A6_2017-Security_Misconfiguration.html">OWASP_2017_A06</a></span> 
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to &#39;nosniff&#39;. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Other info</th>
+		<td> 
+<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p>
+
+<p>At &quot;High&quot; threshold this scan rule will not alert on client or server error responses.</p>
+ </td>
+	</tr>
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (690 bytes)</summary>
+				
+				<pre><code>POST https://tunein.co.za:3000/auth/refresh HTTP/1.1
+host: tunein.co.za:3000
+Connection: keep-alive
+Content-Length: 275
+Pragma: no-cache
+Cache-Control: no-cache
+sec-ch-ua: &quot;Chromium&quot;;v=&quot;128&quot;, &quot;Not;A=Brand&quot;;v=&quot;24&quot;, &quot;Google Chrome&quot;;v=&quot;128&quot;
+Accept: application/json, text/plain, */*
+sec-ch-ua-platform: &quot;Android&quot;
+sec-ch-ua-mobile: ?1
+User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36
+Content-Type: application/json
+Origin: http://localhost:8081
+Sec-Fetch-Site: cross-site
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: http://localhost:8081/
+Accept-Language: en-US,en;q=0.9
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (275 bytes)</summary>
+				
+				<pre><code>{&quot;refreshToken&quot;:&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxMmM0MjM4LWUwNzEtNzAzMS1jYjZjLTMwODgxMzc4NzIyZiIsInVzZXJuYW1lIjoiamFkZW4iLCJlbWFpbCI6Imptb29kbGV5MDgzMUBnbWFpbC5jb20iLCJpYXQiOjE3Mjg3MjMwNDksImV4cCI6MTcyODczMDI0OX0.buWLtkTKdhYX0wxrw04j3cihNzHY6feTuAwpWb2cV7I&quot;}</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (274 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 201 Created
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 268
+ETag: W/&quot;10c-As8jHZAfBWgpQg5xk/1MmeEYzO8&quot;
+Date: Thu, 17 Oct 2024 19:07:56 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+</code></pre>
+				
+				
+			</details> <details class="response-body" open="open">
+				<summary>Response body (268 bytes)</summary>
+				
+				<pre><code>{&quot;token&quot;:&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxMmM0MjM4LWUwNzEtNzAzMS1jYjZjLTMwODgxMzc4NzIyZiIsImVtYWlsIjoiam1vb2RsZXkwODMxQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiamFkZW4iLCJpYXQiOjE3MjkxOTIwNzYsImV4cCI6MTcyOTE5OTI3Nn0.NtRYwXGdwhRXt7cLxQ31dEFRsPBd9Dgc71pmAUIPYKg&quot;}</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Parameter</th>
+		<td><pre><code>x-content-type-options</code></pre></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to &#39;nosniff&#39; for all web pages.</p>
+
+<p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				
+				
+				  
+				 
+				
+				
+				
+				
+				<li id="alerts--risk-0-confidence-2">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Informational</span>, <span>Confidence</span>=<span
+							class="confidence-level">Medium</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						
+						
+					</ol>
+				</li>
+				
+				<li id="alerts--risk-0-confidence-1">
+					<h3>
+						<span>Risk</span>=<span
+							class="risk-level">Informational</span>, <span>Confidence</span>=<span
+							class="confidence-level">Low</span> <span>(1)</span>
+					</h3>
+					<ol>
+						
+						<li class="alerts--site-li">
+							<h4>
+								<span class="site">https://tunein.co.za:3000</span> <span>(1)</span>
+							</h4>
+							<ol>
+								
+								<li>
+									<h5>
+										<a
+											href="#alert-type-5">Re-examine Cache-control Directives</a> <span>(1)</span>
+									</h5>
+									<ol>
+										<li><details>
+												<summary>
+													<span class="request-method-n-url">GET https://tunein.co.za:3000/users</span>
+												</summary>
+												
+<table class="alerts-table">
+	<tr>
+		<th scope="row">Alert tags</th>
+		<td>
+			<ul class="alert-tags-list">
+				<li>
+					<span><a href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/04-Authentication_Testing/06-Testing_for_Browser_Cache_Weaknesses">WSTG-v42-ATHN-06</a></span> 
+				</li>
+				<li>
+					<span><a href="https://cwe.mitre.org/data/definitions/525.html">CWE-525</a></span> 
+				</li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">Alert description</th>
+		<td> 
+<p>The cache-control header has not been set properly or is missing, allowing the browser and proxies to cache content. For static assets like css, js, or image files this might be intended, however, the resources should be reviewed to ensure that no sensitive content will be cached.</p>
+ </td>
+	</tr>
+	
+	<tr>
+		<th scope="row">Request</th>
+		<td><details open="open">
+				<summary>Request line and header section (909 bytes)</summary>
+				
+				<pre><code>GET https://tunein.co.za:3000/users HTTP/1.1
+host: tunein.co.za:3000
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+sec-ch-ua: &quot;Chromium&quot;;v=&quot;128&quot;, &quot;Not;A=Brand&quot;;v=&quot;24&quot;, &quot;Google Chrome&quot;;v=&quot;128&quot;
+Accept: application/json, text/plain, */*
+sec-ch-ua-mobile: ?1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxMmM0MjM4LWUwNzEtNzAzMS1jYjZjLTMwODgxMzc4NzIyZiIsImVtYWlsIjoiam1vb2RsZXkwODMxQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiamFkZW4iLCJpYXQiOjE3MjkxOTIwNzYsImV4cCI6MTcyOTE5OTI3Nn0.NtRYwXGdwhRXt7cLxQ31dEFRsPBd9Dgc71pmAUIPYKg
+User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36
+sec-ch-ua-platform: &quot;Android&quot;
+Origin: http://localhost:8081
+Sec-Fetch-Site: cross-site
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: http://localhost:8081/
+Accept-Language: en-US,en;q=0.9
+
+</code></pre>
+				
+				
+			</details> <details class="request-body" open="open">
+				<summary>Request body (0 bytes)</summary>
+				
+				<pre><code></code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Response</th>
+		<td><details open="open">
+				<summary>Status line and header section (270 bytes)</summary>
+				
+				<pre><code>HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 4039
+ETag: W/&quot;fc7-pxkXxChTP0DRWOSVf+MmSRFM+ok&quot;
+Date: Thu, 17 Oct 2024 19:07:56 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+</code></pre>
+				
+				
+			</details> <details class="response-body">
+				<summary>Response body (4039 bytes)</summary>
+				
+				<pre><code>{&quot;profile_name&quot;:&quot;Jaden Moodley&quot;,&quot;userID&quot;:&quot;012c4238-e071-7031-cb6c-30881378722f&quot;,&quot;username&quot;:&quot;jaden&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-08-18T14:52:53.386Z-image.jpeg&quot;,&quot;followers&quot;:{&quot;count&quot;:4,&quot;data&quot;:[{&quot;profile_name&quot;:&quot;Thabiso Matau&quot;,&quot;userID&quot;:&quot;711c5238-3081-7008-9055-510a6bebc7e9&quot;,&quot;username&quot;:&quot;8xbbie&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:0,&quot;data&quot;:{}},&quot;bio&quot;:&quot;Pure OPIUM🔥&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},{&quot;profile_name&quot;:&quot;lesedi kane&quot;,&quot;userID&quot;:&quot;413c6268-6051-7024-2806-f4627605df0b&quot;,&quot;username&quot;:&quot;theoriginalles&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:0,&quot;data&quot;:{}},&quot;bio&quot;:&quot;im new&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},{&quot;profile_name&quot;:&quot;Nin&quot;,&quot;userID&quot;:&quot;391f8a4b-cf04-423d-8b53-d6967c57c830&quot;,&quot;username&quot;:&quot;nin&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-09-18T23:15:25.512Z-image.jpeg&quot;,&quot;followers&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:0,&quot;data&quot;:{}},&quot;bio&quot;:&quot;Lets go&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:true},{&quot;profile_name&quot;:&quot;Nin&quot;,&quot;userID&quot;:&quot;147b0953-29c4-4866-b637-83a092841f3d&quot;,&quot;username&quot;:&quot;nini&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-09-28T17:38:37.614Z-image.jpeg&quot;,&quot;followers&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:0,&quot;data&quot;:{}},&quot;bio&quot;:&quot;&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false}]},&quot;following&quot;:{&quot;count&quot;:2,&quot;data&quot;:[{&quot;profile_name&quot;:&quot;lesedi kane&quot;,&quot;userID&quot;:&quot;413c6268-6051-7024-2806-f4627605df0b&quot;,&quot;username&quot;:&quot;theoriginalles&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/IMG_20230913_153948_541.jpg&quot;,&quot;followers&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:0,&quot;data&quot;:{}},&quot;bio&quot;:&quot;im new&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:false},{&quot;profile_name&quot;:&quot;Nin&quot;,&quot;userID&quot;:&quot;391f8a4b-cf04-423d-8b53-d6967c57c830&quot;,&quot;username&quot;:&quot;nin&quot;,&quot;profile_picture_url&quot;:&quot;https://tunein-nest-bucket.s3.af-south-1.amazonaws.com/2024-09-18T23:15:25.512Z-image.jpeg&quot;,&quot;followers&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;following&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;links&quot;:{&quot;count&quot;:0,&quot;data&quot;:{}},&quot;bio&quot;:&quot;Lets go&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_songs&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;fav_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;recent_rooms&quot;:{&quot;count&quot;:0,&quot;data&quot;:[]},&quot;hasSpotifyAccount&quot;:true}]},&quot;links&quot;:{&quot;count&quot;:2,&quot;data&quot;:{&quot;twitter&quot;:[&quot;twitter.com/test&quot;],&quot;spotify&quot;:[&quot;spotify.com/me&quot;]}},&quot;bio&quot;:&quot;Hello there stranger&quot;,&quot;fav_genres&quot;:{&quot;count&quot;:2,&quot;data&quot;:[&quot;j-pop&quot;,&quot;vocaloid&quot;]},&quot;fav_songs&quot;:{&quot;count&quot;:2,&quot;data&quot;:[{&quot;songID&quot;:&quot;87a46ddf-7d30-4e4f-b17f-46ae05c412bb&quot;,&quot;title&quot;:&quot;STYX HELIX&quot;,&quot;artists&quot;:[&quot;MYTH &amp; ROID&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;2tcSz3bcJqriPg9vetvJLs&quot;,&quot;duration&quot;:289},{&quot;songID&quot;:&quot;8b20cb14-82af-4730-bad4-028ddb163333&quot;,&quot;title&quot;:&quot;Tell Your World&quot;,&quot;artists&quot;:[&quot;livetune&quot;,&quot;Hatsune Miku&quot;],&quot;cover&quot;:null,&quot;spotify_id&quot;:&quot;6kBNaF6seD0JqFl4aBJ55e&quot;,&quot;duration&quot;:254}]},&quot;fav_rooms&quot;:{&quot;count&quot;:1,&quot;data&quot;:[&quot;8f928675-5c95-497a-b8a7-917064cdb462&quot;]},&quot;recent_rooms&quot;:{&quot;count&quot;:4,&quot;data&quot;:[&quot;0352e8b8-e987-4dc9-a379-dc68b541e24f&quot;,&quot;497d8138-13d2-49c9-808d-287b447448e8&quot;,&quot;376578dd-9ef6-41cb-a9f6-2ded47e22c84&quot;,&quot;62560ae5-9236-490c-8c75-c234678dc346&quot;]},&quot;hasSpotifyAccount&quot;:false}</code></pre>
+				
+				
+			</details></td>
+	</tr>
+	<tr>
+		<th scope="row">Parameter</th>
+		<td><pre><code>cache-control</code></pre></td>
+	</tr>
+	
+	
+	<tr>
+		<th scope="row">Solution</th>
+		<td> 
+<p>For secure content, ensure the cache-control HTTP header is set with &quot;no-cache, no-store, must-revalidate&quot;. If an asset should be cached consider setting the directives &quot;public, max-age, immutable&quot;.</p>
+ </td>
+	</tr>
+</table>
+
+											</details></li>
+									</ol>
+								</li>
+								
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+				  
+			</ol>
+		</section>
+
+		<section id="appendix" class="appendix">
+			<h2>Appendix</h2>
+
+			<section id="alert-types" class="alert-types">
+				<h3>Alert types</h3>
+				<p class="alert-types-intro">This section contains additional information on the types of alerts in the report.</p>
+				<ol>
+					<li
+						id="alert-type-0">
+						<h4>Personally Identifiable Information via WebSocket</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/110005/">plugin ID: 110005</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/359.html">359</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>13</td>
+							</tr>
+							
+						</table>
+					</li>
+					<li
+						id="alert-type-1">
+						<h4>Cross-Domain Misconfiguration</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10098/">Cross-Domain Misconfiguration</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/264.html">264</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>14</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://vulncat.fortify.com/en/detail?id=desc.config.dotnet.html5_overly_permissive_cors_policy">https://vulncat.fortify.com/en/detail?id=desc.config.dotnet.html5_overly_permissive_cors_policy</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-2">
+						<h4>Server Leaks Information via &quot;X-Powered-By&quot; HTTP Response Header Field(s)</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10037/">Server Leaks Information via &quot;X-Powered-By&quot; HTTP Response Header Field(s)</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/200.html">200</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>13</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework">https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework</a></li>
+										<li><a
+											href="https://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html">https://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-3">
+						<h4>Strict-Transport-Security Header Not Set</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10035/">Strict-Transport-Security Header</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/319.html">319</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>15</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html">https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html</a></li>
+										<li><a
+											href="https://owasp.org/www-community/Security_Headers">https://owasp.org/www-community/Security_Headers</a></li>
+										<li><a
+											href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security</a></li>
+										<li><a
+											href="https://caniuse.com/stricttransportsecurity">https://caniuse.com/stricttransportsecurity</a></li>
+										<li><a
+											href="https://datatracker.ietf.org/doc/html/rfc6797">https://datatracker.ietf.org/doc/html/rfc6797</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-4">
+						<h4>X-Content-Type-Options Header Missing</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10021/">X-Content-Type-Options Header Missing</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/693.html">693</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>15</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)">https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)</a></li>
+										<li><a
+											href="https://owasp.org/www-community/Security_Headers">https://owasp.org/www-community/Security_Headers</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-5">
+						<h4>Re-examine Cache-control Directives</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10015/">Re-examine Cache-control Directives</a>)
+									</span>   
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">CWE ID</th>
+								<td><a
+									href="https://cwe.mitre.org/data/definitions/525.html">525</a></td>
+							</tr>
+							<tr>
+								<th scope="row">WASC ID</th>
+								<td>13</td>
+							</tr>
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#web-content-caching">https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#web-content-caching</a></li>
+										<li><a
+											href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control</a></li>
+										<li><a
+											href="https://grayduck.mn/2021/09/13/cache-control-recommendations/">https://grayduck.mn/2021/09/13/cache-control-recommendations/</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+					<li
+						id="alert-type-6">
+						<h4>Session Management Response Identified</h4>
+						<table class="alert-types-table">
+							<tr>
+								<th scope="row">Source</th>
+								<td>
+									
+									   <span>raised by a passive scanner</span> <span>(<a
+										href="https://www.zaproxy.org/docs/alerts/10112/">Session Management Response Identified</a>)
+									</span>   
+								</td>
+							</tr>
+							
+							
+							<tr>
+								<th scope="row">Reference</th>
+								<td>
+									<ol>
+										<li><a
+											href="https://www.zaproxy.org/docs/desktop/addons/authentication-helper/session-mgmt-id">https://www.zaproxy.org/docs/desktop/addons/authentication-helper/session-mgmt-id</a></li>
+									</ol>
+								</td>
+							</tr>
+						</table>
+					</li>
+				</ol>
+			</section>
+		</section>
+		 
+	</main>
+</body>
+</html>
+
+
+
