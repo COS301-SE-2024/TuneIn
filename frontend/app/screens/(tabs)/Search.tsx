@@ -163,7 +163,7 @@ const Search: React.FC = () => {
 									language: item.language,
 									roomSize: "50",
 									userProfile: item.creator.profile_picture_url,
-									mine: true,
+									mine: false, //this was making the edit button appear on the room card
 									songName: item.current_song ? item.current_song.title : null,
 									childrenRoomIDs: item.childrenRoomIDs,
 								},
@@ -332,7 +332,7 @@ const Search: React.FC = () => {
 									language: item.language,
 									roomSize: "50",
 									userProfile: item.creator.profile_picture_url,
-									mine: true,
+									mine: false, //this was making the edit button appear on the room card
 									songName: item.current_song ? item.current_song.title : null,
 									childrenRoomIDs: item.childrenRoomIDs,
 								},
@@ -369,7 +369,7 @@ const Search: React.FC = () => {
 									language: item.language,
 									roomSize: "50",
 									userProfile: item.creator.profile_picture_url,
-									mine: true,
+									mine: false, //this was making the edit button appear on the room card
 									songName: item.current_song ? item.current_song.title : null,
 									childrenRoomIDs: item.childrenRoomIDs,
 								},
