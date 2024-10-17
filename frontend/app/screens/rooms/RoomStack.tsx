@@ -302,6 +302,7 @@ function MyRoomTabs() {
 						queues: JSON.stringify(childRoomQueueData),
 					},
 				});
+				setShowModal(false);
 			}
 		} catch (error) {
 			console.log("Error getting child rooms: ", error);

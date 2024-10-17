@@ -553,13 +553,20 @@ const AdvancedSettings = () => {
 									setStartDate={setStartDate}
 									setEndDate={setEndDate}
 								></DateTimePickerComponent>
+								{/* <TouchableOpacity
+									onPress={() => {
+										setStartDate(undefined);
+										setEndDate(undefined);
+									}}
+								> */}
 								<TouchableOpacity
+									style={styles.clearDatesButton} // Make it a button
 									onPress={() => {
 										setStartDate(undefined);
 										setEndDate(undefined);
 									}}
 								>
-									<Text style={styles.clearDatesButton}>Clear dates</Text>
+									<Text style={styles.clearDatesButtonText}>Clear dates</Text>
 								</TouchableOpacity>
 							</>
 						)}
@@ -684,10 +691,18 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 	},
 	clearDatesButton: {
-		padding: 10,
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		backgroundColor: colors.primary,
+		borderRadius: 5,
+		marginTop: 10,
+		alignSelf: "center", // Center the button
+	},
+	clearDatesButtonText: {
+		color: "#fff",
+		fontWeight: "bold",
 		fontSize: 16,
 		textAlign: "center",
-		flex: 1,
 	},
 	header: {
 		flexDirection: "row",
