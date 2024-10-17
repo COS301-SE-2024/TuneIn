@@ -86,6 +86,10 @@ const WelcomeScreen: React.FC = () => {
 			scopes: [scopes.join(" ")],
 			usePKCE: false,
 			state: state,
+			extraParams: {
+				// use the "show_dialog" parameter to force the user to approve the app again
+				show_dialog: true,
+			},
 		},
 		discovery,
 	);
