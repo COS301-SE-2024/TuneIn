@@ -45,10 +45,6 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 	};
 
 	const handleUnbanUser = async () => {
-		// Perform the unban action here
-		console.log(`Unbanning user: ${selectedParticipant?.username}`);
-		// After unbanning, close the menu
-		console.log(`Banning user: ${selectedParticipant?.username}`);
 		const token = await auth.getToken();
 		if (!token) {
 			console.error("Failed to get token");
@@ -56,7 +52,7 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 		}
 		const roomData = JSON.parse(room as string);
 		const response = await fetch(
-			`${utils.API_BASE_URL}/rooms/${roomData.id}/banned`,
+			`${utils.API_BASE_URL}/rooms/${roomData.roomID}/banned`,
 			{
 				method: "DELETE",
 				headers: {
@@ -74,9 +70,9 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 		}
 		console.log("User banned successfully");
 		setBannedUsersarray(
-			bannedUsersArray.filter(() => {
-				return selectedParticipant?.id;
-			}),
+			bannedUsersArray.filter(
+				(user: Participant) => user.id !== selectedParticipant?.id,
+			),
 		);
 		handleCloseContextMenu();
 	};
