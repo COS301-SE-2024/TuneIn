@@ -66,8 +66,8 @@ const AdvancedSettings = () => {
 			setRoomData(formattedRoom);
 			setToggle1(formattedRoom.isPrivate);
 			setToggle2(
-				((formattedRoom.start_date ?? false) ||
-					(formattedRoom.end_date ?? false)) as boolean,
+				(formattedRoom.start_date !== undefined ||
+					formattedRoom.end_date !== undefined) as boolean,
 			);
 			setToggle3(formattedRoom.isTemporary);
 			setStartDate(
@@ -407,8 +407,8 @@ const AdvancedSettings = () => {
 					is_private: toggle1,
 					is_scheduled: toggle2,
 					is_temporary: toggle3,
-					start_date: startDate,
-					end_date: endDate,
+					start_date: startDate ?? null,
+					end_date: endDate ?? null,
 				};
 				console.log("Room data to save: ", data, token);
 				const response = await axios(`${utils.API_BASE_URL}/rooms/${roomID}`, {
