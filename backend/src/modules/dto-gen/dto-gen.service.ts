@@ -303,7 +303,7 @@ export class DtoGenService {
 					room_name: r.name,
 					description: r.description || "",
 					is_temporary: r.is_temporary || false,
-					is_private: pRoom !== undefined ? true : false,
+					is_private: pRoom !== null,
 					language: r.room_language || "",
 					has_explicit_content: r.explicit || false,
 					has_nsfw_content: r.nsfw || false,

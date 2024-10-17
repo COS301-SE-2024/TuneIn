@@ -13,7 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../styles/colors";
 import * as utils from "../../services/Utils";
 import auth from "../../services/AuthManagement";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLive } from "../../LiveContext";
 
 interface Participant {
 	id: string;
@@ -27,12 +28,14 @@ interface BannedUsersProps {
 
 const BannedUsers: React.FC<BannedUsersProps> = () => {
 	const navigation = useNavigation();
+	const navigator = useRouter();
 	const router = useLocalSearchParams();
 	const { room } = router;
 	const [bannedUsersArray, setBannedUsersarray] = useState<Participant[]>([]);
 	const [selectedParticipant, setSelectedParticipant] =
 		useState<Participant | null>(null);
 	const [contextMenuVisible, setContextMenuVisible] = useState(false);
+	const { currentUser } = useLive();
 
 	const handleOpenContextMenu = (participant: Participant) => {
 		setSelectedParticipant(participant);
@@ -45,10 +48,6 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 	};
 
 	const handleUnbanUser = async () => {
-		// Perform the unban action here
-		console.log(`Unbanning user: ${selectedParticipant?.username}`);
-		// After unbanning, close the menu
-		console.log(`Banning user: ${selectedParticipant?.username}`);
 		const token = await auth.getToken();
 		if (!token) {
 			console.error("Failed to get token");
@@ -56,7 +55,7 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 		}
 		const roomData = JSON.parse(room as string);
 		const response = await fetch(
-			`${utils.API_BASE_URL}/rooms/${roomData.id}/banned`,
+			`${utils.API_BASE_URL}/rooms/${roomData.roomID}/banned`,
 			{
 				method: "DELETE",
 				headers: {
@@ -74,9 +73,9 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 		}
 		console.log("User banned successfully");
 		setBannedUsersarray(
-			bannedUsersArray.filter(() => {
-				return selectedParticipant?.id;
-			}),
+			bannedUsersArray.filter(
+				(user: Participant) => user.id !== selectedParticipant?.id,
+			),
 		);
 		handleCloseContextMenu();
 	};
@@ -117,16 +116,28 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 		};
 		getBannedUsers();
 	}, []);
+	const navigateToProfile = (user: any) => {
+		console.log("Navigating to profile page for user:", user);
+		navigator.navigate(
+			`/screens/profile/ProfilePage?friend=${JSON.stringify({
+				profile_picture_url: user.profile_picture_url,
+				username: user.username,
+			})}&user=${user}`,
+		);
+	};
 
 	const renderItem = ({ item }: { item: Participant }) => {
 		const truncatedUsername =
 			item.username.length > 20
 				? `${item.username.slice(0, 17)}...`
 				: item.username;
-
+		const isMine = currentUser?.username === item.username;
 		return (
 			<View style={styles.participantContainer}>
-				<TouchableOpacity style={styles.profileInfoContainer}>
+				<TouchableOpacity
+					style={styles.profileInfoContainer}
+					onPress={navigateToProfile.bind(null, item)}
+				>
 					<Image
 						source={
 							item.profilePictureUrl
@@ -137,17 +148,16 @@ const BannedUsers: React.FC<BannedUsersProps> = () => {
 					/>
 					<Text style={styles.username}>{truncatedUsername}</Text>
 				</TouchableOpacity>
-				{/* <TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
-					<Ionicons name="ellipsis-vertical" size={24} color="black" />
-				</TouchableOpacity> */}
-				<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
-					<Ionicons
-						name="ellipsis-vertical"
-						size={24}
-						color="black"
-						testID={`ellipsis-${item.id}`}
-					/>
-				</TouchableOpacity>
+				{isMine && (
+					<TouchableOpacity onPress={() => handleOpenContextMenu(item)}>
+						<Ionicons
+							name="ellipsis-vertical"
+							size={24}
+							color="black"
+							testID={`ellipsis-${item.id}`}
+						/>
+					</TouchableOpacity>
+				)}
 			</View>
 		);
 	};

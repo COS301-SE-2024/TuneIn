@@ -48,24 +48,22 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 							<Text style={styles.menuText}>Room Info</Text>
 						</TouchableOpacity>
 					)} */}
-					{isHost ? (
-						<>
-							<TouchableOpacity
-								onPress={onAdvancedSettings}
-								style={styles.menuItem}
-							>
-								<Text style={styles.menuText}>Advanced Settings</Text>
-							</TouchableOpacity>
-
-							<TouchableOpacity onPress={onBanUserList} style={styles.menuItem}>
-								<Text style={styles.menuText}>Banned Users</Text>
-							</TouchableOpacity>
-						</>
-					) : (
-						<TouchableOpacity onPress={onRoomInfo} style={styles.menuItem}>
-							<Text style={styles.menuText}>Room Info</Text>
+					{isHost && (
+						<TouchableOpacity
+							onPress={onAdvancedSettings}
+							style={styles.menuItem}
+						>
+							<Text style={styles.menuText}>Advanced Settings</Text>
 						</TouchableOpacity>
 					)}
+
+					<TouchableOpacity onPress={onBanUserList} style={styles.menuItem}>
+						<Text style={styles.menuText}>Banned Users</Text>
+					</TouchableOpacity>
+
+					<TouchableOpacity onPress={onRoomInfo} style={styles.menuItem}>
+						<Text style={styles.menuText}>Room Info</Text>
+					</TouchableOpacity>
 
 					<TouchableOpacity onPress={onShareRoom} style={styles.menuItem}>
 						<Text style={styles.menuText}>
