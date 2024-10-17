@@ -66,10 +66,10 @@ const AdvancedSettings = () => {
 			setRoomData(formattedRoom);
 			setToggle1(formattedRoom.isPrivate);
 			setToggle2(
-				(formattedRoom.start_date !== undefined ||
-					formattedRoom.end_date !== undefined) as boolean,
+				((formattedRoom.start_date ?? false) ||
+					(formattedRoom.end_date ?? false)) as boolean,
 			);
-			setToggle3(formattedRoom.isTemporary ?? false);
+			setToggle3(formattedRoom.isTemporary);
 			setStartDate(
 				formattedRoom.start_date
 					? new Date(formattedRoom.start_date)
@@ -359,47 +359,49 @@ const AdvancedSettings = () => {
 			const token = await auth.getToken();
 			if (roomData) {
 				const roomID = roomData.id ?? roomData.roomID;
-				if (startDate === undefined && endDate === undefined) {
-					// alert message based on the OS
-					if (Platform.OS === "web") {
-						alert("Please select a start or end date");
-					} else {
-						ToastAndroid.show(
-							"Please select a start or end date",
-							ToastAndroid.SHORT,
-						);
+				if (toggle2) {
+					if (startDate === undefined && endDate === undefined) {
+						// alert message based on the OS
+						if (Platform.OS === "web") {
+							alert("Please select a start or end date");
+						} else {
+							ToastAndroid.show(
+								"Please select a start or end date",
+								ToastAndroid.SHORT,
+							);
+						}
+						return;
 					}
-					return;
-				}
-				// check if the dates make sense
-				if (startDate && endDate && startDate >= endDate) {
-					// alert message based on the OS
-					if (Platform.OS === "web") {
-						alert("Start date must be before end date");
-					} else {
-						ToastAndroid.show(
-							"Start date must be before end date",
-							ToastAndroid.SHORT,
-						);
+					// check if the dates make sense
+					if (startDate && endDate && startDate >= endDate) {
+						// alert message based on the OS
+						if (Platform.OS === "web") {
+							alert("Start date must be before end date");
+						} else {
+							ToastAndroid.show(
+								"Start date must be before end date",
+								ToastAndroid.SHORT,
+							);
+						}
+						return;
 					}
-					return;
-				}
-				// check if the start date is in the past
-				if (startDate && startDate < new Date()) {
-					if (Platform.OS === "web") {
-						alert("Start date must be in the future");
-					} else {
-						ToastAndroid.show(
-							"Start date must be in the future",
-							ToastAndroid.SHORT,
-						);
+					// check if the start date is in the past
+					if (startDate && startDate < new Date()) {
+						if (Platform.OS === "web") {
+							alert("Start date must be in the future");
+						} else {
+							ToastAndroid.show(
+								"Start date must be in the future",
+								ToastAndroid.SHORT,
+							);
+						}
+						return;
 					}
-					return;
-				}
-				// check if the end date is in the past
-				if (endDate && endDate < new Date()) {
-					alert("End date must be in the future");
-					return;
+					// check if the end date is in the past
+					if (endDate && endDate < new Date()) {
+						alert("End date must be in the future");
+						return;
+					}
 				}
 				const data = {
 					is_private: toggle1,
