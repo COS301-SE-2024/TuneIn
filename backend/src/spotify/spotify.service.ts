@@ -30,7 +30,7 @@ export class SpotifyService {
 	// private redirectUri: string;
 	private authHeader: string;
 	private userlessAPI: Spotify.SpotifyApi;
-	private TuneInAPI: Spotify.SpotifyApi; // an API client for the TuneIn Spotify account
+	// private TuneInAPI: Spotify.SpotifyApi; // an API client for the TuneIn Spotify account
 
 	constructor(
 		private readonly configService: ConfigService,
@@ -65,74 +65,72 @@ export class SpotifyService {
 		);
 
 		let error: Error | undefined;
-		this.refreshTuneInAPI().then(() => {
-			for (let i = 0; i < RETRIES; i++) {
-				try {
-					this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
-						this.clientId,
-						this.clientSecret,
-					);
-					break;
-				} catch (e) {
-					error = e as Error;
-					console.error(e);
-				}
+		for (let i = 0; i < RETRIES; i++) {
+			try {
+				this.userlessAPI = Spotify.SpotifyApi.withClientCredentials(
+					this.clientId,
+					this.clientSecret,
+				);
+				break;
+			} catch (e) {
+				error = e as Error;
+				console.error(e);
 			}
-			if (error) {
-				throw error;
-			}
-		});
+		}
+		if (error) {
+			throw error;
+		}
 	}
 
-	async refreshTuneInAPI(): Promise<void> {
-		const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
-		if (!tuneinID) {
-			throw new Error("Missing TUNEIN_USER_ID");
-		}
-		let error: Error | undefined;
-		await this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
-			for (let i = 0; i < RETRIES; i++) {
-				try {
-					this.TuneInAPI = SpotifyApi.withAccessToken(
-						this.clientId,
-						tp.tokens,
-						{
-							beforeRequest: (url: string, options) => {
-								console.log(`TuneInAPI request: ${url}`);
-								console.log(options);
-							},
-							afterRequest: (url: string, options, response: Response) => {
-								console.log(`TuneInAPI response: ${url}`);
-								console.log(options);
-								console.log(response);
-								// if (response.status === 429) {
-								// 	const retryAfter = response.headers.get("retry-after");
-								// 	if (retryAfter) {
-								// 		const delay = parseInt(retryAfter, 10) * 1000;
-								// 		console.log(`Rate limited, waiting ${delay}ms`);
-								// 		return this.wait(delay).then(() => {
-								// 			return;
-								// 		});
-								// 	}
-								// } else if (response.status === 401) {
-								// 	console.log(`Token expired, refreshing...`);
-								// 	this.getSpotifyTokens(tuneinID);
-								// }
-								// return;
-							},
-						},
-					);
-					break;
-				} catch (e) {
-					error = e as Error;
-					console.error(e);
-				}
-			}
-			if (error) {
-				throw error;
-			}
-		});
-	}
+	// async refreshTuneInAPI(): Promise<void> {
+	// 	const tuneinID = this.configService.get<string>("TUNEIN_USER_ID");
+	// 	if (!tuneinID) {
+	// 		throw new Error("Missing TUNEIN_USER_ID");
+	// 	}
+	// 	let error: Error | undefined;
+	// 	await this.getSpotifyTokens(tuneinID).then((tp: SpotifyTokenPair) => {
+	// 		for (let i = 0; i < RETRIES; i++) {
+	// 			try {
+	// 				userAPI = SpotifyApi.withAccessToken(
+	// 					this.clientId,
+	// 					tp.tokens,
+	// 					{
+	// 						beforeRequest: (url: string, options) => {
+	// 							console.log(`TuneInAPI request: ${url}`);
+	// 							console.log(options);
+	// 						},
+	// 						afterRequest: (url: string, options, response: Response) => {
+	// 							console.log(`TuneInAPI response: ${url}`);
+	// 							console.log(options);
+	// 							console.log(response);
+	// 							// if (response.status === 429) {
+	// 							// 	const retryAfter = response.headers.get("retry-after");
+	// 							// 	if (retryAfter) {
+	// 							// 		const delay = parseInt(retryAfter, 10) * 1000;
+	// 							// 		console.log(`Rate limited, waiting ${delay}ms`);
+	// 							// 		return this.wait(delay).then(() => {
+	// 							// 			return;
+	// 							// 		});
+	// 							// 	}
+	// 							// } else if (response.status === 401) {
+	// 							// 	console.log(`Token expired, refreshing...`);
+	// 							// 	this.getSpotifyTokens(tuneinID);
+	// 							// }
+	// 							// return;
+	// 						},
+	// 					},
+	// 				);
+	// 				break;
+	// 			} catch (e) {
+	// 				error = e as Error;
+	// 				console.error(e);
+	// 			}
+	// 		}
+	// 		if (error) {
+	// 			throw error;
+	// 		}
+	// 	});
+	// }
 
 	async downloadImage(url: string): Promise<Buffer> {
 		const response = await firstValueFrom(
@@ -150,6 +148,11 @@ export class SpotifyService {
 
 	getUserlessAPI(): Spotify.SpotifyApi {
 		return this.userlessAPI;
+	}
+
+	async getUserAPI(userID: string): Promise<SpotifyApi> {
+		const tp: SpotifyTokenPair = await this.getSpotifyTokens(userID);
+		return SpotifyApi.withAccessToken(this.clientId, tp.tokens);
 	}
 
 	async getSelf(token: SpotifyTokenResponse): Promise<Spotify.UserProfile> {
@@ -216,29 +219,32 @@ export class SpotifyService {
 	}
 
 	async getRoomPlaylist(room: RoomDto): Promise<Spotify.Playlist> {
-		await this.refreshTuneInAPI();
 		const r = await this.prisma.room.findUnique({
 			where: {
 				room_id: room.roomID,
+			},
+			include: {
+				users: true,
 			},
 		});
 		if (r === null) {
 			throw new Error("Room not found somehow");
 		}
-		if (r.playlist_id) {
+		const userAPI: SpotifyApi = await this.getUserAPI(r.users.user_id);
+		if (r.playlist_id !== null) {
 			const playlist: Spotify.Playlist =
 				await this.retryService.spotifyRequestWithRetries(
-					this.TuneInAPI.playlists.getPlaylist(r.playlist_id),
+					userAPI.playlists.getPlaylist(r.playlist_id),
 				);
 			return playlist;
 		} else {
 			const user: Spotify.UserProfile =
 				await this.retryService.spotifyRequestWithRetries(
-					this.TuneInAPI.currentUser.profile(),
+					userAPI.currentUser.profile(),
 				);
 			const playlist: Spotify.Playlist =
 				await this.retryService.spotifyRequestWithRetries(
-					this.TuneInAPI.playlists.createPlaylist(user.id, {
+					userAPI.playlists.createPlaylist(user.id, {
 						name: room.room_name,
 						description: room.description,
 						public: true,
@@ -260,7 +266,7 @@ export class SpotifyService {
 				}
 				console.log(`Size of base64: ${b64.length}`);
 				// await this.retryService.spotifyRequestWithRetries(
-				// 	this.TuneInAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
+				//  userAPI.playlists.addCustomPlaylistCoverImageFromBase64String(
 				// 		playlist.id,
 				// 		b64,
 				// 	),
@@ -278,108 +284,127 @@ export class SpotifyService {
 		}
 	}
 
-	async updateRoomPlaylist(
-		playlistID: string,
-		roomQueueTrackIDs: string[],
-	): Promise<void> {
-		await this.refreshTuneInAPI();
-		const currentTracks: Spotify.PlaylistedTrack<Spotify.Track>[] = [];
+	// async updateRoomPlaylist(
+	// 	playlistID: string,
+	// 	roomQueueTrackIDs: string[],
+	// ): Promise<void> {
+	// 	const userAPI: SpotifyApi = await this.getUserAPI(r.users.user_id);
+	// 	const currentTracks: Spotify.PlaylistedTrack<Spotify.Track>[] = [];
 
-		// handle current playlist songs, if not empty
-		// get current playlist state
-		const currentPlaylist: Spotify.Page<
-			Spotify.PlaylistedTrack<Spotify.Track>
-		> = await this.retryService.spotifyRequestWithRetries(
-			this.TuneInAPI.playlists.getPlaylistItems(playlistID),
-		);
-		console.log(`First request done`);
+	// 	// handle current playlist songs, if not empty
+	// 	// get current playlist state
+	// 	const currentPlaylist: Spotify.Page<
+	// 		Spotify.PlaylistedTrack<Spotify.Track>
+	// 	> = await this.retryService.spotifyRequestWithRetries(
+	// 		userAPI.playlists.getPlaylistItems(playlistID),
+	// 	);
+	// 	console.log(`First request done`);
 
-		// fetch songs from Spotify with retries
-		while (currentTracks.length < currentPlaylist.total) {
-			await this.wait(500); // for rate limiting
-			console.log(`Loop request`);
-			const tracks: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>> =
-				await this.retryService.spotifyRequestWithRetries(
-					this.TuneInAPI.playlists.getPlaylistItems(
-						playlistID,
-						undefined,
-						undefined,
-						50,
-						currentTracks.length,
-					),
-				);
-			currentTracks.push(...tracks.items);
-		}
-		const currentPlaylistTrackIDs: string[] = currentTracks.map(
-			(track) => track.track.id,
-		);
+	// 	// fetch songs from Spotify with retries
+	// 	while (currentTracks.length < currentPlaylist.total) {
+	// 		await this.wait(500); // for rate limiting
+	// 		console.log(`Loop request`);
+	// 		const tracks: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>> =
+	// 			await this.retryService.spotifyRequestWithRetries(
+	// 				userAPI.playlists.getPlaylistItems(
+	// 					playlistID,
+	// 					undefined,
+	// 					undefined,
+	// 					50,
+	// 					currentTracks.length,
+	// 				),
+	// 			);
+	// 		currentTracks.push(...tracks.items);
+	// 	}
+	// 	const currentPlaylistTrackIDs: string[] = currentTracks.map(
+	// 		(track) => track.track.id,
+	// 	);
 
-		//if the playlist and full queue are not the same, then the queue has changed
-		// update the spotify playlist
-		let changed = false;
-		if (roomQueueTrackIDs.length !== currentPlaylistTrackIDs.length) {
-			changed = true;
-		}
-		let start = 0;
-		if (!changed) {
-			for (start = 0; start < roomQueueTrackIDs.length; start++) {
-				if (
-					!roomQueueTrackIDs[start] ||
-					!currentPlaylistTrackIDs[start] ||
-					roomQueueTrackIDs[start] !== currentPlaylistTrackIDs[start]
-				) {
-					changed = true;
-					break;
-				}
-			}
-		}
+	// 	//if the playlist and full queue are not the same, then the queue has changed
+	// 	// update the spotify playlist
+	// 	let changed = false;
+	// 	if (roomQueueTrackIDs.length !== currentPlaylistTrackIDs.length) {
+	// 		changed = true;
+	// 	}
+	// 	let start = 0;
+	// 	if (!changed) {
+	// 		for (start = 0; start < roomQueueTrackIDs.length; start++) {
+	// 			if (
+	// 				!roomQueueTrackIDs[start] ||
+	// 				!currentPlaylistTrackIDs[start] ||
+	// 				roomQueueTrackIDs[start] !== currentPlaylistTrackIDs[start]
+	// 			) {
+	// 				changed = true;
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
 
-		if (!changed) return;
+	// 	if (!changed) return;
 
-		//delete all songs from start
-		if (start <= currentPlaylistTrackIDs.length) {
-			const deleteIDs: string[] = currentPlaylistTrackIDs.slice(start);
-			const promises: Promise<void>[] = [];
-			for (let i = 0; i < deleteIDs.length; i += 50) {
-				// remove songs from playlist in batches of 50 with retries
-				const ids = deleteIDs.slice(i, i + 50);
-				await new Promise((resolve) => setTimeout(resolve, 500));
-				const deleteRequest = this.retryService.spotifyRequestWithRetries(
-					this.TuneInAPI.playlists.removeItemsFromPlaylist(playlistID, {
-						tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
-					}),
-				);
-				promises.push(deleteRequest);
-			}
-			await Promise.all(promises);
-		}
+	// 	//delete all songs from start
+	// 	if (start <= currentPlaylistTrackIDs.length) {
+	// 		const deleteIDs: string[] = currentPlaylistTrackIDs.slice(start);
+	// 		const promises: Promise<void>[] = [];
+	// 		for (let i = 0; i < deleteIDs.length; i += 50) {
+	// 			// remove songs from playlist in batches of 50 with retries
+	// 			const ids = deleteIDs.slice(i, i + 50);
+	// 			await new Promise((resolve) => setTimeout(resolve, 500));
+	// 			const deleteRequest = this.retryService.spotifyRequestWithRetries(
+	// 				userAPI.playlists.removeItemsFromPlaylist(playlistID, {
+	// 					tracks: ids.map((id) => ({ uri: `spotify:track:${id}` })),
+	// 				}),
+	// 			);
+	// 			promises.push(deleteRequest);
+	// 		}
+	// 		await Promise.all(promises);
+	// 	}
 
-		const uris: string[] = roomQueueTrackIDs
-			.map((id) => `spotify:track:${id}`)
-			.slice(start);
-		const promises: Promise<void>[] = [];
-		for (let i = 0; i < uris.length; i += 50) {
-			const ids = uris.slice(i, i + 50);
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			const insertRequest = this.retryService.spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.addItemsToPlaylist(playlistID, ids, start + i),
-			);
-			promises.push(insertRequest);
-		}
-		await Promise.all(promises);
-	}
+	// 	const uris: string[] = roomQueueTrackIDs
+	// 		.map((id) => `spotify:track:${id}`)
+	// 		.slice(start);
+	// 	const promises: Promise<void>[] = [];
+	// 	for (let i = 0; i < uris.length; i += 50) {
+	// 		const ids = uris.slice(i, i + 50);
+	// 		await new Promise((resolve) => setTimeout(resolve, 500));
+	// 		const insertRequest = this.retryService.spotifyRequestWithRetries(
+	// 			userAPI.playlists.addItemsToPlaylist(playlistID, ids, start + i),
+	// 		);
+	// 		promises.push(insertRequest);
+	// 	}
+	// 	await Promise.all(promises);
+	// }
 
 	async addSongsToRoomPlaylist(
-		playlistID: string,
+		room: RoomDto,
 		trackIDs: string[],
 	): Promise<void> {
+		const r = await this.prisma.room.findUnique({
+			where: {
+				room_id: room.roomID,
+			},
+			include: {
+				users: true,
+			},
+		});
+		if (r === null) {
+			throw new Error("Room not found somehow");
+		}
+		let playlistID: string;
+		if (r.playlist_id === null) {
+			const playlist = await this.getRoomPlaylist(room);
+			playlistID = playlist.id;
+		} else {
+			playlistID = r.playlist_id;
+		}
+		const userAPI: SpotifyApi = await this.getUserAPI(r.users.user_id);
 		const uris: string[] = trackIDs.map((id) => `spotify:track:${id}`);
 		const promises: Promise<void>[] = [];
 		for (let i = 0; i < uris.length; i += 50) {
 			const ids = uris.slice(i, i + 50);
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			const insertRequest = this.retryService.spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.addItemsToPlaylist(playlistID, ids),
+				userAPI.playlists.addItemsToPlaylist(playlistID, ids),
 			);
 			promises.push(insertRequest);
 		}
@@ -387,17 +412,36 @@ export class SpotifyService {
 	}
 
 	async replaceSongsFromRoomPlaylist(
-		playlistID: string,
+		room: RoomDto,
 		startIndex: number,
 		trackIDs: string[],
 	): Promise<void> {
+		const r = await this.prisma.room.findUnique({
+			where: {
+				room_id: room.roomID,
+			},
+			include: {
+				users: true,
+			},
+		});
+		if (r === null) {
+			throw new Error("Room not found somehow");
+		}
+		let playlistID: string;
+		if (r.playlist_id === null) {
+			const playlist = await this.getRoomPlaylist(room);
+			playlistID = playlist.id;
+		} else {
+			playlistID = r.playlist_id;
+		}
+		const userAPI: SpotifyApi = await this.getUserAPI(r.users.user_id);
 		const uris: string[] = trackIDs.map((id) => `spotify:track:${id}`);
 		const promises: Promise<void>[] = [];
 		for (let i = 0; i < uris.length; i += 50) {
 			const ids = uris.slice(i, i + 50);
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			const updateRequest = this.retryService.spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.updatePlaylistItems(playlistID, {
+				userAPI.playlists.updatePlaylistItems(playlistID, {
 					uris: ids,
 					range_start: startIndex + i,
 				}),
@@ -466,12 +510,67 @@ export class SpotifyService {
 		await this.addTracksToDB(result);
 		return result;
 	}
+	// async getTuneInPlaylistIDs(playlistID: string): Promise<string[]> {
+	// 	await this.refreshTuneInAPI();
+	// 	const playlistInfo: Spotify.Playlist<Spotify.Track> =
+	// 		await this.retryService.spotifyRequestWithRetries(
+	// 			userAPI.playlists.getPlaylist(playlistID),
+	// 		);
 
-	async getTuneInPlaylistIDs(playlistID: string): Promise<string[]> {
-		await this.refreshTuneInAPI();
+	// 	let i = 0;
+	// 	const promises: Promise<
+	// 		Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>
+	// 	>[] = [];
+	// 	while (i < playlistInfo.tracks.total) {
+	// 		await this.wait(500); // for rate limiting
+	// 		promises.push(
+	// 			this.retryService.spotifyRequestWithRetries(
+	// 				userAPI.playlists.getPlaylistItems(
+	// 					playlistID,
+	// 					undefined,
+	// 					undefined,
+	// 					50,
+	// 					i,
+	// 				),
+	// 			),
+	// 		);
+	// 		i += 50;
+	// 	}
+
+	// 	const songs: Spotify.Page<Spotify.PlaylistedTrack<Spotify.Track>>[] =
+	// 		await Promise.all(promises);
+	// 	const result: string[] = [];
+	// 	for (const s of songs) {
+	// 		const items: Spotify.PlaylistedTrack<Spotify.Track>[] = s.items;
+	// 		const tracks = items.map((item) => item.track);
+	// 		result.push(...tracks.map((track) => track.id));
+	// 	}
+	// 	return result;
+	// }
+
+	async getRoomPlaylistIDs(room: RoomDto): Promise<string[]> {
+		const r = await this.prisma.room.findUnique({
+			where: {
+				room_id: room.roomID,
+			},
+			include: {
+				users: true,
+			},
+		});
+		if (r === null) {
+			throw new Error("Room not found somehow");
+		}
+		let playlistID: string;
+		if (r.playlist_id === null) {
+			const playlist = await this.getRoomPlaylist(room);
+			playlistID = playlist.id;
+		} else {
+			playlistID = r.playlist_id;
+		}
+		const userAPI: SpotifyApi = await this.getUserAPI(r.users.user_id);
 		const playlistInfo: Spotify.Playlist<Spotify.Track> =
 			await this.retryService.spotifyRequestWithRetries(
-				this.TuneInAPI.playlists.getPlaylist(playlistID),
+				userAPI.playlists.getPlaylist(playlistID),
 			);
 
 		let i = 0;
@@ -482,7 +581,7 @@ export class SpotifyService {
 			await this.wait(500); // for rate limiting
 			promises.push(
 				this.retryService.spotifyRequestWithRetries(
-					this.TuneInAPI.playlists.getPlaylistItems(
+					userAPI.playlists.getPlaylistItems(
 						playlistID,
 						undefined,
 						undefined,
