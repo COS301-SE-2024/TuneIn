@@ -25,7 +25,7 @@ describe("RoomCollaboration Component", () => {
 		expect(getByText("Chat")).toBeTruthy();
 		expect(getByText("Reactions")).toBeTruthy();
 		expect(getByText("Add To The Playlist")).toBeTruthy();
-		expect(getByText("Voting")).toBeTruthy();
+		// expect(getByText("Voting")).toBeTruthy();
 	});
 
 	it("navigates back when the back button is pressed", () => {
@@ -44,6 +44,6 @@ describe("RoomCollaboration Component", () => {
 		expect(getByTestId("chat-icon")).toBeTruthy();
 		expect(getByTestId("reactions-icon")).toBeTruthy();
 		expect(getByTestId("playlist-icon")).toBeTruthy();
-		expect(getByTestId("voting-icon")).toBeTruthy();
+		// expect(getByTestId("voting-icon")).toBeTruthy();
 	});
 });

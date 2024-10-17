@@ -9,10 +9,11 @@ import {
 	ScrollView,
 	ToastAndroid,
 } from "react-native";
-import { useRouter } from "expo-router"; // Import useRouter from 'expo-router'
-import MyToggleWidget from "../../components/ToggleWidget"; // Adjust the import path as needed
+import { useRouter } from "expo-router";
+import MyToggleWidget from "../../components/ToggleWidget";
 import CreateButton from "../../components/CreateButton";
 import DateTimePickerComponent from "./DatePicker";
+import { colors } from "../../styles/colors";
 
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();
@@ -35,72 +36,55 @@ const CreateRoomScreen: React.FC = () => {
 
 	const handleToggleChange = (isFirstOptionSelected: boolean) => {
 		newRoom["is_permanent"] = isFirstOptionSelected;
-		console.log(
-			isFirstOptionSelected ? "Permanent selected" : "Temporary selected",
-			newRoom,
-		);
 	};
 
 	const handleToggleChange2 = (isFirstOptionSelected: boolean) => {
 		newRoom["is_private"] = !isFirstOptionSelected;
-		console.log(
-			isFirstOptionSelected ? "Public selected" : "Private selected",
-			newRoom,
-		);
 	};
 
 	const navigateToRoomDetails = () => {
-		console.log("Navigating to RoomDetails screen");
 		if (isSwitched) {
 			newRoom["start_date"] = startDate ?? null;
 			newRoom["end_date"] = endDate ?? null;
-			if (startDate === undefined && endDate === undefined) {
-				// alert message based on the OS
-				if (Platform.OS === "web") {
-					alert("Please select a start or end date");
-				} else {
-					ToastAndroid.show(
-						"Please select a start or end date",
-						ToastAndroid.SHORT,
-					);
-				}
+
+			if (!startDate && !endDate) {
+				Platform.OS === "web"
+					? alert("Please select a start or end date")
+					: ToastAndroid.show(
+							"Please select a start or end date",
+							ToastAndroid.SHORT,
+						);
 				return;
 			}
-			// check if the dates make sense
+
 			if (startDate && endDate && startDate >= endDate) {
-				// alert message based on the OS
-				if (Platform.OS === "web") {
-					alert("Start date must be before end date");
-				} else {
-					ToastAndroid.show(
-						"Start date must be before end date",
-						ToastAndroid.SHORT,
-					);
-				}
+				Platform.OS === "web"
+					? alert("Start date must be before end date")
+					: ToastAndroid.show(
+							"Start date must be before end date",
+							ToastAndroid.SHORT,
+						);
 				return;
 			}
-			// check if the start date is in the past
+
 			if (startDate && startDate < new Date()) {
-				if (Platform.OS === "web") {
-					alert("Start date must be in the future");
-				} else {
-					ToastAndroid.show(
-						"Start date must be in the future",
-						ToastAndroid.SHORT,
-					);
-				}
+				Platform.OS === "web"
+					? alert("Start date must be in the future")
+					: ToastAndroid.show(
+							"Start date must be in the future",
+							ToastAndroid.SHORT,
+						);
 				return;
 			}
-			// check if the end date is in the past
+
 			if (endDate && endDate < new Date()) {
 				alert("End date must be in the future");
 				return;
 			}
 		}
-		console.log("Today date:", new Date());
+
 		newRoom["is_scheduled"] = isSwitched;
 		const room = JSON.stringify(newRoom);
-		console.log("New room:", room);
 		router.navigate({
 			pathname: "/screens/rooms/RoomDetails",
 			params: { room: room },
@@ -138,24 +122,29 @@ const CreateRoomScreen: React.FC = () => {
 						</View>
 						<View style={styles.scheduleContainer}>
 							<Text style={styles.scheduleText}>Schedule for later</Text>
-							<Switch value={isSwitched} onValueChange={setIsSwitched} />
+							<Switch
+								value={isSwitched}
+								onValueChange={setIsSwitched}
+								thumbColor={isSwitched ? "#fffff" : "#ffffff"}
+								trackColor={{ false: "#767577", true: colors.primary }}
+							/>
 						</View>
 						{isSwitched && (
-							<View styles={styles.dateTimePickerContainer}>
+							<View style={styles.dateTimePickerContainer}>
 								<DateTimePickerComponent
 									startDate={startDate}
 									setStartDate={setStartDate}
 									endDate={endDate}
 									setEndDate={setEndDate}
 								/>
-								{/* button to clear dates*/}
 								<TouchableOpacity
+									style={styles.clearDatesButton} // Make it a button
 									onPress={() => {
 										setStartDate(undefined);
 										setEndDate(undefined);
 									}}
 								>
-									<Text style={styles.clearDatesButton}>Clear dates</Text>
+									<Text style={styles.clearDatesButtonText}>Clear dates</Text>
 								</TouchableOpacity>
 							</View>
 						)}
@@ -168,14 +157,19 @@ const CreateRoomScreen: React.FC = () => {
 };
 
 const styles = {
-	// add styles for the clear dates button with padding and size and spacing
-	// turn it into a button
-	// make the button such that the date picker will hover over it
 	clearDatesButton: {
-		padding: 10,
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		backgroundColor: colors.primary,
+		borderRadius: 5,
+		marginTop: 10,
+		alignSelf: "center", // Center the button
+	},
+	clearDatesButtonText: {
+		color: "#fff",
+		fontWeight: "bold",
 		fontSize: 16,
 		textAlign: "center",
-		flex: 1,
 	},
 	keyboardAvoidingView: {
 		flex: 1,
@@ -218,27 +212,18 @@ const styles = {
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		marginBottom: 20,
 	},
 	scheduleText: {
 		fontSize: 16,
 		fontWeight: "bold",
 	},
 	dateTimePickerContainer: {
+		marginTop: 0,
+		zIndex: 1,
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 20,
-	},
-	dateTimePicker: {
-		marginBottom: 20,
-	},
-	dateTimePickerInput: {
-		borderWidth: 1,
-		borderColor: "#70c6d8",
-		borderRadius: 10,
-		padding: 10,
-		backgroundColor: "#F9FAFB",
 	},
 };
 
