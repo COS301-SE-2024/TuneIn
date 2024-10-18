@@ -488,12 +488,13 @@ const RoomPage: React.FC = () => {
 
 				{roomControls.canControlRoom() ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
-						{/* <TouchableOpacity
+						<TouchableOpacity
 							style={styles.controlButton}
-							onPress={playPreviousTrack}
+							onPress={syncWithRoom} // Function to sync with the room
 						>
-							<FontAwesome5 name="step-backward" size={30} color="black" />
-						</TouchableOpacity> */}
+							<MaterialIcons name="sync" size={28} color="black" />
+						</TouchableOpacity>
+
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
@@ -515,7 +516,7 @@ const RoomPage: React.FC = () => {
 							<FontAwesome5 name="step-forward" size={30} color="black" />
 						</TouchableOpacity>
 					</View>
-				) : (
+				) : userInRoom ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.joinLeaveButton}
@@ -527,6 +528,8 @@ const RoomPage: React.FC = () => {
 							</Text>
 						</TouchableOpacity>
 					</View>
+				) : (
+					<View></View>
 				)}
 			</View>
 			{/* <Animated.ScrollView
