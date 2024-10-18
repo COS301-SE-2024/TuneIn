@@ -1,0 +1,4689 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content class">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >LiveGateway</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/live/live.gateway.ts</code>
+        </p>
+
+
+
+
+            <p class="comment">
+                <h3>Implements</h3>
+            </p>
+            <p class="comment">
+                        <code>OnGatewayConnection</code>
+                        <code>OnGatewayDisconnect</code>
+            </p>
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier"></span>
+                                <a href="#server" >server</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleAuth" >handleAuth</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleConnection" >handleConnection</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleCurrentMedia" >handleCurrentMedia</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleDirectMessage" >handleDirectMessage</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleDisconnect" >handleDisconnect</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleEmojiReaction" >handleEmojiReaction</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleEnterDM" >handleEnterDM</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleExitDM" >handleExitDM</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleGetDirectMessageHistory" >handleGetDirectMessageHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleGetLiveChatHistory" >handleGetLiveChatHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleInitPauseMedia" >handleInitPauseMedia</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleInitPlayMedia" >handleInitPlayMedia</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleInitSkipMedia" >handleInitSkipMedia</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleJoinRoom" >handleJoinRoom</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleLeaveRoom" >handleLeaveRoom</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleLiveMessage" >handleLiveMessage</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleMessage" >handleMessage</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleModifyDM" >handleModifyDM</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handlePing" >handlePing</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleRequestQueueState" >handleRequestQueueState</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleSongDequeue" >handleSongDequeue</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleSongEnqueue" >handleSongEnqueue</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleStopTyping" >handleStopTyping</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleThrownError" >handleThrownError</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                <a href="#handleTimeSync" >handleTimeSync</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleTyping" >handleTyping</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#sendMediaState" >sendMediaState</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#sendQueueState" >sendQueueState</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#validateChatEvent" >validateChatEvent</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#validatePlaybackEvent" >validatePlaybackEvent</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#validateQueueEvent" >validateQueueEvent</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(roomUsers: <a href="../injectables/RoomUsersService.html" target="_self">RoomUsersService</a>, dmUsers: <a href="../injectables/DmUsersService.html" target="_self">DmUsersService</a>, dbUtils: <a href="../injectables/DbUtilsService.html" target="_self">DbUtilsService</a>, dtogen: <a href="../injectables/DtoGenService.html" target="_self">DtoGenService</a>, roomService: <a href="../injectables/RoomsService.html" target="_self">RoomsService</a>, eventQueueService: <a href="../injectables/EventQueueService.html" target="_self">EventQueueService</a>, roomQueue: <a href="../injectables/RoomQueueService.html" target="_self">RoomQueueService</a>, userService: <a href="../injectables/UsersService.html" target="_self">UsersService</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="41" class="link-to-prism">src/live/live.gateway.ts:41</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>roomUsers</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/RoomUsersService.html" target="_self" >RoomUsersService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dmUsers</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/DmUsersService.html" target="_self" >DmUsersService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dbUtils</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/DbUtilsService.html" target="_self" >DbUtilsService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dtogen</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/DtoGenService.html" target="_self" >DtoGenService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>roomService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/RoomsService.html" target="_self" >RoomsService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>eventQueueService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/EventQueueService.html" target="_self" >EventQueueService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>roomQueue</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/RoomQueueService.html" target="_self" >RoomQueueService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>userService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/UsersService.html" target="_self" >UsersService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="server"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>server</b></span>
+                        <a href="#server"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>Server</code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @WebSocketServer()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="57" class="link-to-prism">src/live/live.gateway.ts:57</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleAuth"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleAuth</b></span>
+                        <a href="#handleAuth"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleAuth(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.CONNECT_USER)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="92"
+                                    class="link-to-prism">src/live/live.gateway.ts:92</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleConnection"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>handleConnection</b></span>
+                        <a href="#handleConnection"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleConnection(client: Socket)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="59"
+                                    class="link-to-prism">src/live/live.gateway.ts:59</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleCurrentMedia"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleCurrentMedia</b></span>
+                        <a href="#handleCurrentMedia"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleCurrentMedia(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.CURRENT_MEDIA)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1049"
+                                    class="link-to-prism">src/live/live.gateway.ts:1049</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleDirectMessage"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleDirectMessage</b></span>
+                        <a href="#handleDirectMessage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleDirectMessage(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="425"
+                                    class="link-to-prism">src/live/live.gateway.ts:425</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleDisconnect"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>handleDisconnect</b></span>
+                        <a href="#handleDisconnect"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleDisconnect(client: Socket)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="65"
+                                    class="link-to-prism">src/live/live.gateway.ts:65</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleEmojiReaction"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleEmojiReaction</b></span>
+                        <a href="#handleEmojiReaction"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleEmojiReaction(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.EMOJI_REACTION)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="392"
+                                    class="link-to-prism">src/live/live.gateway.ts:392</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleEnterDM"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleEnterDM</b></span>
+                        <a href="#handleEnterDM"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleEnterDM(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.ENTER_DM)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="593"
+                                    class="link-to-prism">src/live/live.gateway.ts:593</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleExitDM"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleExitDM</b></span>
+                        <a href="#handleExitDM"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleExitDM(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.EXIT_DM)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="636"
+                                    class="link-to-prism">src/live/live.gateway.ts:636</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleGetDirectMessageHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleGetDirectMessageHistory</b></span>
+                        <a href="#handleGetDirectMessageHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleGetDirectMessageHistory(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="469"
+                                    class="link-to-prism">src/live/live.gateway.ts:469</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleGetLiveChatHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleGetLiveChatHistory</b></span>
+                        <a href="#handleGetLiveChatHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleGetLiveChatHistory(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="237"
+                                    class="link-to-prism">src/live/live.gateway.ts:237</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleInitPauseMedia"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleInitPauseMedia</b></span>
+                        <a href="#handleInitPauseMedia"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleInitPauseMedia(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.INIT_PAUSE)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="828"
+                                    class="link-to-prism">src/live/live.gateway.ts:828</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleInitPlayMedia"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleInitPlayMedia</b></span>
+                        <a href="#handleInitPlayMedia"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleInitPlayMedia(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.INIT_PLAY)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="781"
+                                    class="link-to-prism">src/live/live.gateway.ts:781</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleInitSkipMedia"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleInitSkipMedia</b></span>
+                        <a href="#handleInitSkipMedia"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleInitSkipMedia(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.INIT_SKIP)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="922"
+                                    class="link-to-prism">src/live/live.gateway.ts:922</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleJoinRoom"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleJoinRoom</b></span>
+                        <a href="#handleJoinRoom"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleJoinRoom(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="288"
+                                    class="link-to-prism">src/live/live.gateway.ts:288</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleLeaveRoom"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleLeaveRoom</b></span>
+                        <a href="#handleLeaveRoom"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleLeaveRoom(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.LEAVE_ROOM)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="351"
+                                    class="link-to-prism">src/live/live.gateway.ts:351</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleLiveMessage"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleLiveMessage</b></span>
+                        <a href="#handleLiveMessage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleLiveMessage(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="180"
+                                    class="link-to-prism">src/live/live.gateway.ts:180</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleMessage"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleMessage</b></span>
+                        <a href="#handleMessage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleMessage(p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(&#x27;message&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="83"
+                                    class="link-to-prism">src/live/live.gateway.ts:83</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleModifyDM"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleModifyDM</b></span>
+                        <a href="#handleModifyDM"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleModifyDM(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.MODIFY_DM)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="670"
+                                    class="link-to-prism">src/live/live.gateway.ts:670</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handlePing"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handlePing</b></span>
+                        <a href="#handlePing"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handlePing(client: Socket)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.PING)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="750"
+                                    class="link-to-prism">src/live/live.gateway.ts:750</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;Date&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleRequestQueueState"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleRequestQueueState</b></span>
+                        <a href="#handleRequestQueueState"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleRequestQueueState(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.REQUEST_QUEUE)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1350"
+                                    class="link-to-prism">src/live/live.gateway.ts:1350</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleSongDequeue"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleSongDequeue</b></span>
+                        <a href="#handleSongDequeue"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleSongDequeue(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.DEQUEUE_SONG)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1304"
+                                    class="link-to-prism">src/live/live.gateway.ts:1304</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleSongEnqueue"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleSongEnqueue</b></span>
+                        <a href="#handleSongEnqueue"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleSongEnqueue(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.ENQUEUE_SONG)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1258"
+                                    class="link-to-prism">src/live/live.gateway.ts:1258</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleStopTyping"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleStopTyping</b></span>
+                        <a href="#handleStopTyping"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleStopTyping(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="551"
+                                    class="link-to-prism">src/live/live.gateway.ts:551</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleThrownError"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>handleThrownError</b></span>
+                        <a href="#handleThrownError"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleThrownError(client: Socket, error: Error)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1480"
+                                    class="link-to-prism">src/live/live.gateway.ts:1480</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>error</td>
+                                            <td>
+                                                        <code>Error</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleTimeSync"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>handleTimeSync</b></span>
+                        <a href="#handleTimeSync"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleTimeSync(client: Socket, data: literal type)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(&#x27;time_sync&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="759"
+                                    class="link-to-prism">src/live/live.gateway.ts:759</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>data</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleTyping"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleTyping</b></span>
+                        <a href="#handleTyping"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleTyping(client: Socket, p: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@SubscribeMessage(SOCKET_EVENTS.TYPING)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="511"
+                                    class="link-to-prism">src/live/live.gateway.ts:511</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>client</td>
+                                            <td>
+                                                        <code>Socket</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>p</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="sendMediaState"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>sendMediaState</b></span>
+                        <a href="#sendMediaState"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>sendMediaState(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1366"
+                                    class="link-to-prism">src/live/live.gateway.ts:1366</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="sendQueueState"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>sendQueueState</b></span>
+                        <a href="#sendQueueState"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>sendQueueState(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1388"
+                                    class="link-to-prism">src/live/live.gateway.ts:1388</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="validateChatEvent"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>validateChatEvent</b></span>
+                        <a href="#validateChatEvent"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>validateChatEvent(payload: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1399"
+                                    class="link-to-prism">src/live/live.gateway.ts:1399</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/ChatEventDto.html" target="_self" >Promise&lt;ChatEventDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="validatePlaybackEvent"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>validatePlaybackEvent</b></span>
+                        <a href="#validatePlaybackEvent"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>validatePlaybackEvent(payload: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1461"
+                                    class="link-to-prism">src/live/live.gateway.ts:1461</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/PlaybackEventDto.html" target="_self" >Promise&lt;PlaybackEventDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="validateQueueEvent"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>validateQueueEvent</b></span>
+                        <a href="#validateQueueEvent"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>validateQueueEvent(payload: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dateRequired)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1433"
+                                    class="link-to-prism">src/live/live.gateway.ts:1433</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Default value</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+                                            <td>
+                                            </td>
+
+                                        </tr>
+                                        <tr>
+                                                <td>dateRequired</td>
+                                            <td>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+                                            <td>
+                                                    <code>false</code>
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/QueueEventDto.html" target="_self" >Promise&lt;QueueEventDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+
+
+
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+	ConnectedSocket,
+	MessageBody,
+	OnGatewayConnection,
+	OnGatewayDisconnect,
+	SubscribeMessage,
+	WebSocketGateway,
+	WebSocketServer,
+} from &quot;@nestjs/websockets&quot;;
+import { Server, Socket } from &quot;socket.io&quot;;
+import { SOCKET_EVENTS } from &quot;../common/constants&quot;;
+import { ChatEventDto } from &quot;./dto/chatevent.dto&quot;;
+import { RoomUsersService } from &quot;./roomusers/roomuser.service&quot;;
+import { DbUtilsService } from &quot;../modules/db-utils/db-utils.service&quot;;
+import { DtoGenService } from &quot;../modules/dto-gen/dto-gen.service&quot;;
+import { LiveChatMessageDto } from &quot;./dto/livechatmessage.dto&quot;;
+import { PlaybackEventDto } from &quot;./dto/playbackevent.dto&quot;;
+import { RoomsService } from &quot;../modules/rooms/rooms.service&quot;;
+import { EventQueueService } from &quot;./eventqueue/eventqueue.service&quot;;
+// import { LiveService } from &quot;./live.service&quot;;
+import { RoomQueueService } from &quot;../modules/rooms/roomqueue/roomqueue.service&quot;;
+import { EmojiReactionDto } from &quot;./dto/emojireaction.dto&quot;;
+import { QueueEventDto } from &quot;./dto/queueevent.dto&quot;;
+import { RoomSongDto } from &quot;../modules/rooms/dto/roomsong.dto&quot;;
+import { RoomDto } from &quot;../modules/rooms/dto/room.dto&quot;;
+import { VoteDto } from &quot;../modules/rooms/dto/vote.dto&quot;;
+import { DmUsersService } from &quot;./dmusers/dmusers.service&quot;;
+import { UserDto } from &quot;../modules/users/dto/user.dto&quot;;
+import { DirectMessageDto } from &quot;../modules/users/dto/dm.dto&quot;;
+import { UsersService } from &quot;../modules/users/users.service&quot;;
+
+@WebSocketGateway({
+	namespace: &quot;/live&quot;,
+	transports: [&quot;websocket&quot;],
+	cors: {
+		origin: &quot;*&quot;,
+		methods: [&quot;GET&quot;, &quot;POST&quot;],
+	},
+})
+//@UseFilters(new WsExceptionFilter())
+export class LiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
+	constructor(
+		private readonly roomUsers: RoomUsersService,
+		private readonly dmUsers: DmUsersService,
+		private readonly dbUtils: DbUtilsService,
+		private readonly dtogen: DtoGenService,
+		private readonly roomService: RoomsService,
+		private readonly eventQueueService: EventQueueService,
+		// private readonly liveService: LiveService,
+		private readonly roomQueue: RoomQueueService,
+		private readonly userService: UsersService,
+	) {
+		this.roomService.server &#x3D; this.server;
+		// this.liveService.setServer(this.server);
+	}
+
+	@WebSocketServer() server: Server;
+
+	async handleConnection(client: Socket) {
+		console.log(&quot;Client connected with ID: &quot; + client.id);
+		this.roomService.server &#x3D; this.server;
+		// this.liveService.setServer(this.server);
+	}
+
+	async handleDisconnect(client: Socket) {
+		this.roomService.server &#x3D; this.server;
+		// this.liveService.setServer(this.server);
+		try {
+			console.log(&quot;Client (id: &quot; + client.id + &quot;) disconnected&quot;);
+			if (this.roomUsers.getConnectedUser(client.id) !&#x3D;&#x3D; null) {
+				this.roomUsers.leaveRoom(client.id);
+			}
+			this.roomUsers.removeConnectedUser(client.id);
+			this.dmUsers.disconnectChat(client.id);
+			this.dmUsers.removeConnectedUser(client.id);
+			client.disconnect();
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	@SubscribeMessage(&quot;message&quot;)
+	async handleMessage(@MessageBody() p: string): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(&quot;message&quot;, async () &#x3D;&gt; {
+			console.log(p);
+			//Hello World
+			this.server.emit(&quot;message&quot;, { response: &quot;Hello World&quot; });
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.CONNECT_USER)
+	async handleAuth(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.CONNECT_USER, async () &#x3D;&gt; {
+			try {
+				//auth
+				const payload: ChatEventDto &#x3D; await this.validateChatEvent(p);
+				if (!payload.userID) {
+					throw new Error(&quot;No userID provided&quot;);
+				}
+				// get connected client ids
+				// pass to addConnectedUser
+				console.log(&quot;pre-room fetch&quot;);
+				if (
+					!this.server ||
+					!this.server.sockets ||
+					!this.server.sockets.adapter ||
+					!this.server.sockets.adapter.rooms
+				) {
+					console.error(&quot;One of the required properties is undefined:&quot;, {
+						server: !!this.server,
+						sockets: !!this.server?.sockets,
+						adapter: !!this.server?.sockets?.adapter,
+						rooms: !!this.server?.sockets?.adapter?.rooms,
+					});
+					await this.roomUsers.addConnectedUser(client.id, payload.userID);
+					await this.dmUsers.addConnectedUser(client.id, payload.userID);
+				} else {
+					const clientsSet: Set&lt;string&gt; | undefined &#x3D;
+						this.server.sockets.adapter.rooms.get(client.id);
+					console.log(&quot;post-room fetch&quot;);
+					if (!clientsSet) {
+						throw new Error(&quot;No connected clients found&quot;);
+					}
+					const connectedClients: string[] &#x3D; [...clientsSet];
+					for (const c of connectedClients) {
+						await this.roomUsers.addConnectedUser(c, payload.userID);
+						await this.dmUsers.addConnectedUser(c, payload.userID);
+					}
+				}
+				const response: ChatEventDto &#x3D; {
+					userID: null,
+					date_created: new Date(),
+				};
+				client.join(payload.userID);
+				this.server.emit(SOCKET_EVENTS.CONNECTED, response);
+				console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.CONNECTED);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	/*
+	@SubscribeMessage(SOCKET_EVENTS.DISCONNECT_USER)
+	async handleLeaveRoom(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			console.error(error);
+			this.handleThrownError(client, error as Error);
+		}
+	}
+	*/
+
+	/*
+	@SubscribeMessage(SOCKET_EVENTS.ERROR)
+	async handleError(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		try {
+			//this.server.emit();
+		} catch (error) {
+			console.error(error);
+			this.handleThrownError(client, error as Error);
+		}
+	}
+	*/
+
+	/* **************************************************************************************** */
+
+	@SubscribeMessage(SOCKET_EVENTS.LIVE_MESSAGE)
+	async handleLiveMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.LIVE_MESSAGE, async () &#x3D;&gt; {
+			try {
+				/*
+				validate auth
+
+				get room id
+				if room does not exist
+					return error
+
+				create message
+				emit to room: LIVE_MESSAGE, { message: payload.message }
+				*/
+
+				//auth
+
+				const payload: ChatEventDto &#x3D; await this.validateChatEvent(p);
+				if (!payload.userID) {
+					throw new Error(&quot;No userID provided&quot;);
+				}
+
+				if (!payload.body) {
+					throw new Error(&quot;No body provided&quot;);
+				}
+				const roomID: string &#x3D; payload.body.roomID;
+				if (!roomID) {
+					throw new Error(&quot;No roomID provided&quot;);
+				}
+				if (!this.dbUtils.roomExists(roomID)) {
+					throw new Error(&quot;Room does not exist&quot;);
+				}
+
+				const message: LiveChatMessageDto &#x3D; payload.body;
+				const messageID: string &#x3D; await this.roomService.createLiveChatMessage(
+					message,
+					payload.userID,
+				);
+				const finalMessage: LiveChatMessageDto &#x3D;
+					await this.dtogen.generateLiveChatMessageDto(messageID);
+				const response: ChatEventDto &#x3D; {
+					userID: finalMessage.sender.userID,
+					date_created: new Date(),
+					body: finalMessage,
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.LIVE_MESSAGE, response);
+				console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.LIVE_MESSAGE);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY)
+	async handleGetLiveChatHistory(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.GET_LIVE_CHAT_HISTORY,
+			async () &#x3D;&gt; {
+				try {
+					//this.server.emit();
+					/*
+				validate auth
+
+				get room id
+				if room does not exist
+					return error
+
+				get chat history
+				emit to socket: LIVE_MESSAGE, { message: chatHistory }
+				*/
+
+					//auth
+
+					const payload: ChatEventDto &#x3D; await this.validateChatEvent(p);
+					if (!payload.userID) {
+						throw new Error(&quot;No userID provided&quot;);
+					}
+
+					if (!payload.body) {
+						throw new Error(&quot;No body provided&quot;);
+					}
+					const roomID: string &#x3D; payload.body.roomID;
+					if (!roomID) {
+						throw new Error(&quot;No roomID provided&quot;);
+					}
+					if (!this.dbUtils.roomExists(roomID)) {
+						throw new Error(&quot;Room does not exist&quot;);
+					}
+
+					const messages: LiveChatMessageDto[] &#x3D;
+						await this.roomService.getLiveChatHistoryDto(roomID);
+					this.server.emit(SOCKET_EVENTS.LIVE_CHAT_HISTORY, messages);
+					console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.LIVE_CHAT_HISTORY);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
+				}
+			},
+		);
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.JOIN_ROOM)
+	async handleJoinRoom(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.JOIN_ROOM, async () &#x3D;&gt; {
+			try {
+				//this.server.emit();
+				/*
+				validate auth
+
+				get room id
+				if room does not exist
+					return error
+
+				add user to room data structure
+				add user to socket room
+				emit to room: USER_JOINED, { userId: user.id }
+				*/
+
+				//auth
+
+				const payload: ChatEventDto &#x3D; await this.validateChatEvent(p);
+				if (!payload.userID) {
+					throw new Error(&quot;No userID provided&quot;);
+				}
+
+				if (!payload.body) {
+					throw new Error(&quot;No body provided&quot;);
+				}
+				const roomID: string &#x3D; payload.body.roomID;
+				if (!roomID) {
+					throw new Error(&quot;No roomID provided&quot;);
+				}
+				if (!this.dbUtils.roomExists(roomID)) {
+					throw new Error(&quot;Room does not exist&quot;);
+				}
+
+				await this.roomUsers.setRoomId(client.id, roomID);
+				client.join(roomID);
+				const joinAnnouncement: ChatEventDto &#x3D; {
+					userID: payload.userID,
+					date_created: new Date(),
+				};
+				this.server
+					.to(roomID)
+					.emit(SOCKET_EVENTS.USER_JOINED_ROOM, joinAnnouncement);
+				console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.USER_JOINED_ROOM);
+
+				// if (!(await this.roomQueue.isPlaying(roomID))) {
+				// 	await this.roomQueue.play(roomID);
+				// }
+				if (await this.roomQueue.isPlaying(roomID)) {
+					await this.sendMediaState(roomID);
+				}
+				await this.sendQueueState(roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.LEAVE_ROOM)
+	async handleLeaveRoom(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.LEAVE_ROOM, async () &#x3D;&gt; {
+			try {
+				//auth
+
+				const payload: ChatEventDto &#x3D; await this.validateChatEvent(p);
+				if (!payload.userID) {
+					throw new Error(&quot;No userID provided&quot;);
+				}
+
+				const roomID &#x3D; this.roomUsers.getRoomId(client.id);
+				if (!roomID) {
+					throw new Error(&quot;User is not in a room&quot;);
+				}
+				if (!this.dbUtils.roomExists(roomID)) {
+					throw new Error(&quot;Room does not exist&quot;);
+				}
+
+				if ((await this.roomService.getRoomUserCount(roomID)) &#x3D;&#x3D;&#x3D; 1) {
+					await this.roomQueue.pauseSong(roomID);
+				}
+
+				const response: ChatEventDto &#x3D; {
+					userID: payload.userID,
+					date_created: new Date(),
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.USER_LEFT_ROOM, response);
+				console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.USER_LEFT_ROOM);
+				await this.roomUsers.leaveRoom(client.id);
+				client.leave(roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.EMOJI_REACTION)
+	async handleEmojiReaction(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.EMOJI_REACTION,
+			async () &#x3D;&gt; {
+				try {
+					console.log(p);
+					let r: EmojiReactionDto;
+					try {
+						const j &#x3D; JSON.parse(p);
+						r &#x3D; j as EmojiReactionDto;
+					} catch (e) {
+						console.error(e);
+						throw new Error(&quot;Invalid JSON received&quot;);
+					}
+					const roomID &#x3D; this.roomUsers.getRoomId(client.id);
+					if (!roomID) {
+						throw new Error(&quot;User is not in a room&quot;);
+					}
+					await this.roomService.saveReaction(roomID, r);
+					this.server.to(roomID).emit(SOCKET_EVENTS.EMOJI_REACTION, r);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
+				}
+			},
+		);
+	}
+	/* **************************************************************************************** */
+
+	@SubscribeMessage(SOCKET_EVENTS.DIRECT_MESSAGE)
+	async handleDirectMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.DIRECT_MESSAGE,
+			async () &#x3D;&gt; {
+				try {
+					console.log(p);
+					let payload: DirectMessageDto;
+					try {
+						const j &#x3D; JSON.parse(p);
+						payload &#x3D; j as DirectMessageDto;
+					} catch (e) {
+						console.error(e);
+						throw new Error(&quot;Invalid JSON received&quot;);
+					}
+
+					const chatID: string | null &#x3D; await this.dmUsers.getChatID(client.id);
+					if (!chatID) {
+						throw new Error(&quot;User is not in a DM chat&quot;);
+					}
+
+					const user: UserDto | null &#x3D; await this.dmUsers.getUser(client.id);
+					if (!user) {
+						throw new Error(&quot;User not found in DM chat&quot;);
+					}
+
+					console.log(&quot;user: &quot; + user);
+					console.log(&quot;chatID: &quot; + chatID);
+					const finalMessage: DirectMessageDto &#x3D;
+						await this.userService.sendMessage(payload);
+					this.server
+						.to(chatID)
+						.emit(SOCKET_EVENTS.DIRECT_MESSAGE, finalMessage);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
+				}
+			},
+		);
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY)
+	async handleGetDirectMessageHistory(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(
+			SOCKET_EVENTS.GET_DIRECT_MESSAGE_HISTORY,
+			async () &#x3D;&gt; {
+				try {
+					console.log(p);
+					let payload: { userID: string; participantID: string };
+					try {
+						const j &#x3D; JSON.parse(p);
+						payload &#x3D; j as { userID: string; participantID: string };
+					} catch (e) {
+						console.error(e);
+						throw new Error(&quot;Invalid JSON received&quot;);
+					}
+					const messages: DirectMessageDto[] &#x3D;
+						await this.userService.getMessages(
+							payload.userID,
+							payload.participantID,
+						);
+					let chatID: string | null &#x3D; await this.dmUsers.getChatID(client.id);
+					if (!chatID) {
+						await this.dmUsers.setChatInfo(client.id, payload.participantID);
+						chatID &#x3D; await this.dmUsers.getChatID(client.id);
+						if (!chatID) {
+							throw new Error(&quot;Chat ID was not set for some reason&quot;);
+						}
+						client.join(chatID);
+					}
+					this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
+					console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.DM_HISTORY);
+				} catch (error) {
+					console.error(error);
+					this.handleThrownError(client, error as Error);
+				}
+			},
+		);
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.TYPING)
+	async handleTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.TYPING, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				/*
+				let payload: { userID: string; participantID: string };
+				try {
+					const j &#x3D; JSON.parse(p);
+					payload &#x3D; j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error(&quot;Invalid JSON received&quot;);
+				}
+					*/
+
+				const chatID: string | null &#x3D; await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error(&quot;User is not in a DM chat&quot;);
+				}
+
+				const user: UserDto | null &#x3D; await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error(&quot;User not found in DM chat&quot;);
+				}
+
+				const typingAnnouncement &#x3D; {
+					userID: user.userID,
+				};
+				this.server.to(chatID).emit(SOCKET_EVENTS.TYPING, typingAnnouncement);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.STOP_TYPING)
+	async handleStopTyping(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.STOP_TYPING, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				/*
+				let payload: { userID: string; participantID: string };
+				try {
+					const j &#x3D; JSON.parse(p);
+					payload &#x3D; j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error(&quot;Invalid JSON received&quot;);
+				}
+					*/
+
+				const chatID: string | null &#x3D; await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error(&quot;User is not in a DM chat&quot;);
+				}
+
+				const user: UserDto | null &#x3D; await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error(&quot;User not found in DM chat&quot;);
+				}
+
+				const stopTypingAnnouncement &#x3D; {
+					userID: user.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.TYPING, stopTypingAnnouncement);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.ENTER_DM)
+	async handleEnterDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.ENTER_DM, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				let enterPayload: { userID: string; participantID: string };
+				try {
+					const j &#x3D; JSON.parse(p);
+					enterPayload &#x3D; j as { userID: string; participantID: string };
+				} catch (e) {
+					console.error(e);
+					throw new Error(&quot;Invalid JSON received&quot;);
+				}
+
+				await this.dmUsers.setChatInfo(client.id, enterPayload.participantID);
+				const chatID: string | null &#x3D; await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error(&quot;Chat ID was not set for some reason&quot;);
+				}
+				client.join(chatID);
+				const onlineAnnouncement &#x3D; {
+					userID: enterPayload.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.USER_ONLINE, onlineAnnouncement);
+				console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.USER_ONLINE);
+				const messages: DirectMessageDto[] &#x3D; await this.userService.getMessages(
+					enterPayload.userID,
+					enterPayload.participantID,
+				);
+				this.server.to(chatID).emit(SOCKET_EVENTS.DM_HISTORY, messages);
+				console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.DM_HISTORY);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.EXIT_DM)
+	async handleExitDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.EXIT_DM, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				const chatID: string | null &#x3D; await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error(&quot;User is not in a DM chat&quot;);
+				}
+
+				const user: UserDto | null &#x3D; await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error(&quot;User not found in DM chat&quot;);
+				}
+
+				await this.dmUsers.disconnectChat(client.id);
+				const offlineAnnouncement &#x3D; {
+					userID: user.userID,
+				};
+				this.server
+					.to(chatID)
+					.emit(SOCKET_EVENTS.USER_OFFLINE, offlineAnnouncement);
+				console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.USER_OFFLINE);
+				client.leave(chatID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.MODIFY_DM)
+	async handleModifyDM(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.MODIFY_DM, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				let payload: {
+					userID: string;
+					participantID: string;
+					action: string;
+					message: DirectMessageDto;
+				};
+				try {
+					const j &#x3D; JSON.parse(p);
+					payload &#x3D; j as {
+						userID: string;
+						participantID: string;
+						action: string;
+						message: DirectMessageDto;
+					};
+				} catch (e) {
+					console.error(e);
+					throw new Error(&quot;Invalid JSON received&quot;);
+				}
+
+				const chatID: string | null &#x3D; await this.dmUsers.getChatID(client.id);
+				if (!chatID) {
+					throw new Error(&quot;User is not in a DM chat&quot;);
+				}
+
+				const user: UserDto | null &#x3D; await this.dmUsers.getUser(client.id);
+				if (!user) {
+					throw new Error(&quot;User not found in DM chat&quot;);
+				}
+
+				if (payload.action &#x3D;&#x3D;&#x3D; &quot;edit&quot;) {
+					const edited: DirectMessageDto &#x3D; await this.userService.editMessage(
+						payload.message,
+					);
+					this.server.to(chatID).emit(SOCKET_EVENTS.CHAT_MODIFIED, {
+						userID: user.userID,
+						participantID: payload.participantID,
+						action: &quot;edit&quot;,
+						message: edited,
+					});
+				} else if (payload.action &#x3D;&#x3D;&#x3D; &quot;delete&quot;) {
+					let deletedMessage: DirectMessageDto;
+					try {
+						deletedMessage &#x3D; await this.dtogen.generateDirectMessageDto(
+							payload.message.pID,
+						);
+					} catch (e) {
+						console.error(e);
+						throw new Error(&quot;Message does not exist&quot;);
+					}
+
+					const deleted &#x3D; await this.userService.deleteMessage(deletedMessage);
+					if (!deleted) {
+						throw new Error(&quot;Message could not be deleted&quot;);
+					}
+					this.server.to(chatID).emit(SOCKET_EVENTS.CHAT_MODIFIED, {
+						userID: user.userID,
+						participantID: payload.participantID,
+						action: &quot;delete&quot;,
+						message: deletedMessage,
+					});
+				} else {
+					throw new Error(&quot;Invalid action&quot;);
+				}
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	/* **************************************************************************************** */
+
+	@SubscribeMessage(SOCKET_EVENTS.PING)
+	async handlePing(@ConnectedSocket() client: Socket): Promise&lt;Date&gt; {
+		console.log(&quot;Received event: ping&quot;);
+		if (!client)
+			throw new Error(&quot;This is a stub because client should always be defined&quot;);
+		return new Date();
+	}
+
+	// for determining client and server clock latency
+	@SubscribeMessage(&quot;time_sync&quot;)
+	handleTimeSync(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() data: { t0: number },
+	) {
+		const t1 &#x3D; Date.now();
+		client.emit(&quot;time_sync_response&quot;, { t0: data.t0, t1, t2: Date.now() });
+	}
+
+	/* **************************************************************************************** */
+
+	/*
+	//synchronised media playback
+	PLAY_MEDIA: &quot;playMedia&quot;,
+	PAUSE_MEDIA: &quot;pauseMedia&quot;,
+	STOP_MEDIA: &quot;stopMedia&quot;,
+	SEEK_MEDIA: &quot;seekMedia&quot;,
+	CURRENT_MEDIA: &quot;currentMedia&quot;,
+	QUEUE_STATE: &quot;queueState&quot;,
+	MEDIA_SYNC: &quot;mediaSync&quot;,
+	*/
+
+	@SubscribeMessage(SOCKET_EVENTS.INIT_PLAY)
+	async handleInitPlayMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_PLAY, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				const payload: PlaybackEventDto &#x3D; await this.validatePlaybackEvent(p);
+				if (!payload.UTC_time || payload.UTC_time &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;No UTC_time provided&quot;);
+				}
+
+				const roomID: string | null &#x3D; this.roomUsers.getRoomId(client.id);
+				if (roomID &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;User is not in a room&quot;);
+				}
+
+				//{check user permissions}
+				const song: RoomSongDto | null &#x3D; await this.roomQueue.play(
+					roomID,
+					payload.UTC_time,
+				);
+				console.log(&quot;Song to play: &quot; + song);
+				if (song &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;No song is queued&quot;);
+				}
+				const startTime: number | undefined &#x3D; song.startTime;
+				if (startTime &#x3D;&#x3D;&#x3D; undefined) {
+					throw new Error(&quot;No start time for song&quot;);
+				}
+				const response: PlaybackEventDto &#x3D; {
+					date_created: new Date(),
+					userID: null,
+					roomID: roomID,
+					spotifyID: song.spotifyID,
+					UTC_time: startTime,
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+				await this.sendQueueState(roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.INIT_PAUSE)
+	async handleInitPauseMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		console.log(&quot;Received event: &quot; + SOCKET_EVENTS.INIT_PAUSE);
+		try {
+			console.log(p);
+
+			const roomID: string | null &#x3D; this.roomUsers.getRoomId(client.id);
+			if (roomID &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(&quot;User is not in a room&quot;);
+			}
+
+			//{check user permissions}
+
+			if (await this.roomQueue.isPlaying(roomID)) {
+				/*
+				await this.roomQueue.pauseSong(roomID);
+				const response: PlaybackEventDto &#x3D; {
+					date_created: new Date(),
+					userID: null,
+					roomID: roomID,
+					songID: null,
+					UTC_time: null,
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.PAUSE_MEDIA, response);
+				*/
+			}
+			await this.roomQueue.pauseSong(roomID);
+			const song: RoomSongDto | null &#x3D; await this.roomQueue.getCurrentSong(
+				roomID,
+			);
+			console.log(&quot;Paused song: &quot; + song);
+			if (song &#x3D;&#x3D;&#x3D; null) {
+				throw new Error(&quot;No song is queued&quot;);
+			}
+			const startTime: number | undefined &#x3D; song.startTime;
+			if (startTime &#x3D;&#x3D;&#x3D; undefined) {
+				throw new Error(&quot;No start time for song&quot;);
+			}
+			const response: PlaybackEventDto &#x3D; {
+				date_created: new Date(),
+				userID: null,
+				roomID: roomID,
+				spotifyID: song.spotifyID,
+				UTC_time: startTime,
+			};
+			this.server.to(roomID).emit(SOCKET_EVENTS.PAUSE_MEDIA, response);
+			await this.sendQueueState(roomID);
+		} catch (error) {
+			console.error(error);
+			this.handleThrownError(client, error as Error);
+		}
+	}
+
+	// @SubscribeMessage(SOCKET_EVENTS.INIT_STOP)
+	// async handleInitStopMedia(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_STOP, async () &#x3D;&gt; {
+	// 			// 		console.log(&quot;Received event: &quot; + SOCKET_EVENTS.INIT_STOP);
+	// 		try {
+	// 			//this.server.emit();
+	// 			console.log(p);
+
+	// 			const roomID: string | null &#x3D; this.roomUsers.getRoomId(client.id);
+	// 			if (roomID &#x3D;&#x3D;&#x3D; null) {
+	// 				throw new Error(&quot;User is not in a room&quot;);
+	// 			}
+
+	// 			//{check user permissions}
+
+	// 			if (await this.roomQueue.isPlaying(roomID)) {
+	// 				/*
+	// 				await this.roomQueue.stopSong(roomID);
+	// 				const response: PlaybackEventDto &#x3D; {
+	// 					date_created: new Date(),
+	// 					userID: null,
+	// 					roomID: roomID,
+	// 					songID: null,
+	// 					UTC_time: null,
+	// 				};
+	// 				this.server.to(roomID).emit(SOCKET_EVENTS.STOP_MEDIA, response);
+	// 				*/
+	// 			}
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error as Error);
+	// 		}
+	// 	});
+	// }
+
+	@SubscribeMessage(SOCKET_EVENTS.INIT_SKIP)
+	async handleInitSkipMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_SKIP, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				const payload: PlaybackEventDto &#x3D; await this.validatePlaybackEvent(p);
+				if (!payload.UTC_time || payload.UTC_time &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;No UTC_time provided&quot;);
+				}
+
+				const roomID: string | null &#x3D; this.roomUsers.getRoomId(client.id);
+				if (roomID &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;User is not in a room&quot;);
+				}
+
+				//{check user permissions}
+
+				await this.roomQueue.playNext(roomID, payload.UTC_time);
+				let song: RoomSongDto | null &#x3D; await this.roomQueue.getCurrentSong(
+					roomID,
+				);
+				console.log(&quot;Song to play: &quot; + song);
+				if (song &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;No song is queued&quot;);
+				}
+				let startTime: number | undefined &#x3D; song.startTime;
+				if (startTime &#x3D;&#x3D;&#x3D; undefined) {
+					song &#x3D; await this.roomQueue.play(roomID, payload.UTC_time);
+					if (song &#x3D;&#x3D;&#x3D; null) {
+						throw new Error(&quot;No song is queued&quot;);
+					}
+				}
+				startTime &#x3D; song.startTime;
+				if (startTime &#x3D;&#x3D;&#x3D; undefined) {
+					throw new Error(&quot;No start time for song. Very weird error&quot;);
+				}
+
+				const response: PlaybackEventDto &#x3D; {
+					date_created: new Date(),
+					userID: null,
+					roomID: roomID,
+					spotifyID: song.spotifyID,
+					UTC_time: startTime,
+				};
+				this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+				await this.sendQueueState(roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	// @SubscribeMessage(SOCKET_EVENTS.INIT_PREV)
+	// async handleInitPrevMedia(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.INIT_PREV, async () &#x3D;&gt; {
+	// 		try {
+	// 			console.log(p);
+	// 			const payload: PlaybackEventDto &#x3D; await this.validatePlaybackEvent(p);
+	// 			if (!payload.UTC_time || payload.UTC_time &#x3D;&#x3D;&#x3D; null) {
+	// 				throw new Error(&quot;No UTC_time provided&quot;);
+	// 			}
+
+	// 			const roomID: string | null &#x3D; this.roomUsers.getRoomId(client.id);
+	// 			if (roomID &#x3D;&#x3D;&#x3D; null) {
+	// 				throw new Error(&quot;User is not in a room&quot;);
+	// 			}
+
+	// 			//{check user permissions}
+	// 			await this.roomQueue.playPrev(roomID, payload.UTC_time);
+	// 			let song: RoomSongDto | null &#x3D; await this.roomQueue.getCurrentSong(
+	// 				roomID,
+	// 			);
+	// 			console.log(&quot;Song to play: &quot; + song);
+	// 			if (song &#x3D;&#x3D;&#x3D; null) {
+	// 				throw new Error(&quot;No song is queued&quot;);
+	// 			}
+	// 			let startTime: number | undefined &#x3D; song.startTime;
+	// 			if (startTime &#x3D;&#x3D;&#x3D; undefined) {
+	// 				song &#x3D; await this.roomQueue.play(roomID, payload.UTC_time);
+	// 				if (song &#x3D;&#x3D;&#x3D; null) {
+	// 					throw new Error(&quot;No song is queued&quot;);
+	// 				}
+	// 			}
+	// 			startTime &#x3D; song.startTime;
+	// 			if (startTime &#x3D;&#x3D;&#x3D; undefined) {
+	// 				throw new Error(&quot;No start time for song. Very weird error&quot;);
+	// 			}
+
+	// 			const response: PlaybackEventDto &#x3D; {
+	// 				date_created: new Date(),
+	// 				userID: null,
+	// 				roomID: roomID,
+	// 				spotifyID: song.spotifyID,
+	// 				UTC_time: startTime,
+	// 			};
+	// 			this.server.to(roomID).emit(SOCKET_EVENTS.PLAY_MEDIA, response);
+	// 			await this.sendQueueState(roomID);
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error as Error);
+	// 		}
+	// 	});
+	// }
+
+	// @SubscribeMessage(SOCKET_EVENTS.SEEK_MEDIA)
+	// async handleSeekMedia(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(async () &#x3D;&gt; {
+	// 		try {
+	// 			//this.server.emit();
+	// 			console.log(p);
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error as Error);
+	// 		}
+	// 	});
+	// }
+
+	@SubscribeMessage(SOCKET_EVENTS.CURRENT_MEDIA)
+	async handleCurrentMedia(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.CURRENT_MEDIA, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				const roomID: string | null &#x3D; this.roomUsers.getRoomId(client.id);
+				if (roomID &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;User is not in a room&quot;);
+				}
+
+				//{check user permissions}
+				await this.sendMediaState(roomID);
+				await this.sendQueueState(roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error as Error);
+			}
+		});
+	}
+
+	// @SubscribeMessage(SOCKET_EVENTS.MEDIA_SYNC)
+	// async handleMediaSync(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.MEDIA_SYNC, async () &#x3D;&gt; {
+	// 		try {
+	// 			//this.server.emit();
+	// 			console.log(p);
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error as Error);
+	// 		}
+	// 	});
+	// }
+
+	// @SubscribeMessage(SOCKET_EVENTS.UPVOTE_SONG)
+	// async handleSongUpvote(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.UPVOTE_SONG, async () &#x3D;&gt; {
+	// 		try {
+	// 			console.log(p);
+	// 			const payload: QueueEventDto &#x3D; await this.validateQueueEvent(p, true);
+	// 			if (!payload.createdAt) {
+	// 				throw new Error(&quot;No createdAt provided&quot;);
+	// 			}
+	// 			const somethingChanged: boolean &#x3D; await this.roomQueue.upvoteSong(
+	// 				payload.roomID,
+	// 				payload.songs[0].spotifyID,
+	// 				payload.songs[0].userID,
+	// 				payload.createdAt,
+	// 			);
+	// 			if (somethingChanged) {
+	// 				const song &#x3D; await this.roomQueue.getSongAsRoomSongDto(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 				);
+	// 				if (song) {
+	// 					const response: QueueEventDto &#x3D; {
+	// 						roomID: payload.roomID,
+	// 						songs: [song],
+	// 					};
+	// 					this.server
+	// 						.to(payload.roomID)
+	// 						.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 					console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.VOTE_UPDATED);
+	// 					this.sendQueueState(payload.roomID);
+	// 				}
+	// 			}
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error);
+	// 		}
+	// 	});
+	// }
+
+	// @SubscribeMessage(SOCKET_EVENTS.DOWNVOTE_SONG)
+	// async handleSongDownvote(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(SOCKET_EVENTS.DOWNVOTE_SONG, async () &#x3D;&gt; {
+	// 		try {
+	// 			console.log(p);
+	// 			const payload: QueueEventDto &#x3D; await this.validateQueueEvent(p, true);
+	// 			if (!payload.createdAt) {
+	// 				throw new Error(&quot;No createdAt provided&quot;);
+	// 			}
+	// 			const somethingChanged: boolean &#x3D; await this.roomQueue.downvoteSong(
+	// 				payload.roomID,
+	// 				payload.songs[0].spotifyID,
+	// 				payload.songs[0].userID,
+	// 				payload.createdAt,
+	// 			);
+	// 			if (somethingChanged) {
+	// 				const song &#x3D; await this.roomQueue.getSongAsRoomSongDto(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 				);
+	// 				if (song) {
+	// 					const response: QueueEventDto &#x3D; {
+	// 						roomID: payload.roomID,
+	// 						songs: [song],
+	// 					};
+	// 					this.server
+	// 						.to(payload.roomID)
+	// 						.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 					console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.VOTE_UPDATED);
+	// 					this.sendQueueState(payload.roomID);
+	// 				}
+	// 			}
+	// 		} catch (error) {
+	// 			console.error(error);
+	// 			this.handleThrownError(client, error);
+	// 		}
+	// 	});
+	// }
+
+	// @SubscribeMessage(SOCKET_EVENTS.UNDO_SONG_VOTE)
+	// async handleVoteUndo(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(
+	// 		SOCKET_EVENTS.UNDO_SONG_VOTE,
+	// 		async () &#x3D;&gt; {
+	// 			try {
+	// 				console.log(p);
+	// 				const payload: QueueEventDto &#x3D; await this.validateQueueEvent(p);
+	// 				const somethingChanged: boolean &#x3D; await this.roomQueue.undoSongVote(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 					payload.songs[0].userID,
+	// 				);
+	// 				if (somethingChanged) {
+	// 					const song &#x3D; await this.roomQueue.getSongAsRoomSongDto(
+	// 						payload.roomID,
+	// 						payload.songs[0].spotifyID,
+	// 					);
+	// 					if (song) {
+	// 						const response: QueueEventDto &#x3D; {
+	// 							roomID: payload.roomID,
+	// 							songs: [song],
+	// 						};
+	// 						this.server
+	// 							.to(payload.roomID)
+	// 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 						console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.VOTE_UPDATED);
+	// 						this.sendQueueState(payload.roomID);
+	// 					}
+	// 				}
+	// 			} catch (error) {
+	// 				console.error(error);
+	// 				this.handleThrownError(client, error);
+	// 			}
+	// 		},
+	// 	);
+	// }
+
+	// @SubscribeMessage(SOCKET_EVENTS.SWAP_SONG_VOTE)
+	// async handleVoteSwap(
+	// 	@ConnectedSocket() client: Socket,
+	// 	@MessageBody() p: string,
+	// ): Promise&lt;void&gt; {
+	// 	this.eventQueueService.addToQueue(
+	// 		SOCKET_EVENTS.SWAP_SONG_VOTE,
+	// 		async () &#x3D;&gt; {
+	// 			try {
+	// 				console.log(p);
+	// 				const payload: QueueEventDto &#x3D; await this.validateQueueEvent(p, true);
+	// 				if (!payload.createdAt) {
+	// 					throw new Error(&quot;No createdAt provided&quot;);
+	// 				}
+	// 				const somethingChanged: boolean &#x3D; await this.roomQueue.swapSongVote(
+	// 					payload.roomID,
+	// 					payload.songs[0].spotifyID,
+	// 					payload.songs[0].userID,
+	// 					payload.createdAt,
+	// 				);
+	// 				if (somethingChanged) {
+	// 					const song &#x3D; await this.roomQueue.getSongAsRoomSongDto(
+	// 						payload.roomID,
+	// 						payload.songs[0].spotifyID,
+	// 					);
+	// 					if (song) {
+	// 						const response: QueueEventDto &#x3D; {
+	// 							roomID: payload.roomID,
+	// 							songs: [song],
+	// 						};
+	// 						this.server
+	// 							.to(payload.roomID)
+	// 							.emit(SOCKET_EVENTS.VOTE_UPDATED, response);
+	// 						console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.VOTE_UPDATED);
+	// 						this.sendQueueState(payload.roomID);
+	// 					}
+	// 				}
+	// 			} catch (error) {
+	// 				console.error(error);
+	// 				this.handleThrownError(client, error);
+	// 			}
+	// 		},
+	// 	);
+	// }
+
+	@SubscribeMessage(SOCKET_EVENTS.ENQUEUE_SONG)
+	async handleSongEnqueue(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.ENQUEUE_SONG, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				const payload: QueueEventDto &#x3D; await this.validateQueueEvent(p, true);
+				const userID: string | null &#x3D; this.roomUsers.getUserId(client.id);
+				if (userID &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;User is not in a room&quot;);
+				}
+				const somethingChanged: boolean &#x3D; await this.roomQueue.addSongs(
+					payload.roomID,
+					userID,
+					payload.songs,
+				);
+				if (somethingChanged) {
+					const queueState: {
+						room: RoomDto;
+						songs: RoomSongDto[];
+						votes: VoteDto[];
+					} &#x3D; await this.roomQueue.getQueueState(payload.roomID);
+					const newSongs: RoomSongDto[] &#x3D; queueState.songs.filter((s) &#x3D;&gt;
+						payload.songs.some((p) &#x3D;&gt; p.spotifyID &#x3D;&#x3D;&#x3D; s.spotifyID),
+					);
+					if (newSongs.length &gt; 0) {
+						const response: QueueEventDto &#x3D; {
+							roomID: payload.roomID,
+							songs: newSongs,
+						};
+						this.server
+							.to(payload.roomID)
+							.emit(SOCKET_EVENTS.SONG_ADDED, response);
+						console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.SONG_ADDED);
+					}
+				}
+				this.sendQueueState(payload.roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.DEQUEUE_SONG)
+	async handleSongDequeue(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.DEQUEUE_SONG, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				const payload: QueueEventDto &#x3D; await this.validateQueueEvent(p);
+				const userID: string | null &#x3D; this.roomUsers.getUserId(client.id);
+				if (userID &#x3D;&#x3D;&#x3D; null) {
+					throw new Error(&quot;User is not in a room&quot;);
+				}
+				const somethingChanged: boolean &#x3D; await this.roomQueue.removeSongs(
+					payload.roomID,
+					userID,
+					payload.songs,
+				);
+				if (somethingChanged) {
+					const queueState: {
+						room: RoomDto;
+						songs: RoomSongDto[];
+						votes: VoteDto[];
+					} &#x3D; await this.roomQueue.getQueueState(payload.roomID);
+					const newSongs: RoomSongDto[] &#x3D; queueState.songs.filter((s) &#x3D;&gt;
+						payload.songs.some((p) &#x3D;&gt; p.spotifyID &#x3D;&#x3D;&#x3D; s.spotifyID),
+					);
+					if (newSongs.length &gt; 0) {
+						const response: QueueEventDto &#x3D; {
+							roomID: payload.roomID,
+							songs: newSongs,
+						};
+						this.server
+							.to(payload.roomID)
+							.emit(SOCKET_EVENTS.SONG_REMOVED, response);
+						console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.SONG_REMOVED);
+					}
+				}
+				this.sendQueueState(payload.roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	@SubscribeMessage(SOCKET_EVENTS.REQUEST_QUEUE)
+	async handleRequestQueueState(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() p: string,
+	): Promise&lt;void&gt; {
+		this.eventQueueService.addToQueue(SOCKET_EVENTS.REQUEST_QUEUE, async () &#x3D;&gt; {
+			try {
+				console.log(p);
+				const obj: { roomID: string } &#x3D; JSON.parse(p) as { roomID: string };
+				await this.sendQueueState(obj.roomID);
+			} catch (error) {
+				console.error(error);
+				this.handleThrownError(client, error);
+			}
+		});
+	}
+
+	async sendMediaState(roomID: string): Promise&lt;void&gt; {
+		const song: RoomSongDto | null &#x3D; await this.roomQueue.getCurrentSong(
+			roomID,
+		);
+		if (song) {
+			const startTime: number | undefined &#x3D; await song.startTime;
+			if (!startTime) {
+				throw new Error(&quot;No song start time found somehow?&quot;);
+			}
+			const response: PlaybackEventDto &#x3D; {
+				date_created: new Date(),
+				userID: null,
+				roomID: roomID,
+				spotifyID: song.spotifyID,
+				song: song,
+				UTC_time: startTime,
+			};
+			this.server.to(roomID).emit(SOCKET_EVENTS.CURRENT_MEDIA, response);
+			console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.CURRENT_MEDIA);
+		}
+	}
+
+	async sendQueueState(roomID: string): Promise&lt;void&gt; {
+		const queueState: {
+			room: RoomDto;
+			songs: RoomSongDto[];
+			votes: VoteDto[];
+		} &#x3D; await this.roomQueue.getQueueState(roomID);
+		this.server.to(roomID).emit(SOCKET_EVENTS.QUEUE_STATE, queueState);
+		console.log(&quot;Response emitted: &quot; + SOCKET_EVENTS.QUEUE_STATE);
+	}
+	/* **************************************************************************************** */
+
+	async validateChatEvent(payload: string): Promise&lt;ChatEventDto&gt; {
+		/*
+		if no token, return error
+		if token
+			if token is not valid
+				return error
+		*/
+		let p: ChatEventDto;
+		try {
+			const j &#x3D; JSON.parse(payload);
+			p &#x3D; j as ChatEventDto;
+		} catch (e) {
+			console.error(e);
+			throw new Error(&quot;Invalid JSON received&quot;);
+		}
+		if (!p.userID) {
+			throw new Error(&quot;No userID provided&quot;);
+		}
+
+		const result: ChatEventDto &#x3D; {
+			userID: p.userID,
+		};
+		if (p.date_created) {
+			result.date_created &#x3D; p.date_created;
+		}
+		if (p.body) {
+			result.body &#x3D; p.body;
+		}
+		if (p.errorMessage) {
+			throw new Error(&quot;errorMessage is not a valid field for input events.&quot;);
+		}
+		return result;
+	}
+
+	async validateQueueEvent(
+		payload: string,
+		dateRequired &#x3D; false,
+	): Promise&lt;QueueEventDto&gt; {
+		/*
+		if no token, return error
+		if token
+			if token is not valid
+				return error
+		*/
+		let q: QueueEventDto;
+		try {
+			console.log(&#x60;Payload: &quot;${payload}&quot;&#x60;);
+			const j &#x3D; JSON.parse(payload);
+			q &#x3D; j as QueueEventDto;
+		} catch (e) {
+			console.error(e);
+			throw new Error(&quot;Invalid JSON received&quot;);
+		}
+		if (!q.roomID) {
+			throw new Error(&quot;No &#x27;userID&#x27; provided&quot;);
+		}
+		if (dateRequired &amp;&amp; !q.createdAt) {
+			throw new Error(&quot;No &#x27;createdAt&#x27; provided&quot;);
+		}
+		return q;
+	}
+
+	async validatePlaybackEvent(payload: string): Promise&lt;PlaybackEventDto&gt; {
+		/*
+		if no token, return error
+		if token
+			if token is not valid
+				return error
+		*/
+		let p: PlaybackEventDto;
+		try {
+			console.log(&#x60;Payload: &quot;${payload}&quot;&#x60;);
+			const j &#x3D; JSON.parse(payload);
+			p &#x3D; j as PlaybackEventDto;
+		} catch (e) {
+			console.error(e);
+			throw new Error(&quot;Invalid JSON received&quot;);
+		}
+		return p;
+	}
+
+	async handleThrownError(client: Socket, error: Error): Promise&lt;void&gt; {
+		const errorResponse: ChatEventDto &#x3D; {
+			userID: null,
+			date_created: new Date(),
+			errorMessage: error.message,
+		};
+		client.emit(SOCKET_EVENTS.ERROR, errorResponse);
+		console.log(&quot;Error emitted: &quot; + SOCKET_EVENTS.ERROR);
+	}
+}
+</code></pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'LiveGateway.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

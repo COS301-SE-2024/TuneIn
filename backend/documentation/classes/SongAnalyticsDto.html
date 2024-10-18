@@ -1,0 +1,981 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content class">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >SongAnalyticsDto</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/modules/rooms/dto/roomanalytics.dto.ts</code>
+        </p>
+
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#downvotes" >downvotes</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#global_rank" >global_rank</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#plays" >plays</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#rank" >rank</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                <a href="#song_id" >song_id</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#spotify_id" >spotify_id</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#upvotes" >upvotes</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+
+            <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="downvotes"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>downvotes</b></span>
+                        <a href="#downvotes"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Number of downvotes the song received&#x27;})<br />@IsNumber()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="295" class="link-to-prism">src/modules/rooms/dto/roomanalytics.dto.ts:295</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="global_rank"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>global_rank</b></span>
+                        <a href="#global_rank"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Global rank of the song across all rooms&#x27;})<br />@IsNumber()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="303" class="link-to-prism">src/modules/rooms/dto/roomanalytics.dto.ts:303</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="plays"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>plays</b></span>
+                        <a href="#plays"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Number of times the song was played&#x27;})<br />@IsNumber()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="287" class="link-to-prism">src/modules/rooms/dto/roomanalytics.dto.ts:287</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="rank"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>rank</b></span>
+                        <a href="#rank"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Rank of the song based on some criteria&#x27;})<br />@IsNumber()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="299" class="link-to-prism">src/modules/rooms/dto/roomanalytics.dto.ts:299</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="song_id"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>song_id</b></span>
+                        <a href="#song_id"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Internal song ID&#x27;})<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="283" class="link-to-prism">src/modules/rooms/dto/roomanalytics.dto.ts:283</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="spotify_id"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>spotify_id</b></span>
+                        <a href="#spotify_id"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Spotify ID of the song&#x27;})<br />@IsString()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="280" class="link-to-prism">src/modules/rooms/dto/roomanalytics.dto.ts:280</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="upvotes"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>upvotes</b></span>
+                        <a href="#upvotes"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Number of upvotes the song received&#x27;})<br />@IsNumber()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="291" class="link-to-prism">src/modules/rooms/dto/roomanalytics.dto.ts:291</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+</section>
+
+
+
+
+
+
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { ApiProperty } from &quot;@nestjs/swagger&quot;;
+import {
+	IsArray,
+	IsDate,
+	IsNumber,
+	IsObject,
+	IsString,
+	ValidateNested,
+} from &quot;class-validator&quot;;
+import { UserDto } from &quot;../../users/dto/user.dto&quot;;
+import { Type } from &quot;class-transformer&quot;;
+export class RoomAnalyticsKeyMetricsDto {
+	// an object called unique visitors with two properties, count and percentage_change. both are numbers
+	@ApiProperty({
+		title: &quot;UniqueVisitors&quot;,
+		description: &quot;Unique visitors to the user&#x27;s rooms&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			count: { type: &quot;number&quot; },
+			percentage_change: { type: &quot;number&quot; },
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	unique_visitors: {
+		count: number;
+		percentage_change: number;
+	};
+
+	// an object called returning_visitors with two properties, count and percentage_change. both are numbers
+	@ApiProperty({
+		title: &quot;ReturningVisitors&quot;,
+		description: &quot;Returning visitors to the user&#x27;s rooms&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			count: { type: &quot;number&quot; },
+			percentage_change: { type: &quot;number&quot; },
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	returning_visitors: {
+		count: number;
+		percentage_change: number;
+	};
+
+	// an object called average_session_duration with two properties, duration and percentage_change. both are numbers
+	@ApiProperty({
+		title: &quot;AverageSessionDuration&quot;,
+		description: &quot;Average session duration in the user&#x27;s rooms&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			duration: { type: &quot;number&quot; },
+			percentage_change: { type: &quot;number&quot; },
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	average_session_duration: {
+		duration: number;
+		percentage_change: number;
+	};
+}
+
+export class RoomAnalyticsQueueDto {
+	@ApiProperty({ description: &quot;Total number of songs ever queued in the room&quot; })
+	@IsNumber()
+	total_songs_queued: number;
+
+	@ApiProperty({
+		description: &quot;Number of times the room&#x27;s queue was exported as a playlist&quot;,
+	})
+	@IsNumber()
+	total_queue_exports: number;
+}
+
+export class ParticipantsPerHourDto {
+	@ApiProperty({
+		description: &quot;The number of participants in the room at the given hour&quot;,
+	})
+	@IsNumber()
+	count: number;
+
+	@ApiProperty({
+		description: &quot;The specific hour for participant count&quot;,
+		type: Date,
+	})
+	@IsDate()
+	instance: Date;
+}
+
+export class AllTimeSessionDataDto {
+	@ApiProperty({
+		description: &quot;The average session duration of the room&quot;,
+	})
+	@IsNumber()
+	avg_duration: number;
+
+	@ApiProperty({
+		description: &quot;The minimum session duration of the room&quot;,
+	})
+	@IsNumber()
+	min_duration: number;
+
+	@ApiProperty({
+		description: &quot;The maximum session duration of the room&quot;,
+	})
+	@IsNumber()
+	max_duration: number;
+}
+
+export class SessionDurationPerDayDto {
+	@ApiProperty({ type: &quot;number&quot; })
+	duration: number;
+
+	@ApiProperty({ type: Date })
+	day: Date;
+}
+
+export class SessionDataPerDayDto {
+	@ApiProperty({ type: SessionDurationPerDayDto, isArray: true })
+	@Type(() &#x3D;&gt; SessionDurationPerDayDto)
+	avg_duration: SessionDurationPerDayDto[];
+
+	@ApiProperty({ type: SessionDurationPerDayDto, isArray: true })
+	@Type(() &#x3D;&gt; SessionDurationPerDayDto)
+	min_duration: SessionDurationPerDayDto[];
+
+	@ApiProperty({ type: SessionDurationPerDayDto, isArray: true })
+	@Type(() &#x3D;&gt; SessionDurationPerDayDto)
+	max_duration: SessionDurationPerDayDto[];
+}
+
+export class JoinsCount {
+	@ApiProperty({ type: &quot;number&quot; })
+	count: number;
+
+	@ApiProperty({ type: Date })
+	day: Date;
+}
+
+export class JoinsPerDay {
+	total_joins: JoinsCount[];
+	unique_joins: JoinsCount[];
+}
+
+export class RoomAnalyticsParticipationDto {
+	@ApiProperty({
+		title: &quot;Joins&quot;,
+		description:
+			&quot;Join statistics, including total and unique joins per day and all-time&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			per_day: {
+				title: &quot;JoinsPerDay&quot;,
+				type: &quot;object&quot;,
+			},
+			all_time: {
+				title: &quot;JoinsAllTime&quot;,
+				type: &quot;object&quot;,
+				properties: {
+					total_joins: { type: &quot;number&quot; },
+					unique_joins: { type: &quot;number&quot; },
+				},
+			},
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	joins: {
+		per_day: JoinsPerDay;
+		all_time: {
+			total_joins: number;
+			unique_joins: number;
+		};
+	};
+
+	@ApiProperty({
+		description: &quot;Participants per hour data&quot;,
+		type: ParticipantsPerHourDto,
+		isArray: true,
+	})
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() &#x3D;&gt; ParticipantsPerHourDto)
+	participants_per_hour: ParticipantsPerHourDto[];
+
+	@ApiProperty({
+		title: &quot;SessionData&quot;,
+		description:
+			&quot;Session data including average, minimum, and maximum duration all-time and per day&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			all_time: {
+				type: &quot;object&quot;,
+				title: &quot;AllTimeSessionDataDto&quot;,
+			},
+			per_day: {
+				type: &quot;array&quot;,
+				items: {
+					type: &quot;object&quot;,
+					title: &quot;SessionDurationPerDayDto&quot;,
+				},
+			},
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	session_data: {
+		all_time: AllTimeSessionDataDto;
+		per_day: SessionDurationPerDayDto[];
+	};
+
+	@ApiProperty({
+		title: &quot;ReturnVisits&quot;,
+		description: &quot;Expected return visits and probability of return&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			expected_return_count: { type: &quot;number&quot; },
+			probability_of_return: { type: &quot;number&quot; },
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	return_visits: {
+		expected_return_count: number;
+		probability_of_return: number;
+	};
+
+	@ApiProperty({
+		description: &quot;Number of previews of the room, i.e. without joining&quot;,
+	})
+	@IsNumber()
+	room_previews: number;
+}
+
+export class MessagesPerHour {
+	@ApiProperty({ type: &quot;number&quot; })
+	count: number;
+
+	@ApiProperty({ type: Date })
+	hour: Date;
+}
+
+export class RoomAnalyticsInteractionsDto {
+	@ApiProperty({
+		title: &quot;Messages&quot;,
+		description: &quot;Total messages sent and messages sent per hour&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			total: { type: &quot;number&quot; },
+			per_hour: {
+				type: &quot;array&quot;,
+				items: {
+					title: &quot;MessagesPerHour&quot;,
+					type: &quot;object&quot;,
+				},
+			},
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	messages: {
+		total: number;
+		per_hour: MessagesPerHour[];
+	};
+
+	@ApiProperty({ description: &quot;Total number of reactions sent in the room&quot; })
+	@IsNumber()
+	reactions_sent: number;
+
+	@ApiProperty({ description: &quot;Number of times the room was bookmarked&quot; })
+	@IsNumber()
+	bookmarked_count: number;
+}
+
+export class SongAnalyticsDto {
+	@ApiProperty({ description: &quot;Spotify ID of the song&quot; })
+	@IsString()
+	spotify_id: string;
+
+	@ApiProperty({ description: &quot;Internal song ID&quot; })
+	song_id: string;
+
+	@ApiProperty({ description: &quot;Number of times the song was played&quot; })
+	@IsNumber()
+	plays: number;
+
+	@ApiProperty({ description: &quot;Number of upvotes the song received&quot; })
+	@IsNumber()
+	upvotes: number;
+
+	@ApiProperty({ description: &quot;Number of downvotes the song received&quot; })
+	@IsNumber()
+	downvotes: number;
+
+	@ApiProperty({ description: &quot;Rank of the song based on some criteria&quot; })
+	@IsNumber()
+	rank: number;
+
+	@ApiProperty({ description: &quot;Global rank of the song across all rooms&quot; })
+	@IsNumber()
+	global_rank: number;
+}
+
+export class RoomAnalyticsVotesDto {
+	@ApiProperty({ description: &quot;Total number of upvotes for songs in the room&quot; })
+	@IsNumber()
+	total_upvotes: number;
+
+	@ApiProperty({
+		description: &quot;Total number of downvotes for songs in the room&quot;,
+	})
+	@IsNumber()
+	total_downvotes: number;
+
+	@ApiProperty({
+		description:
+			&quot;Daily percentage change in upvotes for songs in the room. (last 24 hours)&quot;,
+	})
+	@IsNumber()
+	daily_percentage_change_in_upvotes: number;
+
+	@ApiProperty({
+		description:
+			&quot;Daily percentage change in downvotes for songs in the room. (last 24 hours)&quot;,
+	})
+	@IsNumber()
+	daily_percentage_change_in_downvotes: number;
+
+	@ApiProperty({
+		description:
+			&quot;Details of songs including Spotify ID, song ID, upvotes, and downvotes&quot;,
+		type: SongAnalyticsDto,
+		isArray: true,
+	})
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() &#x3D;&gt; SongAnalyticsDto)
+	songs: SongAnalyticsDto[];
+}
+
+export class RoomAnalyticsSongsDto {
+	@ApiProperty({
+		title: &quot;MostPlayed&quot;,
+		description: &quot;Most played songs in the room&quot;,
+		type: SongAnalyticsDto,
+		isArray: true,
+	})
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() &#x3D;&gt; SongAnalyticsDto)
+	most_played: SongAnalyticsDto[];
+
+	@ApiProperty({
+		description: &quot;Top voted songs in the room&quot;,
+		type: SongAnalyticsDto,
+		isArray: true,
+	})
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() &#x3D;&gt; SongAnalyticsDto)
+	top_voted: SongAnalyticsDto[];
+}
+
+export class RoomAnalyticsContributorsDto {
+	@ApiProperty({
+		title: &quot;TopContributors&quot;,
+		description: &quot;Top contributors to the room&#x27;s queue&quot;,
+		type: &quot;object&quot;,
+		properties: {
+			user: { title: &quot;UserDto&quot;, type: &quot;object&quot; },
+			rank: { type: &quot;number&quot; },
+			num_songs: { type: &quot;number&quot; },
+			num_upvotes: { type: &quot;number&quot; },
+		},
+	})
+	@IsObject()
+	@ValidateNested()
+	top_contributors: {
+		user: UserDto;
+		rank: number;
+		num_songs: number;
+		num_upvotes: number;
+	};
+}
+
+export class RoomAnalyticsDto {
+	@ApiProperty({ description: &quot;Queue analytics&quot;, type: RoomAnalyticsQueueDto })
+	@IsObject()
+	@ValidateNested()
+	@Type(() &#x3D;&gt; RoomAnalyticsQueueDto)
+	queue: RoomAnalyticsQueueDto;
+
+	@ApiProperty({
+		description: &quot;Participation analytics&quot;,
+		type: RoomAnalyticsParticipationDto,
+	})
+	@IsObject()
+	@ValidateNested()
+	@Type(() &#x3D;&gt; RoomAnalyticsParticipationDto)
+	participation: RoomAnalyticsParticipationDto;
+
+	@ApiProperty({
+		description: &quot;Interactions analytics&quot;,
+		type: RoomAnalyticsInteractionsDto,
+	})
+	@IsObject()
+	@ValidateNested()
+	@Type(() &#x3D;&gt; RoomAnalyticsInteractionsDto)
+	interactions: RoomAnalyticsInteractionsDto;
+
+	@ApiProperty({ description: &quot;Votes analytics&quot;, type: RoomAnalyticsVotesDto })
+	@IsObject()
+	@ValidateNested()
+	@Type(() &#x3D;&gt; RoomAnalyticsVotesDto)
+	votes: RoomAnalyticsVotesDto;
+
+	@ApiProperty({ description: &quot;Songs analytics&quot;, type: RoomAnalyticsSongsDto })
+	@IsObject()
+	@ValidateNested()
+	@Type(() &#x3D;&gt; RoomAnalyticsSongsDto)
+	songs: RoomAnalyticsSongsDto;
+
+	@ApiProperty({
+		description: &quot;Contributors analytics&quot;,
+		type: RoomAnalyticsContributorsDto,
+	})
+	@IsObject()
+	@ValidateNested()
+	@Type(() &#x3D;&gt; RoomAnalyticsContributorsDto)
+	contributors: RoomAnalyticsContributorsDto;
+}
+</code></pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'SongAnalyticsDto.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

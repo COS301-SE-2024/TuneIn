@@ -1,0 +1,775 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content class">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >SpotifyCallbackResponse</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/auth/spotify/spotifyauth.service.ts</code>
+        </p>
+
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#spotifyTokens" >spotifyTokens</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#token" >token</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+
+            <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="spotifyTokens"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>spotifyTokens</b></span>
+                        <a href="#spotifyTokens"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="../classes/SpotifyTokenPair.html" target="_self" >SpotifyTokenPair</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty()<br />@IsObject()<br />@Type(undefined)<br />@ValidateNested()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="78" class="link-to-prism">src/auth/spotify/spotifyauth.service.ts:78</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="token"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>token</b></span>
+                        <a href="#token"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty()<br />@IsString()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="72" class="link-to-prism">src/auth/spotify/spotifyauth.service.ts:72</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+</section>
+
+
+
+
+
+
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { HttpException, Injectable } from &quot;@nestjs/common&quot;;
+import * as Spotify from &quot;@spotify/web-api-ts-sdk&quot;;
+import { ConfigService } from &quot;@nestjs/config&quot;;
+import { HttpService } from &quot;@nestjs/axios&quot;;
+import { firstValueFrom } from &quot;rxjs&quot;;
+import { Prisma } from &quot;@prisma/client&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import { PrismaService } from &quot;../../../prisma/prisma.service&quot;;
+import { JWTPayload } from &quot;../auth.service&quot;;
+import * as jwt from &quot;jsonwebtoken&quot;;
+import { IsNumber, IsObject, IsString, ValidateNested } from &quot;class-validator&quot;;
+import { ApiProperty } from &quot;@nestjs/swagger&quot;;
+import { AxiosError } from &quot;axios&quot;;
+import { Type } from &quot;class-transformer&quot;;
+import { TasksService } from &quot;../../tasks/tasks.service&quot;;
+
+export class SpotifyTokenResponse {
+	@ApiProperty()
+	@IsString()
+	access_token: string;
+
+	@ApiProperty()
+	@IsString()
+	token_type: string;
+
+	@ApiProperty()
+	@IsString()
+	scope: string;
+
+	@ApiProperty()
+	@IsNumber()
+	expires_in: number;
+
+	@ApiProperty()
+	@IsString()
+	refresh_token: string;
+}
+
+export class SpotifyTokenRefreshResponse {
+	@ApiProperty()
+	@IsString()
+	access_token: string;
+
+	@ApiProperty()
+	@IsString()
+	token_type: string;
+
+	@ApiProperty()
+	@IsString()
+	scope: string;
+
+	@ApiProperty()
+	@IsNumber()
+	expires_in: number;
+}
+
+export class SpotifyTokenPair {
+	@ApiProperty()
+	@IsObject()
+	@ValidateNested()
+	@Type(() &#x3D;&gt; SpotifyTokenResponse)
+	tokens: SpotifyTokenResponse;
+
+	@ApiProperty()
+	@IsNumber()
+	epoch_expiry: number;
+}
+
+export class SpotifyCallbackResponse {
+	@ApiProperty()
+	@IsString()
+	token: string;
+
+	@ApiProperty()
+	@IsObject()
+	@Type(() &#x3D;&gt; SpotifyTokenPair)
+	@ValidateNested()
+	spotifyTokens: SpotifyTokenPair;
+}
+
+@Injectable()
+export class SpotifyAuthService {
+	private clientId: string;
+	private clientSecret: string;
+	// private redirectUri: string;
+	private authHeader: string;
+	// private selfAuthorisedAPI: Spotify.SpotifyApi;
+
+	constructor(
+		private readonly configService: ConfigService,
+		private readonly httpService: HttpService,
+		private readonly prisma: PrismaService,
+		// private readonly dbUtils: DbUtilsService,
+		private readonly tasksService: TasksService,
+	) {
+		const clientId &#x3D; this.configService.get&lt;string&gt;(&quot;SPOTIFY_CLIENT_ID&quot;);
+		if (!clientId) {
+			throw new Error(&quot;Missing SPOTIFY_CLIENT_ID&quot;);
+		}
+		this.clientId &#x3D; clientId;
+
+		const clientSecret &#x3D; this.configService.get&lt;string&gt;(
+			&quot;SPOTIFY_CLIENT_SECRET&quot;,
+		);
+		if (!clientSecret) {
+			throw new Error(&quot;Missing SPOTIFY_CLIENT_SECRET&quot;);
+		}
+		this.clientSecret &#x3D; clientSecret;
+
+		// const redirectUri &#x3D; this.configService.get&lt;string&gt;(&quot;SPOTIFY_REDIRECT_URI&quot;);
+		// if (!redirectUri) {
+		// 	throw new Error(&quot;Missing SPOTIFY_REDIRECT_URI&quot;);
+		// }
+		// this.redirectUri &#x3D; redirectUri;
+
+		this.authHeader &#x3D; Buffer.from(
+			&#x60;${this.clientId}:${this.clientSecret}&#x60;,
+		).toString(&quot;base64&quot;);
+
+		// this.selfAuthorisedAPI &#x3D; Spotify.SpotifyApi.withClientCredentials(
+		// 	this.clientId,
+		// 	this.clientSecret,
+		// );
+	}
+
+	//how state is constructed in frontend
+	/*
+	const makeStateVariable &#x3D; (redirectURI: string) &#x3D;&gt; {
+		const state &#x3D; {
+			&quot;unique-pre-padding&quot;: generateRandom(10),
+			&quot;expo-redirect&quot;: redirectURI,
+			&quot;ip-address&quot;: utils.API_BASE_NO_PORT,
+			&quot;redirect-used&quot;: SPOTIFY_REDIRECT_URI,
+			&quot;unique-post-padding&quot;: generateRandom(10),
+		};
+		const bytes &#x3D; new TextEncoder().encode(JSON.stringify(state));
+		const b64 &#x3D; utils.bytesToBase64(bytes);
+		return b64;
+	};
+	*/
+	getStateObject(state: string): {
+		&quot;expo-redirect&quot;: string;
+		&quot;ip-address&quot;: string;
+		&quot;redirect-used&quot;: string;
+	} {
+		const decodedState &#x3D; Buffer.from(state, &quot;base64&quot;).toString(&quot;utf-8&quot;);
+		const obj &#x3D; JSON.parse(decodedState);
+		if (!obj[&quot;expo-redirect&quot;]) {
+			throw new Error(
+				&quot;Invalid state parameter. Does not contain expo-redirect&quot;,
+			);
+		}
+		if (!obj[&quot;ip-address&quot;]) {
+			throw new Error(&quot;Invalid state parameter. Does not contain ip-address&quot;);
+		}
+		if (!obj[&quot;redirect-used&quot;]) {
+			throw new Error(
+				&quot;Invalid state parameter. Does not contain redirect-used&quot;,
+			);
+		}
+		return obj;
+	}
+
+	async exchangeCodeForToken(
+		code: string,
+		state: string,
+	): Promise&lt;SpotifyTokenResponse&gt; {
+		try {
+			//Step 0: Get the redirect URI
+			const stateObj &#x3D; this.getStateObject(state);
+			const redirectURI &#x3D; stateObj[&quot;expo-redirect&quot;];
+
+			// Step 1: Create the request options object
+			const requestOptions &#x3D; {
+				url: &quot;https://accounts.spotify.com/api/token&quot;,
+				body: {
+					grant_type: &quot;authorization_code&quot;,
+					code: code,
+					redirect_uri: decodeURIComponent(redirectURI),
+				},
+				headers: {
+					&quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;,
+					Authorization: &#x60;Basic ${this.authHeader}&#x60;,
+				},
+			};
+
+			// Step 2: Log or inspect the request options
+			console.log(&quot;Request options:&quot;, requestOptions);
+
+			// Step 3: Send the request
+			const response &#x3D; await firstValueFrom(
+				this.httpService.post(
+					requestOptions.url,
+					new URLSearchParams(requestOptions.body).toString(), // Convert the body to URL-encoded string
+					{ headers: requestOptions.headers },
+				),
+			);
+
+			console.log(response);
+
+			if (!response || !response.data) {
+				throw new Error(&quot;Failed to exchange code for token&quot;);
+			}
+
+			return response.data as SpotifyTokenResponse;
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err.response?.data);
+			}
+			throw new Error(&quot;Failed to exchange code for token&quot;);
+		}
+	}
+
+	async refreshAccessToken(
+		tk: SpotifyTokenResponse,
+	): Promise&lt;SpotifyTokenResponse&gt; {
+		try {
+			const response &#x3D; await firstValueFrom(
+				this.httpService.post(
+					&quot;https://accounts.spotify.com/api/token&quot;,
+					{
+						grant_type: &quot;refresh_token&quot;,
+						refresh_token: tk.refresh_token,
+					},
+					{
+						headers: {
+							&quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;,
+							Authorization: &#x60;Basic ${this.authHeader}&#x60;,
+						},
+					},
+				),
+			);
+
+			if (!response || !response.data) {
+				throw new Error(&quot;Failed to refresh token&quot;);
+			}
+
+			const refreshToken: SpotifyTokenRefreshResponse &#x3D;
+				response.data as SpotifyTokenRefreshResponse;
+			const result: SpotifyTokenResponse &#x3D; {
+				access_token: refreshToken.access_token,
+				token_type: refreshToken.token_type,
+				scope: refreshToken.scope,
+				expires_in: refreshToken.expires_in,
+				refresh_token: tk.refresh_token,
+			};
+			return result;
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err.response?.data);
+			}
+			throw new Error(&quot;Failed to refresh token&quot;);
+		}
+	}
+
+	async generateJWT(user: PrismaTypes.users): Promise&lt;string&gt; {
+		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
+		const expiresIn &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_EXPIRATION_TIME&quot;);
+
+		if (!secretKey || secretKey &#x3D;&#x3D;&#x3D; undefined || secretKey &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT secret key&quot;);
+		}
+
+		if (!expiresIn || expiresIn &#x3D;&#x3D;&#x3D; undefined || expiresIn &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT expiration time&quot;);
+		}
+
+		if (!user || user &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(&quot;Cannot generate JWT for null user&quot;);
+		}
+
+		if (!user.email || user.email &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(&quot;Cannot generate JWT for user without email&quot;);
+		}
+
+		const payload: JWTPayload &#x3D; {
+			username: user.username,
+			id: user.user_id,
+			email: user.email,
+		};
+
+		const token &#x3D; jwt.sign(payload, secretKey, { expiresIn });
+		return token;
+	}
+
+	async getSelf(token: SpotifyTokenResponse): Promise&lt;Spotify.UserProfile&gt; {
+		let attempts &#x3D; 0;
+		let error: Error | undefined;
+		for (let i &#x3D; 0; i &lt; 3; i++) {
+			try {
+				const api &#x3D; Spotify.SpotifyApi.withAccessToken(this.clientId, token);
+				const user &#x3D; await api.currentUser.profile();
+				return user;
+			} catch (e) {
+				error &#x3D; e as Error;
+				attempts++;
+				console.error(e);
+				await new Promise((resolve) &#x3D;&gt; setTimeout(resolve, 5000 * attempts));
+			}
+		}
+		if (error) {
+			throw error;
+		}
+		throw new Error(&quot;Failed to get user profile&quot;);
+	}
+
+	async createUser(tk: SpotifyTokenPair): Promise&lt;PrismaTypes.users&gt; {
+		if (tk.epoch_expiry &lt; Date.now()) {
+			tk.tokens &#x3D; await this.refreshAccessToken(tk.tokens);
+		}
+
+		const spotifyUser: Spotify.UserProfile &#x3D; await this.getSelf(tk.tokens);
+		const users: PrismaTypes.users[] &#x3D; await this.prisma.users.findMany();
+
+		let existingUser: PrismaTypes.users | undefined &#x3D; users.find(
+			(user) &#x3D;&gt; user.email &#x3D;&#x3D;&#x3D; spotifyUser.email,
+		);
+		if (!existingUser) {
+			//try to find by username
+			existingUser &#x3D; users.find((user) &#x3D;&gt; user.username &#x3D;&#x3D;&#x3D; spotifyUser.id);
+		}
+		if (existingUser) {
+			return existingUser;
+		}
+
+		const user: Prisma.usersCreateInput &#x3D; {
+			username: spotifyUser.id,
+			full_name: spotifyUser.display_name,
+			external_links: {
+				spotify: [spotifyUser.external_urls.spotify],
+			},
+			email: spotifyUser.email,
+		};
+
+		if (spotifyUser.images &amp;&amp; spotifyUser.images.length &gt; 0) {
+			//find largest profile picture
+			let largest &#x3D; -1;
+			for (let i &#x3D; 0; i &lt; spotifyUser.images.length; i++) {
+				const img &#x3D; spotifyUser.images[i];
+				if (
+					img !&#x3D;&#x3D; undefined &amp;&amp;
+					img.height !&#x3D;&#x3D; undefined &amp;&amp;
+					img.height &gt; largest
+				) {
+					largest &#x3D; i;
+				}
+			}
+			let imageURL &#x3D; &quot;&quot;;
+			if (
+				largest &gt;&#x3D; 0 &amp;&amp;
+				spotifyUser.images[largest] !&#x3D;&#x3D; undefined &amp;&amp;
+				spotifyUser.images[largest] !&#x3D;&#x3D; undefined
+			) {
+				imageURL &#x3D; spotifyUser.images[largest]?.url || &quot;&quot;;
+			}
+
+			console.log(&quot;spotifyUser image : &quot; + spotifyUser.images);
+			console.log(&quot;\nimage size: &quot; + largest);
+
+			user.profile_picture &#x3D;
+				imageURL !&#x3D;&#x3D; &quot;&quot;
+					? imageURL
+					: &quot;https://example.com/default-profile-picture.png&quot;;
+		}
+
+		try {
+			const response &#x3D; await this.prisma.users.create({ data: user });
+			console.log(response);
+			await this.tasksService.addImportLibraryTask(tk, response.user_id);
+			return response;
+		} catch (err) {
+			console.log(err);
+			throw new Error(&quot;Failed to create user&quot;);
+		}
+	}
+
+	async saveUserSpotifyTokens(tk: SpotifyTokenPair, userID: string) {
+		const user &#x3D; await this.prisma.users.findFirst({
+			where: { user_id: userID },
+			include: { authentication: true },
+		});
+
+		if (!user) {
+			throw new Error(&quot;User not found&quot;);
+		}
+
+		try {
+			if (user.authentication !&#x3D;&#x3D; null) {
+				await this.prisma.authentication.update({
+					where: { user_id: user.user_id },
+					data: {
+						token: JSON.stringify(tk),
+					},
+				});
+			} else {
+				await this.prisma.authentication.create({
+					data: {
+						token: JSON.stringify(tk),
+						user_id: user.user_id,
+					},
+				});
+			}
+		} catch (err) {
+			console.log(err);
+			throw new Error(&quot;Failed to save tokens&quot;);
+		}
+	}
+
+	async getSpotifyTokens(userID: string): Promise&lt;SpotifyTokenPair&gt; {
+		const tokens &#x3D; await this.prisma.authentication.findFirst({
+			where: { user_id: userID },
+		});
+
+		if (!tokens) {
+			throw new HttpException(&quot;User&#x27;s Spotify tokens not found&quot;, 404);
+		}
+
+		const tk: SpotifyTokenPair &#x3D; JSON.parse(tokens.token) as SpotifyTokenPair;
+		if (tk.epoch_expiry &lt; Date.now()) {
+			//Token expired
+			const newToken &#x3D; await this.refreshAccessToken(tk.tokens);
+			const newPair: SpotifyTokenPair &#x3D; {
+				tokens: newToken,
+				epoch_expiry: Date.now() + newToken.expires_in * 1000,
+			};
+			await this.saveUserSpotifyTokens(newPair, userID);
+			return newPair;
+		}
+		return tk;
+	}
+}
+</code></pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'SpotifyCallbackResponse.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

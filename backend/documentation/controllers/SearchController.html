@@ -1,0 +1,2555 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content controller">
+                   <div class="content-data">
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Controllers</li>
+  <li class="breadcrumb-item" >SearchController</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/modules/search/search.controller.ts</code>
+        </p>
+
+            <p class="comment">
+                <h3>Prefix</h3>
+            </p>
+            <p class="comment">
+                <code>search</code>
+            </p>
+
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#advancedSearchRooms" >advancedSearchRooms</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#advancedSearchUsers" >advancedSearchUsers</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#clearRoomsHistory" >clearRoomsHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#clearSearchHistory" >clearSearchHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#clearUsersHistory" >clearUsersHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#combinedSearch" >combinedSearch</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchHistory" >searchHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchRooms" >searchRooms</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchRoomsHistory" >searchRoomsHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchRoomsSuggestion" >searchRoomsSuggestion</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchUsers" >searchUsers</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchUsersHistory" >searchUsersHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchUsersSuggestion" >searchUsersSuggestion</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="advancedSearchRooms"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>advancedSearchRooms</b></span>
+                        <a href="#advancedSearchRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>advancedSearchRooms(req: Request, q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, creator_username?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, creator_name?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, participant_count?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, description?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, is_temp?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>, is_priv?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>, is_scheduled?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>, start_date?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, end_date?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, lang?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, explicit?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>, nsfw?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>, tags?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms/advanced&#x27;)<br />@ApiOperation({summary: &#x27;Advanced search for rooms&#x27;, description: &#x27;Advanced search for rooms by various parameters.&#x27;, operationId: &#x27;advancedSearchRooms&#x27;})<br />@ApiOkResponse({description: &#x27;Search results as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br />@ApiQuery({name: &#x27;q&#x27;, required: true, description: &#x27;A room name&#x27;, type: String, example: &#x27;Chill Room&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;creator_username&#x27;, required: false, description: &#x27;A room creator&#x27;s username&#x27;, type: String, example: &#x27;johndoe123&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;creator_name&#x27;, required: false, description: &#x27;A room creator&#x27;s profile name&#x27;, type: String, example: &#x27;John Doe&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;participant_count&#x27;, required: false, description: &#x27;Minimum number of participants&#x27;, type: &#x27;number&#x27;, example: 5, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;description&#x27;, required: false, description: &#x27;A string to find in the room description&#x27;, type: String, example: &#x27;chill&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;is_temp&#x27;, required: false, description: &#x27;Is the room temporary?&#x27;, type: &#x27;boolean&#x27;})<br />@ApiQuery({name: &#x27;is_priv&#x27;, required: false, description: &#x27;Is the room private?&#x27;, type: &#x27;boolean&#x27;})<br />@ApiQuery({name: &#x27;is_scheduled&#x27;, required: false, description: &#x27;Is the room scheduled?&#x27;, type: &#x27;boolean&#x27;})<br />@ApiQuery({name: &#x27;start_date&#x27;, required: false, description: &#x27;Only if scheduled, the start date&#x27;, type: String})<br />@ApiQuery({name: &#x27;end_date&#x27;, required: false, description: &#x27;Only if scheduled, the end date&#x27;, type: String})<br />@ApiQuery({name: &#x27;lang&#x27;, required: false, description: &#x27;The room language (as a ISO 639-1 code)&#x27;, type: String})<br />@ApiQuery({name: &#x27;explicit&#x27;, required: false, description: &#x27;Is the room explicit?&#x27;, type: &#x27;boolean&#x27;})<br />@ApiQuery({name: &#x27;nsfw&#x27;, required: false, description: &#x27;Is the room NSFW?&#x27;, type: &#x27;boolean&#x27;})<br />@ApiQuery({name: &#x27;tags&#x27;, required: false, description: &#x27;A comma separated list of tags to compare&#x27;, type: String})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="349"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:349</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>creator_username</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>creator_name</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>participant_count</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>description</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>is_temp</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>is_priv</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>is_scheduled</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>start_date</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>end_date</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>lang</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>explicit</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>nsfw</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>tags</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="advancedSearchUsers"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>advancedSearchUsers</b></span>
+                        <a href="#advancedSearchUsers"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>advancedSearchUsers(req: Request, q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, creator_username?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, creator_name?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, following?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, followers?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;users/advanced&#x27;)<br />@ApiOperation({summary: &#x27;Advanced search for users&#x27;, description: &#x27;Advanced search for users by various parameters.&#x27;, operationId: &#x27;advancedSearchUsers&#x27;})<br />@ApiOkResponse({description: &#x27;Search results as an array of UserDto.&#x27;, type: UserDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br />@ApiQuery({name: &#x27;q&#x27;, required: true, description: &#x27;A username or profile name&#x27;, type: String, examples: undefined, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;creator_username&#x27;, required: false, description: &#x27;A user&#x27;s username&#x27;, type: String, example: &#x27;johndoe123&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;creator_name&#x27;, required: false, description: &#x27;A user&#x27;s profile name&#x27;, type: String, example: &#x27;John Doe&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;following&#x27;, required: false, description: &#x27;Minimum number of following&#x27;, type: &#x27;number&#x27;, example: 10, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;followers&#x27;, required: false, description: &#x27;Minimum number of followers&#x27;, type: &#x27;number&#x27;, example: 10, allowEmptyValue: false})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="623"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:623</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>creator_username</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>creator_name</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>following</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>followers</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >Promise&lt;UserDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="clearRoomsHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>clearRoomsHistory</b></span>
+                        <a href="#clearRoomsHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>clearRoomsHistory(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Delete(&#x27;rooms/history&#x27;)<br />@ApiOperation({summary: &#x27;Clear room search history&#x27;, description: &#x27;Clear room search history for the user.&#x27;, operationId: &#x27;clearRoomsHistory&#x27;})<br />@ApiOkResponse({description: &#x27;Room search history cleared&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="506"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:506</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="clearSearchHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>clearSearchHistory</b></span>
+                        <a href="#clearSearchHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>clearSearchHistory(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Delete(&#x27;history&#x27;)<br />@ApiOperation({summary: &#x27;Clear search history&#x27;, description: &#x27;Clear search history for the user.&#x27;, operationId: &#x27;clearSearchHistory&#x27;})<br />@ApiOkResponse({description: &#x27;Search history cleared&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="234"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:234</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="clearUsersHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>clearUsersHistory</b></span>
+                        <a href="#clearUsersHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>clearUsersHistory(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Delete(&#x27;users/history&#x27;)<br />@ApiOperation({summary: &#x27;Clear user search history&#x27;, description: &#x27;Clear user search history for the user.&#x27;, operationId: &#x27;clearUsersHistory&#x27;})<br />@ApiOkResponse({description: &#x27;User search history cleared&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="735"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:735</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="combinedSearch"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>combinedSearch</b></span>
+                        <a href="#combinedSearch"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>combinedSearch(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: Request, creator?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get()<br />@ApiOperation({summary: &#x27;Search for rooms and users&#x27;, description: &#x27;Search for rooms and users by room name, creator name or username.&#x27;, operationId: &#x27;search&#x27;})<br />@ApiOkResponse({description: &#x27;Search results as an array of mixed UserDto and RoomDto.&#x27;, type: CombinedSearchResults})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br />@ApiQuery({name: &#x27;q&#x27;, required: true, description: &#x27;A room name / username&#x27;, type: String, example: undefined, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;creator&#x27;, required: false, description: &#x27;A room creator&#x27;s profile name or username&#x27;, type: String, examples: undefined})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="81"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:81</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>creator</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/CombinedSearchResults.html" target="_self" >Promise&lt;CombinedSearchResults&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>searchHistory</b></span>
+                        <a href="#searchHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchHistory(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;history&#x27;)<br />@ApiOperation({summary: &#x27;Get search history (including objects discovered from search)&#x27;, operationId: &#x27;searchHistory&#x27;})<br />@ApiOkResponse({description: &#x27;Search history as an array of strings or RoomDto, or UserDto.&#x27;, type: CombinedSearchHistory, isArray: true})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="209"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:209</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/CombinedSearchHistory.html" target="_self" >Promise&lt;CombinedSearchHistory[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchRooms"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>searchRooms</b></span>
+                        <a href="#searchRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchRooms(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: Request, creator?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms&#x27;)<br />@ApiOperation({summary: &#x27;Search for rooms&#x27;, description: &#x27;Search for rooms by room name or creator name / username.&#x27;, operationId: &#x27;searchRooms&#x27;})<br />@ApiOkResponse({description: &#x27;Search results as an array of RoomDto.&#x27;, type: RoomDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br />@ApiQuery({name: &#x27;q&#x27;, required: true, description: &#x27;A room name&#x27;, type: String, example: &#x27;Chill Room&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;creator&#x27;, required: false, description: &#x27;A room creator&#x27;s profile name / username&#x27;, type: String, examples: undefined, allowEmptyValue: false})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="148"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:148</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>creator</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchRoomsHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>searchRoomsHistory</b></span>
+                        <a href="#searchRoomsHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchRoomsHistory(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;rooms/history&#x27;)<br />@ApiOperation({summary: &#x27;Get recently searched rooms&#x27;, description: &#x27;Get recently searched rooms by the user.&#x27;, operationId: &#x27;searchRoomsHistory&#x27;})<br />@ApiOkResponse({description: &#x27;Recently searched rooms as an array of SearchHistoryDto.&#x27;, type: SearchHistoryDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="453"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:453</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchRoomsSuggestion"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>searchRoomsSuggestion</b></span>
+                        <a href="#searchRoomsSuggestion"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchRoomsSuggestion(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;rooms/suggestions&#x27;)<br />@ApiOperation({summary: &#x27;Get recommended room search terms.&#x27;, description: &#x27;Get recommended room search terms.&#x27;, operationId: &#x27;searchRoomsSuggestion&#x27;})<br />@ApiOkResponse({description: &#x27;room search suggestions as an array of SearchHistoryDto.&#x27;, type: SearchHistoryDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br />@ApiQuery({name: &#x27;q&#x27;, required: true, description: &#x27;A room name&#x27;, type: String, example: &#x27;Chill Room&#x27;, allowEmptyValue: false})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="482"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:482</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchUsers"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>searchUsers</b></span>
+                        <a href="#searchUsers"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchUsers(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;users&#x27;)<br />@ApiOperation({summary: &#x27;Search for users&#x27;, description: &#x27;Search for users by username or profile name.&#x27;, operationId: &#x27;searchUsers&#x27;})<br />@ApiOkResponse({description: &#x27;Search results as an array of UserDto.&#x27;, type: UserDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br />@ApiQuery({name: &#x27;q&#x27;, required: true, description: &#x27;A username or profile name&#x27;, type: String, examples: undefined, allowEmptyValue: false})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="543"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:543</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >Promise&lt;UserDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchUsersHistory"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>searchUsersHistory</b></span>
+                        <a href="#searchUsersHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchUsersHistory(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;users/history&#x27;)<br />@ApiOperation({summary: &#x27;Get recently searched users&#x27;, description: &#x27;Get recently searched users by the user.&#x27;, operationId: &#x27;searchUsersHistory&#x27;})<br />@ApiOkResponse({description: &#x27;Recently searched users as an array of SearchHistoryDto.&#x27;, type: SearchHistoryDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="682"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:682</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchUsersSuggestion"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>searchUsersSuggestion</b></span>
+                        <a href="#searchUsersSuggestion"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchUsersSuggestion(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;users/suggestions&#x27;)<br />@ApiOperation({summary: &#x27;Get recommended user search terms.&#x27;, description: &#x27;Get recommended user search terms.&#x27;, operationId: &#x27;searchUsersSuggestion&#x27;})<br />@ApiOkResponse({description: &#x27;user search suggestions as an array of SearchHistoryDto.&#x27;, type: SearchHistoryDto, isArray: true})<br />@ApiBadRequestResponse({description: &#x27;Invalid query parameters&#x27;})<br />@ApiQuery({name: &#x27;q&#x27;, required: true, description: &#x27;A user name&#x27;, type: String, example: &#x27;John&#x27;, allowEmptyValue: false})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="711"
+                                    class="link-to-prism">src/modules/search/search.controller.ts:711</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+	Controller,
+	Delete,
+	Get,
+	Query,
+	Request,
+	UseGuards,
+} from &quot;@nestjs/common&quot;;
+import {
+	SearchService,
+	CombinedSearchResults,
+	CombinedSearchHistory,
+} from &quot;./search.service&quot;;
+import {
+	ApiBadRequestResponse,
+	ApiBearerAuth,
+	ApiOkResponse,
+	ApiOperation,
+	ApiQuery,
+	ApiSecurity,
+	ApiTags,
+} from &quot;@nestjs/swagger&quot;;
+import { UserDto } from &quot;../users/dto/user.dto&quot;;
+import { RoomDto } from &quot;../rooms/dto/room.dto&quot;;
+import { SearchHistoryDto } from &quot;./dto/searchhistorydto&quot;;
+import { JwtAuthGuard } from &quot;./../../auth/jwt-auth.guard&quot;;
+import { AuthService, JWTPayload } from &quot;./../../auth/auth.service&quot;;
+
+@Controller(&quot;search&quot;)
+@ApiTags(&quot;search&quot;)
+export class SearchController {
+	constructor(
+		private readonly searchService: SearchService,
+		private readonly auth: AuthService,
+	) {}
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	@Get()
+	@ApiOperation({
+		summary: &quot;Search for rooms and users&quot;,
+		description:
+			&quot;Search for rooms and users by room name, creator name or username.&quot;,
+		operationId: &quot;search&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Search results as an array of mixed UserDto and RoomDto.&quot;,
+		type: CombinedSearchResults,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A room name / username&quot;,
+		type: String,
+		example: {
+			room_name: {
+				value: &quot;Chill Room&quot;,
+			},
+			username: {
+				value: &quot;johndoe123&quot;,
+			},
+		},
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;creator&quot;,
+		required: false,
+		description: &quot;A room creator&#x27;s profile name or username&quot;,
+		type: String,
+		examples: {
+			profile_name: {
+				value: &quot;John Doe&quot;,
+			},
+			username: {
+				value: &quot;johndoe123&quot;,
+			},
+		},
+	})
+	async combinedSearch(
+		@Query(&quot;q&quot;) q: string,
+		@Request() req: Request,
+		@Query(&quot;creator&quot;) creator?: string,
+	): Promise&lt;CombinedSearchResults&gt; {
+		const query_params: {
+			q: string;
+			creator?: string;
+		} &#x3D; {
+			q,
+		};
+		if (creator) {
+			query_params.creator &#x3D; creator;
+		}
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		const result &#x3D; await this.searchService.combinedSearch(
+			query_params,
+			userInfo.id,
+		);
+		this.searchService.insertSearchHistory(
+			&quot;/search&quot;,
+			query_params,
+			userInfo.id,
+		);
+
+		return result;
+	}
+
+	/* ************************************************** */
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	@Get(&quot;rooms&quot;)
+	@ApiOperation({
+		summary: &quot;Search for rooms&quot;,
+		description: &quot;Search for rooms by room name or creator name / username.&quot;,
+		operationId: &quot;searchRooms&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Search results as an array of RoomDto.&quot;,
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A room name&quot;,
+		type: String,
+		example: &quot;Chill Room&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;creator&quot;,
+		required: false,
+		description: &quot;A room creator&#x27;s profile name / username&quot;,
+		type: String,
+		examples: {
+			profile_name: {
+				value: &quot;John Doe&quot;,
+			},
+			username: {
+				value: &quot;johndoe123&quot;,
+			},
+		},
+		allowEmptyValue: false,
+	})
+	async searchRooms(
+		@Query(&quot;q&quot;) q: string,
+		@Request() req: Request,
+		@Query(&quot;creator&quot;) creator?: string,
+	): Promise&lt;RoomDto[]&gt; {
+		const query_params: {
+			q: string;
+			creator?: string;
+		} &#x3D; {
+			q,
+		};
+		if (creator) {
+			query_params.creator &#x3D; creator;
+		}
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		const result &#x3D; await this.searchService.searchRooms(
+			query_params,
+			userInfo.id,
+		);
+
+		console.log(&quot;Result room search: &quot; + JSON.stringify(result));
+
+		if (JSON.stringify(result) &#x3D;&#x3D;&#x3D; &quot;[]&quot;) {
+			this.searchService.insertSearchHistory(
+				&quot;/search/rooms&quot;,
+				query_params,
+				userInfo.id,
+			);
+		} else {
+			this.searchService.insertSearchHistory(
+				&quot;/search/rooms&quot;,
+				query_params,
+				userInfo.id,
+			);
+		}
+
+		return result;
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Get(&quot;history&quot;)
+	@ApiOperation({
+		summary: &quot;Get search history (including objects discovered from search)&quot;,
+		operationId: &quot;searchHistory&quot;,
+	})
+	@ApiOkResponse({
+		description:
+			&quot;Search history as an array of strings or RoomDto, or UserDto.&quot;,
+		type: CombinedSearchHistory,
+		isArray: true,
+	})
+	async searchHistory(
+		@Request() req: Request,
+	): Promise&lt;CombinedSearchHistory[]&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.searchService.searchHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Delete(&quot;history&quot;)
+	@ApiOperation({
+		summary: &quot;Clear search history&quot;,
+		description: &quot;Clear search history for the user.&quot;,
+		operationId: &quot;clearSearchHistory&quot;,
+	})
+	@ApiOkResponse({ description: &quot;Search history cleared&quot; })
+	async clearSearchHistory(@Request() req: Request): Promise&lt;void&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		await this.searchService.clearSearchHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	@Get(&quot;rooms/advanced&quot;)
+	@ApiOperation({
+		summary: &quot;Advanced search for rooms&quot;,
+		description: &quot;Advanced search for rooms by various parameters.&quot;,
+		operationId: &quot;advancedSearchRooms&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Search results as an array of RoomDto.&quot;,
+		type: RoomDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A room name&quot;,
+		type: String,
+		example: &quot;Chill Room&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;creator_username&quot;,
+		required: false,
+		description: &quot;A room creator&#x27;s username&quot;,
+		type: String,
+		example: &quot;johndoe123&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;creator_name&quot;,
+		required: false,
+		description: &quot;A room creator&#x27;s profile name&quot;,
+		type: String,
+		example: &quot;John Doe&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;participant_count&quot;,
+		required: false,
+		description: &quot;Minimum number of participants&quot;,
+		type: &quot;number&quot;,
+		example: 5,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;description&quot;,
+		required: false,
+		description: &quot;A string to find in the room description&quot;,
+		type: String,
+		example: &quot;chill&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;is_temp&quot;,
+		required: false,
+		description: &quot;Is the room temporary?&quot;,
+		type: &quot;boolean&quot;,
+	})
+	@ApiQuery({
+		name: &quot;is_priv&quot;,
+		required: false,
+		description: &quot;Is the room private?&quot;,
+		type: &quot;boolean&quot;,
+	})
+	@ApiQuery({
+		name: &quot;is_scheduled&quot;,
+		required: false,
+		description: &quot;Is the room scheduled?&quot;,
+		type: &quot;boolean&quot;,
+	})
+	@ApiQuery({
+		name: &quot;start_date&quot;,
+		required: false,
+		description: &quot;Only if scheduled, the start date&quot;,
+		type: String,
+	})
+	@ApiQuery({
+		name: &quot;end_date&quot;,
+		required: false,
+		description: &quot;Only if scheduled, the end date&quot;,
+		type: String,
+	})
+	@ApiQuery({
+		name: &quot;lang&quot;,
+		required: false,
+		description: &quot;The room language (as a ISO 639-1 code)&quot;,
+		type: String,
+	})
+	@ApiQuery({
+		name: &quot;explicit&quot;,
+		required: false,
+		description: &quot;Is the room explicit?&quot;,
+		type: &quot;boolean&quot;,
+	})
+	@ApiQuery({
+		name: &quot;nsfw&quot;,
+		required: false,
+		description: &quot;Is the room NSFW?&quot;,
+		type: &quot;boolean&quot;,
+	})
+	@ApiQuery({
+		name: &quot;tags&quot;,
+		required: false,
+		description: &quot;A comma separated list of tags to compare&quot;,
+		type: String,
+	})
+	async advancedSearchRooms(
+		@Request() req: Request,
+		@Query(&quot;q&quot;) q: string,
+		@Query(&quot;creator_username&quot;) creator_username?: string,
+		@Query(&quot;creator_name&quot;) creator_name?: string,
+		@Query(&quot;participant_count&quot;) participant_count?: number,
+		@Query(&quot;description&quot;) description?: string,
+		@Query(&quot;is_temp&quot;) is_temp?: boolean,
+		@Query(&quot;is_priv&quot;) is_priv?: boolean,
+		@Query(&quot;is_scheduled&quot;) is_scheduled?: boolean,
+		@Query(&quot;start_date&quot;) start_date?: string,
+		@Query(&quot;end_date&quot;) end_date?: string,
+		@Query(&quot;lang&quot;) lang?: string,
+		@Query(&quot;explicit&quot;) explicit?: boolean,
+		@Query(&quot;nsfw&quot;) nsfw?: boolean,
+		@Query(&quot;tags&quot;) tags?: string,
+	): Promise&lt;RoomDto[]&gt; {
+		const query_params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			participant_count?: number;
+			description?: string;
+			is_temp?: boolean;
+			is_priv?: boolean;
+			is_scheduled?: boolean;
+			start_date?: string;
+			end_date?: string;
+			lang?: string;
+			explicit?: boolean;
+			nsfw?: boolean;
+			tags?: string;
+		} &#x3D; {
+			q,
+		};
+		if (creator_username) {
+			query_params.creator_name &#x3D; creator_username;
+		}
+		if (creator_name) {
+			query_params.creator_name &#x3D; creator_name;
+		}
+		if (participant_count) {
+			query_params.participant_count &#x3D; participant_count;
+		}
+		if (description) {
+			query_params.description &#x3D; description;
+		}
+		if (is_temp) {
+			query_params.is_temp &#x3D; is_temp;
+		}
+		if (is_priv) {
+			query_params.is_priv &#x3D; is_priv;
+		}
+		if (is_scheduled) {
+			query_params.is_scheduled &#x3D; is_scheduled;
+		}
+		if (start_date) {
+			query_params.start_date &#x3D; start_date;
+		}
+		if (end_date) {
+			query_params.end_date &#x3D; end_date;
+		}
+		if (lang) {
+			query_params.lang &#x3D; lang;
+		}
+		if (explicit) {
+			query_params.explicit &#x3D; explicit;
+		}
+		if (nsfw) {
+			query_params.nsfw &#x3D; nsfw;
+		}
+		if (tags) {
+			query_params.tags &#x3D; tags;
+		}
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.searchService.advancedSearchRooms(
+			query_params,
+			userInfo.id,
+		);
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Get(&quot;rooms/history&quot;)
+	@ApiOperation({
+		summary: &quot;Get recently searched rooms&quot;,
+		description: &quot;Get recently searched rooms by the user.&quot;,
+		operationId: &quot;searchRoomsHistory&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Recently searched rooms as an array of SearchHistoryDto.&quot;,
+		type: SearchHistoryDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	async searchRoomsHistory(
+		@Request() req: Request,
+	): Promise&lt;SearchHistoryDto[]&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.searchService.searchRoomsHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+
+	@Get(&quot;rooms/suggestions&quot;)
+	@ApiOperation({
+		summary: &quot;Get recommended room search terms.&quot;,
+		description: &quot;Get recommended room search terms.&quot;,
+		operationId: &quot;searchRoomsSuggestion&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;room search suggestions as an array of SearchHistoryDto.&quot;,
+		type: SearchHistoryDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A room name&quot;,
+		type: String,
+		example: &quot;Chill Room&quot;,
+		allowEmptyValue: false,
+	})
+	async searchRoomsSuggestion(
+		@Query(&quot;q&quot;) q: string,
+	): Promise&lt;SearchHistoryDto[]&gt; {
+		return await this.searchService.searchRoomsSuggestions(q);
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Delete(&quot;rooms/history&quot;)
+	@ApiOperation({
+		summary: &quot;Clear room search history&quot;,
+		description: &quot;Clear room search history for the user.&quot;,
+		operationId: &quot;clearRoomsHistory&quot;,
+	})
+	@ApiOkResponse({ description: &quot;Room search history cleared&quot; })
+	async clearRoomsHistory(@Request() req: Request): Promise&lt;void&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		await this.searchService.clearRoomsHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	@Get(&quot;users&quot;)
+	@ApiOperation({
+		summary: &quot;Search for users&quot;,
+		description: &quot;Search for users by username or profile name.&quot;,
+		operationId: &quot;searchUsers&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Search results as an array of UserDto.&quot;,
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A username or profile name&quot;,
+		type: String,
+		examples: {
+			username: {
+				value: &quot;johndoe123&quot;,
+			},
+			profile_name: {
+				value: &quot;John Doe&quot;,
+			},
+		},
+		allowEmptyValue: false,
+	})
+	async searchUsers(
+		@Query(&quot;q&quot;) q: string,
+		@Request() req: Request,
+	): Promise&lt;UserDto[]&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		const result &#x3D; await this.searchService.searchUsers(q, userInfo.id);
+		console.log(&quot;User search result: &quot; + JSON.stringify(result));
+		this.searchService.insertSearchHistory(
+			&quot;/search/users&quot;,
+			{ q: q },
+			userInfo.id,
+		);
+
+		return result;
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	@Get(&quot;users/advanced&quot;)
+	@ApiOperation({
+		summary: &quot;Advanced search for users&quot;,
+		description: &quot;Advanced search for users by various parameters.&quot;,
+		operationId: &quot;advancedSearchUsers&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Search results as an array of UserDto.&quot;,
+		type: UserDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A username or profile name&quot;,
+		type: String,
+		examples: {
+			username: {
+				value: &quot;johndoe123&quot;,
+			},
+			profile_name: {
+				value: &quot;John Doe&quot;,
+			},
+		},
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;creator_username&quot;,
+		required: false,
+		description: &quot;A user&#x27;s username&quot;,
+		type: String,
+		example: &quot;johndoe123&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;creator_name&quot;,
+		required: false,
+		description: &quot;A user&#x27;s profile name&quot;,
+		type: String,
+		example: &quot;John Doe&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;following&quot;,
+		required: false,
+		description: &quot;Minimum number of following&quot;,
+		type: &quot;number&quot;,
+		example: 10,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;followers&quot;,
+		required: false,
+		description: &quot;Minimum number of followers&quot;,
+		type: &quot;number&quot;,
+		example: 10,
+		allowEmptyValue: false,
+	})
+	async advancedSearchUsers(
+		@Request() req: Request,
+		@Query(&quot;q&quot;) q: string,
+		@Query(&quot;creator_username&quot;) creator_username?: string,
+		@Query(&quot;creator_name&quot;) creator_name?: string,
+		@Query(&quot;following&quot;) following?: number,
+		@Query(&quot;followers&quot;) followers?: number,
+	): Promise&lt;UserDto[]&gt; {
+		const query_params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			following?: number;
+			followers?: number;
+		} &#x3D; {
+			q,
+		};
+		if (creator_username) {
+			query_params.creator_name &#x3D; creator_username;
+		}
+		if (creator_name) {
+			query_params.creator_name &#x3D; creator_name;
+		}
+		if (following) {
+			query_params.following &#x3D; following;
+		}
+		if (followers) {
+			query_params.followers &#x3D; followers;
+		}
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.searchService.advancedSearchUsers(
+			query_params,
+			userInfo.id,
+		);
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Get(&quot;users/history&quot;)
+	@ApiOperation({
+		summary: &quot;Get recently searched users&quot;,
+		description: &quot;Get recently searched users by the user.&quot;,
+		operationId: &quot;searchUsersHistory&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Recently searched users as an array of SearchHistoryDto.&quot;,
+		type: SearchHistoryDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	async searchUsersHistory(
+		@Request() req: Request,
+	): Promise&lt;SearchHistoryDto[]&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.searchService.searchUsersHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+
+	@Get(&quot;users/suggestions&quot;)
+	@ApiOperation({
+		summary: &quot;Get recommended user search terms.&quot;,
+		description: &quot;Get recommended user search terms.&quot;,
+		operationId: &quot;searchUsersSuggestion&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;user search suggestions as an array of SearchHistoryDto.&quot;,
+		type: SearchHistoryDto,
+		isArray: true,
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A user name&quot;,
+		type: String,
+		example: &quot;John&quot;,
+		allowEmptyValue: false,
+	})
+	async searchUsersSuggestion(
+		@Query(&quot;q&quot;) q: string,
+	): Promise&lt;SearchHistoryDto[]&gt; {
+		return await this.searchService.searchUsersSuggestions(q);
+	}
+
+	/* ************************************************** */
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Delete(&quot;users/history&quot;)
+	@ApiOperation({
+		summary: &quot;Clear user search history&quot;,
+		description: &quot;Clear user search history for the user.&quot;,
+		operationId: &quot;clearUsersHistory&quot;,
+	})
+	@ApiOkResponse({ description: &quot;User search history cleared&quot; })
+	async clearUsersHistory(@Request() req: Request): Promise&lt;void&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		await this.searchService.clearUsersHistory(userInfo.id);
+	}
+
+	/* ************************************************** */
+	/*
+	@Get(&quot;genres&quot;)
+	@ApiOperation({ summary: &quot;Search for genres&quot; })
+	@ApiOkResponse({
+		description: &quot;Search results as an array of strings.&quot;,
+		type: [String],
+	})
+	@ApiBadRequestResponse({ description: &quot;Invalid query parameters&quot; })
+	@ApiQuery({
+		name: &quot;q&quot;,
+		required: true,
+		description: &quot;A genre name&quot;,
+		type: String,
+	})
+	async searchGenres(@Query(&quot;q&quot;) q: string): Promise&lt;string[]&gt; {
+		return await this.searchService.searchGenres(q);
+	}
+		*/
+}
+</code></pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'controller';
+            var COMPODOC_CURRENT_PAGE_URL = 'SearchController.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

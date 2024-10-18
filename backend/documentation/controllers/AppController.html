@@ -140,6 +140,19 @@
                                     <span class="modifier"></span>
                                 <a href="#getHello" >getHello</a>
                             </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#uploadFile" >uploadFile</a>
+                            </li>
                         </ul>
                     </td>
                 </tr>
@@ -182,14 +195,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@ApiOperation({summary: &#x27;Hello World!&#x27;})<br />@ApiOkResponse({description: &#x27;Hello World!&#x27;, type: String})<br /></code>
+                    <code>@Get()<br />@ApiOperation({summary: &#x27;Hello World!&#x27;, operationId: &#x27;getHello&#x27;})<br />@ApiOkResponse({description: &#x27;Hello World!&#x27;, type: String})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="15"
-                                    class="link-to-prism">src/app.controller.ts:15</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="38"
+                                    class="link-to-prism">src/app.controller.ts:38</a></div>
                         </td>
                     </tr>
 
@@ -205,26 +218,211 @@
             </tr>
         </tbody>
     </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="uploadFile"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>uploadFile</b></span>
+                        <a href="#uploadFile"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>uploadFile(file: Express.Multer.File)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Post(&#x27;upload&#x27;)<br />@ApiOperation({summary: &#x27;Upload a file to our AWS S3 storage bucket&#x27;, description: &#x27;This operation uploads a file to AWS S3 (the TuneIn bucket) and returns the URL of the uploaded file.&#x27;, operationId: &#x27;uploadFile&#x27;, externalDocs: undefined})<br />@ApiConsumes(&#x27;multipart/form-data&#x27;)<br />@ApiBody({description: &#x27;A file to upload to our AWS S3 storage bucket&#x27;, schema: undefined})<br />@ApiOkResponse({description: &#x27;The URL of the uploaded file&#x27;, type: String})<br />@UseInterceptors(undefined)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="107"
+                                    class="link-to-prism">src/app.controller.ts:107</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>file</td>
+                                            <td>
+                                                        <code>Express.Multer.File</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </section>    </div>
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Controller, Get } from &quot;@nestjs/common&quot;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+	Controller,
+	Get,
+	HttpException,
+	HttpStatus,
+	Post,
+	UploadedFile,
+	UseGuards,
+	UseInterceptors,
+} from &quot;@nestjs/common&quot;;
 import { AppService } from &quot;./app.service&quot;;
-import { ApiOkResponse, ApiOperation } from &quot;@nestjs/swagger&quot;;
+import {
+	ApiBearerAuth,
+	ApiBody,
+	ApiConsumes,
+	ApiOkResponse,
+	ApiOperation,
+	ApiSecurity,
+} from &quot;@nestjs/swagger&quot;;
+import { FileInterceptor } from &quot;@nestjs/platform-express&quot;;
+import { S3Service } from &quot;./s3/s3.service&quot;;
+import { memoryStorage } from &quot;multer&quot;;
+import { JwtAuthGuard } from &quot;./auth/jwt-auth.guard&quot;;
 
 @Controller()
 export class AppController {
-	constructor(private readonly appService: AppService) {}
+	constructor(
+		private readonly appService: AppService,
+		private readonly s3Service: S3Service,
+	) {}
 
 	@Get()
-	@ApiOperation({ summary: &quot;Hello World!&quot; })
+	@ApiOperation({ summary: &quot;Hello World!&quot;, operationId: &quot;getHello&quot; })
 	@ApiOkResponse({
 		description: &quot;Hello World!&quot;,
 		type: String,
 	})
 	getHello(): string {
 		return this.appService.getHello();
+	}
+
+	/*
+	curl -v -X POST http://localhost:3000/upload -F &quot;file&#x3D;@/Users/lesedikekana/Downloads/f.jpg&quot;
+	*/
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Post(&quot;upload&quot;)
+	@ApiOperation({
+		summary: &quot;Upload a file to our AWS S3 storage bucket&quot;,
+		description:
+			&quot;This operation uploads a file to AWS S3 (the TuneIn bucket) and returns the URL of the uploaded file.&quot;,
+		operationId: &quot;uploadFile&quot;,
+		externalDocs: {
+			description: &quot;More about file uploads via HTTP POST requests&quot;,
+			url: &quot;https://www.postman.com/postman/postman-answers/collection/t38ia1u/upload-a-file-via-post-request&quot;,
+		},
+	})
+	@ApiConsumes(&quot;multipart/form-data&quot;)
+	@ApiBody({
+		description: &quot;A file to upload to our AWS S3 storage bucket&quot;,
+		schema: {
+			type: &quot;object&quot;,
+			properties: {
+				file: {
+					type: &quot;string&quot;,
+					format: &quot;binary&quot;,
+				},
+			},
+		},
+	})
+	@ApiOkResponse({
+		description: &quot;The URL of the uploaded file&quot;,
+		type: String,
+	})
+	/*
+	@ApiBadRequestResponse({
+		description: &quot;Bad request. The file is not a .png or .jpg file.&quot;,
+	})
+	@ApiPayloadTooLargeResponse({
+		description: &quot;The file is too large. It must be less than 5MB.&quot;,
+	})
+	*/
+	@UseInterceptors(
+		FileInterceptor(&quot;file&quot;, {
+			storage: memoryStorage(),
+			/*
+			limits: { fileSize: 5 * 1024 * 1024 },
+			fileFilter: (req, file, callback) &#x3D;&gt; {
+				if (!file.originalname.match(/\.(jpg|png)$/)) {
+					return callback(
+						new Error(&quot;Only .png and .jpg files are allowed!&quot;),
+						false,
+					);
+				}
+				callback(null, true);
+			},
+			*/
+		}),
+	)
+	async uploadFile(@UploadedFile() file: Express.Multer.File) {
+		console.log(&quot;File uploaded&quot;);
+		console.log(file);
+		if (!file) {
+			throw new HttpException(&quot;No file uploaded&quot;, HttpStatus.BAD_REQUEST);
+		}
+		const result &#x3D; await this.s3Service.uploadFile(file);
+		return {
+			url: result.Location,
+		};
 	}
 }
 </code></pre>

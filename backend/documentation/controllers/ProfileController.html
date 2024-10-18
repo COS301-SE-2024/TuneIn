@@ -112,7 +112,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/modules/profile/profile.controller.ts</code>
+            <code>archive/modules/profile/profile.controller.ts</code>
         </p>
 
             <p class="comment">
@@ -155,9 +155,16 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#getProfile" >getProfile</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -165,6 +172,9 @@
                                 <a href="#getProfileByUsername" >getProfileByUsername</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -178,17 +188,20 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#unfollowUser" >unfollowUser</a>
+                                <a href="#putProfile" >putProfile</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#updateProfile" >updateProfile</a>
+                                <a href="#unfollowUser" >unfollowUser</a>
                             </li>
                         </ul>
                     </td>
@@ -244,8 +257,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="123"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:123</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="125"
+                                    class="link-to-prism">archive/modules/profile/profile.controller.ts:125</a></div>
                         </td>
                     </tr>
 
@@ -311,6 +324,10 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>getProfile</b></span>
                         <a href="#getProfile"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -327,14 +344,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@UseGuards(JwtAuthGuard)<br />@ApiTags(&#x27;profile&#x27;)<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Get()<br />@ApiTags(&#x27;profile&#x27;)<br />@ApiOperation({summary: &#x27;Get current user&#x27;s profile info&#x27;})<br />@ApiOkResponse({description: &#x27;Successfully returned user profile info.&#x27;, type: UserProfileDto})<br />@ApiTags(&#x27;profile&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="57"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:57</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="44"
+                                    class="link-to-prism">archive/modules/profile/profile.controller.ts:44</a></div>
                         </td>
                     </tr>
 
@@ -370,7 +387,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >UserProfileDto</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -389,6 +406,9 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getProfileByUsername</b></span>
                         <a href="#getProfileByUsername"><span class="icon ion-ios-link"></span></a>
@@ -398,7 +418,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getProfileByUsername(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, username: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getProfileByUsername(username: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -406,14 +426,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@UseGuards(JwtAuthGuard)<br />@Get(&#x27;:username&#x27;)<br />@ApiTags(&#x27;profile&#x27;)<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Get(&#x27;:username&#x27;)<br />@ApiTags(&#x27;profile&#x27;)<br />@ApiOperation({summary: &#x27;Get user profile info by username&#x27;})<br />@ApiParam({name: &#x27;username&#x27;, description: &#x27;The username of the user to fetch profile info for.&#x27;})<br />@ApiOkResponse({description: &#x27;Returns the user profile.&#x27;, type: UserProfileDto})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="102"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:102</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="105"
+                                    class="link-to-prism">archive/modules/profile/profile.controller.ts:105</a></div>
                         </td>
                     </tr>
 
@@ -433,18 +453,6 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
                                         <tr>
                                                 <td>username</td>
                                             <td>
@@ -480,6 +488,9 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>patchProfile</b></span>
                         <a href="#patchProfile"><span class="icon ion-ios-link"></span></a>
@@ -497,14 +508,108 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@UseGuards(JwtAuthGuard)<br />@Patch()<br />@ApiTags(&#x27;profile&#x27;)<br /></code>
+                    <code>@UseGuards(JwtAuthGuard)<br />@Patch()<br />@ApiTags(&#x27;profile&#x27;)<br />@ApiOperation({summary: &#x27;Update user&#x27;s profile info&#x27;})<br />@ApiOkResponse({description: &#x27;Returns the updated user profile info.&#x27;, type: UserProfileDto})<br />@ApiBadRequestResponse({description: &#x27;Bad request. The request body may be malformed.&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="86"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:86</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="82"
+                                    class="link-to-prism">archive/modules/profile/profile.controller.ts:82</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>updateProfileDto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateUserProfileDto.html" target="_self" >UpdateUserProfileDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="putProfile"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>putProfile</b></span>
+                        <a href="#putProfile"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>putProfile(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, updateProfileDto: <a href="../classes/UpdateUserProfileDto.html" target="_self">UpdateUserProfileDto</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@UseGuards(JwtAuthGuard)<br />@Put()<br />@ApiTags(&#x27;profile&#x27;)<br />@ApiOperation({summary: &#x27;Update user&#x27;s profile info&#x27;})<br />@ApiOkResponse({description: &#x27;Returns the updated user profile info.&#x27;, type: UserProfileDto})<br />@ApiBadRequestResponse({description: &#x27;Bad request. The request body may be malformed.&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="60"
+                                    class="link-to-prism">archive/modules/profile/profile.controller.ts:60</a></div>
                         </td>
                     </tr>
 
@@ -599,8 +704,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="145"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:145</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="147"
+                                    class="link-to-prism">archive/modules/profile/profile.controller.ts:147</a></div>
                         </td>
                     </tr>
 
@@ -658,97 +763,6 @@
             </tr>
         </tbody>
     </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="updateProfile"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>updateProfile</b></span>
-                        <a href="#updateProfile"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateProfile(req: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, updateProfileDto: <a href="../classes/UpdateUserProfileDto.html" target="_self">UpdateUserProfileDto</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@UseGuards(JwtAuthGuard)<br />@Put()<br />@ApiTags(&#x27;profile&#x27;)<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="70"
-                                    class="link-to-prism">src/modules/profile/profile.controller.ts:70</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>req</td>
-                                            <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>updateProfileDto</td>
-                                            <td>
-                                                            <code><a href="../classes/UpdateUserProfileDto.html" target="_self" >UpdateUserProfileDto</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto&gt;</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
 </section>    </div>
 
 
@@ -764,11 +778,20 @@
 	UseGuards,
 	Request,
 } from &quot;@nestjs/common&quot;;
-import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from &quot;@nestjs/swagger&quot;;
+import {
+	ApiBadRequestResponse,
+	ApiBearerAuth,
+	ApiOkResponse,
+	ApiOperation,
+	ApiParam,
+	ApiTags,
+} from &quot;@nestjs/swagger&quot;;
 import { UserProfileDto } from &quot;./dto/userprofile.dto&quot;;
 import { ProfileService } from &quot;./profile.service&quot;;
 import { UpdateUserProfileDto } from &quot;./dto/updateuserprofile.dto&quot;;
-import { JwtAuthGuard } from &quot;./../../auth/jwt-auth.guard&quot;;
+// import { JwtAuthGuard } from &quot;./../../auth/jwt-auth.guard&quot;;
+// import { AuthService, JWTPayload } from &quot;../../auth/auth.service&quot;;
+import { JwtAuthGuard } from &quot;src/auth/jwt-auth.guard&quot;;
 import { AuthService, JWTPayload } from &quot;src/auth/auth.service&quot;;
 
 @Controller(&quot;profile&quot;)
@@ -778,87 +801,80 @@ export class ProfileController {
 		private readonly auth: AuthService,
 	) {}
 
-	//NOTE TO DEV:
-	/*
-    add decorators to each of these paths like:
-    @Post()
-    @ApiOperation({ summary: &#x27;Create user&#x27; })
-    @ApiBody({ type: CreateUserDto })
-    @ApiResponse({ status: 201, description: &#x27;The record has been successfully created.&#x27;, type: User })
-    @ApiResponse({ status: 403, description: &#x27;Forbidden.&#x27; })
-    createUser(@Body() createUserDto: CreateUserDto) {
-      //...
-    }
-
-    @Get(&#x27;:id&#x27;)
-    @ApiOperation({ summary: &#x27;Retrieve user&#x27; })
-    @ApiParam({ name: &#x27;id&#x27;, required: true })
-    @ApiResponse({ status: 200, description: &#x27;The found record&#x27;, type: User })
-    getUser(@Param(&#x27;id&#x27;) id: string) {
-      //...
-    }
-
-    such that the API documentation is more detailed and informative for the next dev.
-  */
-
-	/*
-    GET /profile
-    gets profile info
-    no input
-    response: return ProfileDto
-    */
 	@UseGuards(JwtAuthGuard)
+	@Get()
 	@ApiTags(&quot;profile&quot;)
-	getProfile(@Request() req: any): UserProfileDto {
-		return this.profileService.getProfile();
+	@ApiOperation({ summary: &quot;Get current user&#x27;s profile info&quot; })
+	@ApiOkResponse({
+		description: &quot;Successfully returned user profile info.&quot;,
+		type: UserProfileDto,
+	})
+	@ApiTags(&quot;profile&quot;)
+	getProfile(@Request() req: any): Promise&lt;UserProfileDto&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return this.profileService.getProfile(userInfo.id);
 	}
 
-	/*
-    PUT /profile
-    edits profile info
-    input: ProfileDto
-    output: updated ProfileDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Put()
 	@ApiTags(&quot;profile&quot;)
-	async updateProfile(
+	@ApiOperation({ summary: &quot;Update user&#x27;s profile info&quot; })
+	@ApiOkResponse({
+		description: &quot;Returns the updated user profile info.&quot;,
+		type: UserProfileDto,
+	})
+	@ApiBadRequestResponse({
+		description: &quot;Bad request. The request body may be malformed.&quot;,
+	})
+	async putProfile(
 		@Request() req: any,
 		@Body() updateProfileDto: UpdateUserProfileDto,
 	): Promise&lt;UserProfileDto&gt; {
-		return await this.profileService.updateProfile();
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.profileService.updateProfile(
+			userInfo.id,
+			updateProfileDto,
+		);
 	}
 
-	/*
-    PATCH /profile
-    edits profile info
-    input: ProfileDto
-    output: updated ProfileDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Patch()
 	@ApiTags(&quot;profile&quot;)
+	@ApiOperation({ summary: &quot;Update user&#x27;s profile info&quot; })
+	@ApiOkResponse({
+		description: &quot;Returns the updated user profile info.&quot;,
+		type: UserProfileDto,
+	})
+	@ApiBadRequestResponse({
+		description: &quot;Bad request. The request body may be malformed.&quot;,
+	})
 	async patchProfile(
 		@Request() req: any,
 		@Body() updateProfileDto: UpdateUserProfileDto,
 	): Promise&lt;UserProfileDto&gt; {
-		return await this.profileService.patchProfile();
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		return await this.profileService.updateProfile(
+			userInfo.id,
+			updateProfileDto,
+		);
 	}
 
-	/*
-    GET /profile/{username}
-    gets profile info for given username
-    no input
-    response: ProfileDto
-    */
 	@UseGuards(JwtAuthGuard)
 	@Get(&quot;:username&quot;)
 	@ApiTags(&quot;profile&quot;)
+	@ApiOperation({ summary: &quot;Get user profile info by username&quot; })
+	@ApiParam({
+		name: &quot;username&quot;,
+		description: &quot;The username of the user to fetch profile info for.&quot;,
+	})
+	@ApiOkResponse({
+		description: &quot;Returns the user profile.&quot;,
+		type: UserProfileDto,
+	})
 	async getProfileByUsername(
-		@Request() req: any,
 		@Param(&quot;username&quot;) username: string,
 	): Promise&lt;UserProfileDto&gt; {
-		return await this.profileService.getProfileByUsername();
+		return this.profileService.getProfileByUsername(username);
 	}
 
 	@ApiBearerAuth()

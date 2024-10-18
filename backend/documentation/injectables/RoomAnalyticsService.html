@@ -1,0 +1,2147 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >RoomAnalyticsService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/modules/rooms/roomanalytics.service.ts</code>
+        </p>
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getAverageSessionDuration" >getAverageSessionDuration</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getHourlyParticipantAnalytics" >getHourlyParticipantAnalytics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getKeyMetrics" >getKeyMetrics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getMessageInteractionsAnalytics" >getMessageInteractionsAnalytics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getNumberOfBookmarks" >getNumberOfBookmarks</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getNumberOfReactions" >getNumberOfReactions</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getReturningVisitors" >getReturningVisitors</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getReturnVisitsAnalytics" >getReturnVisitsAnalytics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRoomInteractionAnalytics" >getRoomInteractionAnalytics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRoomJoinAnalytics" >getRoomJoinAnalytics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRoomParticipationAnalytics" >getRoomParticipationAnalytics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRoomPreviews" >getRoomPreviews</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRoomSessionAnalytics" >getRoomSessionAnalytics</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getUniqueVisitors" >getUniqueVisitors</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(prisma: <a href="../injectables/PrismaService.html" target="_self">PrismaService</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:19</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>prisma</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/PrismaService.html" target="_self" >PrismaService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getAverageSessionDuration"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getAverageSessionDuration</b></span>
+                        <a href="#getAverageSessionDuration"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getAverageSessionDuration(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, period: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="605"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:605</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>period</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getHourlyParticipantAnalytics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getHourlyParticipantAnalytics</b></span>
+                        <a href="#getHourlyParticipantAnalytics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getHourlyParticipantAnalytics(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="255"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:255</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getKeyMetrics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getKeyMetrics</b></span>
+                        <a href="#getKeyMetrics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getKeyMetrics(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, period: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="526"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:526</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>period</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomAnalyticsKeyMetricsDto.html" target="_self" >Promise&lt;RoomAnalyticsKeyMetricsDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getMessageInteractionsAnalytics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getMessageInteractionsAnalytics</b></span>
+                        <a href="#getMessageInteractionsAnalytics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getMessageInteractionsAnalytics(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="403"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:403</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getNumberOfBookmarks"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getNumberOfBookmarks</b></span>
+                        <a href="#getNumberOfBookmarks"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getNumberOfBookmarks(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="489"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:489</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getNumberOfReactions"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getNumberOfReactions</b></span>
+                        <a href="#getNumberOfReactions"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getNumberOfReactions(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="476"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:476</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getReturningVisitors"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getReturningVisitors</b></span>
+                        <a href="#getReturningVisitors"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getReturningVisitors(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, period: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="679"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:679</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>period</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getReturnVisitsAnalytics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getReturnVisitsAnalytics</b></span>
+                        <a href="#getReturnVisitsAnalytics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getReturnVisitsAnalytics(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, totalVisits: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="366"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:366</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>totalVisits</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRoomInteractionAnalytics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRoomInteractionAnalytics</b></span>
+                        <a href="#getRoomInteractionAnalytics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRoomInteractionAnalytics(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="502"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:502</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomAnalyticsInteractionsDto.html" target="_self" >Promise&lt;RoomAnalyticsInteractionsDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRoomJoinAnalytics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRoomJoinAnalytics</b></span>
+                        <a href="#getRoomJoinAnalytics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRoomJoinAnalytics(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="24"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:24</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRoomParticipationAnalytics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRoomParticipationAnalytics</b></span>
+                        <a href="#getRoomParticipationAnalytics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRoomParticipationAnalytics(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="337"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:337</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomAnalyticsParticipationDto.html" target="_self" >Promise&lt;RoomAnalyticsParticipationDto&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRoomPreviews"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRoomPreviews</b></span>
+                        <a href="#getRoomPreviews"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRoomPreviews(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="327"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:327</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRoomSessionAnalytics"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRoomSessionAnalytics</b></span>
+                        <a href="#getRoomSessionAnalytics"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRoomSessionAnalytics(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="149"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:149</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUniqueVisitors"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUniqueVisitors</b></span>
+                        <a href="#getUniqueVisitors"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUniqueVisitors(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, period: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="545"
+                                    class="link-to-prism">src/modules/rooms/roomanalytics.service.ts:545</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>period</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &quot;@nestjs/common&quot;;
+import { PrismaService } from &quot;../../../prisma/prisma.service&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import { Prisma } from &quot;@prisma/client&quot;;
+import {
+	subHours,
+	addHours,
+	isBefore,
+	startOfHour,
+	startOfDay,
+} from &quot;date-fns&quot;;
+import {
+	RoomAnalyticsParticipationDto,
+	RoomAnalyticsInteractionsDto,
+	RoomAnalyticsKeyMetricsDto,
+} from &quot;./dto/roomanalytics.dto&quot;;
+
+@Injectable()
+export class RoomAnalyticsService {
+	constructor(
+		private readonly prisma: PrismaService, // private readonly dtogen: DtoGenService, // private readonly dbUtils: DbUtilsService, // private readonly rooms: RoomsService,
+	) {}
+
+	async getRoomJoinAnalytics(
+		roomID: string,
+	): Promise&lt;RoomAnalyticsParticipationDto[&quot;joins&quot;]&gt; {
+		let total_joins &#x3D; 0;
+		let unique_joins &#x3D; 0;
+		const joins: RoomAnalyticsParticipationDto[&quot;joins&quot;] &#x3D; {
+			per_day: {
+				total_joins: [],
+				unique_joins: [],
+			},
+			all_time: {
+				total_joins: 0,
+				unique_joins: 0,
+			},
+		};
+		console.log(&quot;Getting room join analytics for room&quot;, roomID);
+		const userActivityPerDay: {
+			day: Date;
+			count: number;
+		}[] &#x3D; await this.prisma.$queryRaw&#x60;
+			SELECT DATE_TRUNC(&#x27;day&#x27;, &quot;room_join_time&quot;) AS day,
+				COUNT(&quot;user_id&quot;)::INTEGER as count
+			FROM &quot;user_activity&quot;
+			WHERE room_id &#x3D; ${roomID}::UUID
+			GROUP BY day, room_id
+			ORDER BY day ASC;
+		&#x60;;
+		const uniqueUserActivityPerDay: {
+			day: Date;
+			count: number;
+		}[] &#x3D; await this.prisma.$queryRaw&#x60;
+			SELECT DATE_TRUNC(&#x27;day&#x27;, &quot;room_join_time&quot;) AS day,
+				COUNT(DISTINCT &quot;user_id&quot;)::INTEGER as count
+			FROM &quot;user_activity&quot;
+			WHERE room_id &#x3D; ${roomID}::UUID
+			GROUP BY day, room_id
+			ORDER BY day ASC;
+		&#x60;;
+
+		// get the room creation date
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		const roomCreationDate: Date | null &#x3D; room?.date_created ?? null;
+
+		if (userActivityPerDay.length &#x3D;&#x3D;&#x3D; 0 || userActivityPerDay &#x3D;&#x3D;&#x3D; undefined) {
+			return joins;
+		}
+
+		for (let i &#x3D; 0; i &lt; userActivityPerDay.length; i++) {
+			total_joins +&#x3D; Number(userActivityPerDay[i]?.count ?? 0);
+		}
+		for (let i &#x3D; 0; i &lt; uniqueUserActivityPerDay.length; i++) {
+			unique_joins +&#x3D; Number(uniqueUserActivityPerDay[i]?.count ?? 0);
+		}
+		// fill in the missing days
+		// get all the days from the first day the room was created until today if the room is not older than 7 days
+		// if the room is older than 7 days, get all the days from 7 days ago until today
+		const allDays: Date[] &#x3D; [];
+		const today: Date &#x3D; addHours(startOfDay(new Date()), 2);
+		const firstDay: Date | undefined &#x3D; userActivityPerDay[0]?.day;
+		if (!firstDay) {
+			return joins;
+		}
+		let day: Date &#x3D; roomCreationDate ?? firstDay;
+		day &#x3D; subHours(startOfDay(day), 22);
+		if (isBefore(day, subHours(today, 24 * 7))) {
+			day &#x3D; subHours(today, 24 * 7);
+		}
+		//floor the day to the nearest day
+		// add the first day
+		while (isBefore(day, today)) {
+			allDays.push(day);
+			day &#x3D; addHours(day, 24);
+		}
+		// allDays.push(addHours(day, 24 * 2));
+		// add the missing days
+		for (const d of allDays) {
+			const dayExists: boolean &#x3D;
+				userActivityPerDay.find((u) &#x3D;&gt; {
+					return u.day.getTime() &#x3D;&#x3D;&#x3D; d.getTime();
+				}) !&#x3D;&#x3D; undefined;
+			console.log(&quot;Day exists&quot;, d, dayExists);
+			if (!dayExists) {
+				userActivityPerDay.push({ day: d, count: 0 });
+			}
+		}
+		// add the missing days
+		for (const d of allDays) {
+			const dayExists: boolean &#x3D;
+				uniqueUserActivityPerDay.find(
+					(u) &#x3D;&gt; u.day.getTime() &#x3D;&#x3D;&#x3D; d.getTime(),
+				) !&#x3D;&#x3D; undefined;
+			if (!dayExists) {
+				uniqueUserActivityPerDay.push({ day: d, count: 0 });
+			}
+		}
+		// sort the arrays
+		userActivityPerDay.sort((a, b) &#x3D;&gt; a.day.getTime() - b.day.getTime());
+		uniqueUserActivityPerDay.sort((a, b) &#x3D;&gt; a.day.getTime() - b.day.getTime());
+		joins.per_day &#x3D; {
+			total_joins:
+				userActivityPerDay.length &gt; 7
+					? userActivityPerDay.slice(
+							userActivityPerDay.length - 7,
+							userActivityPerDay.length,
+					  )
+					: userActivityPerDay,
+			unique_joins:
+				uniqueUserActivityPerDay.length &gt; 7
+					? uniqueUserActivityPerDay.slice(
+							uniqueUserActivityPerDay.length - 7,
+							uniqueUserActivityPerDay.length,
+					  )
+					: uniqueUserActivityPerDay,
+		};
+		joins.all_time &#x3D; {
+			total_joins: total_joins,
+			unique_joins: unique_joins,
+		};
+		return joins;
+	}
+
+	async getRoomSessionAnalytics(
+		roomID: string,
+	): Promise&lt;RoomAnalyticsParticipationDto[&quot;session_data&quot;]&gt; {
+		let avg_duration &#x3D; 0,
+			min_duration &#x3D; 0,
+			max_duration &#x3D; 0;
+		const sessionData: RoomAnalyticsParticipationDto[&quot;session_data&quot;] &#x3D; {
+			all_time: {
+				avg_duration: 0,
+				min_duration: 0,
+				max_duration: 0,
+			},
+			per_day: [],
+		};
+		const sessionDurations: {
+			avg_duration: number;
+			min_duration: number;
+			max_duration: number;
+			day: Date;
+		}[] &#x3D; await this.prisma.$queryRaw&#x60;
+			SELECT DATE_TRUNC(&#x27;day&#x27;, room_join_time) AS day,
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS avg_duration,
+				MIN(NULLIF(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)), 0))::FLOAT AS min_duration,
+				MAX(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT AS max_duration
+			FROM &quot;user_activity&quot;
+			WHERE room_id &#x3D; ${roomID}::UUID
+			GROUP BY day, room_id
+			ORDER BY day ASC;
+		&#x60;;
+
+		if (sessionDurations.length &#x3D;&#x3D;&#x3D; 0) {
+			return sessionData;
+		}
+		// get the room creation date
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		const roomCreationDate: Date | null &#x3D; room?.date_created ?? null;
+
+		// fill in the missing days
+		const allDays: Date[] &#x3D; [];
+		const today: Date &#x3D; new Date();
+		const firstDay: Date | undefined &#x3D; sessionDurations[0]?.day;
+		let day: Date | undefined &#x3D; roomCreationDate ?? firstDay;
+		if (!day) {
+			return sessionData;
+		}
+		if (isBefore(day, subHours(today, 24 * 7))) {
+			day &#x3D; subHours(today, 24 * 7);
+		}
+		//floor the day to the nearest day
+		day &#x3D; subHours(startOfDay(day), 22);
+		while (isBefore(day, today)) {
+			allDays.push(day);
+			day &#x3D; addHours(day, 24);
+		}
+
+		day &#x3D; subHours(startOfDay(day), 22);
+		for (const d of allDays) {
+			const dayExists: boolean &#x3D;
+				sessionDurations.find((u) &#x3D;&gt; u.day.getTime() &#x3D;&#x3D;&#x3D; d.getTime()) !&#x3D;&#x3D;
+				undefined;
+			if (!dayExists) {
+				sessionDurations.push({
+					day: d,
+					avg_duration: 0,
+					min_duration: 0,
+					max_duration: 0,
+				});
+			}
+		}
+		// sort the array
+		sessionDurations.sort((a, b) &#x3D;&gt; a.day.getTime() - b.day.getTime());
+		for (let i &#x3D; 0; i &lt; sessionDurations.length; i++) {
+			const session &#x3D; sessionDurations[i];
+			if (session &#x3D;&#x3D;&#x3D; undefined) {
+				continue;
+			}
+			session.avg_duration &#x3D; Number(session.avg_duration);
+			session.min_duration &#x3D; Number(session.min_duration);
+			session.max_duration &#x3D; Number(session.max_duration);
+			avg_duration +&#x3D; Number(session.avg_duration);
+			min_duration &#x3D; Math.min(min_duration, Number(session.min_duration));
+			max_duration &#x3D; Math.max(max_duration, Number(session.max_duration));
+		}
+		avg_duration &#x3D; avg_duration / sessionDurations.length;
+		sessionData.all_time.avg_duration &#x3D; avg_duration;
+		sessionData.all_time.min_duration &#x3D; min_duration;
+		sessionData.all_time.max_duration &#x3D; max_duration;
+		sessionData.per_day &#x3D; sessionDurations
+			.map((session) &#x3D;&gt; ({
+				...session,
+				duration: Number(session.avg_duration),
+			}))
+			.sort((a, b) &#x3D;&gt; a.day.getTime() - b.day.getTime());
+		sessionData.per_day &#x3D;
+			sessionData.per_day.length &gt; 7
+				? sessionData.per_day.slice(
+						sessionData.per_day.length - 7,
+						sessionData.per_day.length,
+				  )
+				: sessionData.per_day;
+		return sessionData;
+	}
+	async getHourlyParticipantAnalytics(
+		roomID: string,
+	): Promise&lt;RoomAnalyticsParticipationDto[&quot;participants_per_hour&quot;]&gt; {
+		const participantsPerHour: RoomAnalyticsParticipationDto[&quot;participants_per_hour&quot;] &#x3D;
+			[];
+		const today: Date &#x3D; new Date();
+		const yesterday: Date &#x3D; subHours(today, 24);
+		console.log(&quot;Today&quot;, today, &quot;Yesterday&quot;, yesterday);
+		//type cast count in the query to number
+		const userActivityPerHour: {
+			hour: Date;
+			count: number;
+		}[] &#x3D; await this.prisma.$queryRaw&#x60;
+			SELECT DATE_TRUNC(&#x27;hour&#x27;, room_join_time) AS hour,
+				COUNT(&quot;user_id&quot;)::INTEGER as count
+			FROM &quot;user_activity&quot;
+			WHERE room_id &#x3D; ${roomID}::UUID
+			AND room_join_time &gt; ${yesterday}
+			GROUP BY hour, room_id
+			ORDER BY hour ASC;
+		&#x60;;
+		if (userActivityPerHour.length &#x3D;&#x3D;&#x3D; 0) {
+			return participantsPerHour;
+		}
+
+		// get the room creation date
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+		const roomCreationDate: Date | null &#x3D; room?.date_created ?? null;
+
+		const allHours: Date[] &#x3D; [];
+		let hour: Date | undefined &#x3D;
+			roomCreationDate ?? userActivityPerHour[0]?.hour;
+		if (!hour) {
+			return participantsPerHour;
+		}
+		if (isBefore(hour, subHours(today, 24))) {
+			hour &#x3D; subHours(today, 24);
+		}
+		//floor the day to the nearest day
+		hour &#x3D; startOfHour(hour);
+
+		while (isBefore(hour, today)) {
+			allHours.push(hour);
+			hour &#x3D; addHours(hour, 1);
+		}
+		// add the missing hours
+		for (const h of allHours) {
+			const hourExists: boolean &#x3D;
+				userActivityPerHour.find((u) &#x3D;&gt; u.hour.getTime() &#x3D;&#x3D;&#x3D; h.getTime()) !&#x3D;&#x3D;
+				undefined;
+			if (!hourExists) {
+				userActivityPerHour.push({ hour: h, count: 0 });
+			}
+		}
+		// sort the array
+		userActivityPerHour.sort((a, b) &#x3D;&gt; a.hour.getTime() - b.hour.getTime());
+		for (const hour of userActivityPerHour) {
+			const pph &#x3D; {
+				count: 0,
+				instance: new Date(),
+			};
+			pph.count &#x3D; Number(hour.count);
+			pph.instance &#x3D; hour.hour;
+			participantsPerHour.push(pph);
+		}
+		return participantsPerHour;
+	}
+
+	async getRoomPreviews(roomID: string): Promise&lt;number&gt; {
+		const previews: PrismaTypes.room_previews[] | null &#x3D;
+			await this.prisma.room_previews.findMany({
+				where: {
+					room_id: roomID,
+				},
+			});
+		return previews.length;
+	}
+
+	async getRoomParticipationAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise&lt;RoomAnalyticsParticipationDto&gt; {
+		console.log(
+			&quot;Getting room analytics for room&quot;,
+			roomID,
+			&quot; and given userID: &quot;,
+			userID,
+		);
+
+		const roomAnalyticsParticipation: RoomAnalyticsParticipationDto &#x3D;
+			new RoomAnalyticsParticipationDto();
+		roomAnalyticsParticipation.joins &#x3D; await this.getRoomJoinAnalytics(roomID);
+		roomAnalyticsParticipation.session_data &#x3D;
+			await this.getRoomSessionAnalytics(roomID);
+		roomAnalyticsParticipation.participants_per_hour &#x3D;
+			await this.getHourlyParticipantAnalytics(roomID);
+		roomAnalyticsParticipation.room_previews &#x3D; await this.getRoomPreviews(
+			roomID,
+		);
+		roomAnalyticsParticipation.return_visits &#x3D;
+			await this.getReturnVisitsAnalytics(
+				roomID,
+				roomAnalyticsParticipation.joins.all_time.total_joins,
+			);
+		return roomAnalyticsParticipation;
+	}
+
+	async getReturnVisitsAnalytics(
+		roomID: string,
+		totalVisits: number,
+	): Promise&lt;RoomAnalyticsParticipationDto[&quot;return_visits&quot;]&gt; {
+		const returnVisits: RoomAnalyticsParticipationDto[&quot;return_visits&quot;] &#x3D; {
+			expected_return_count: 0,
+			probability_of_return: 0,
+		};
+		const result: {
+			user_count: number;
+			user_id: string;
+		}[] &#x3D; await this.prisma.$queryRaw&#x60;
+		SELECT
+			COUNT(user_id)::INTEGER as user_count,
+			user_id
+		FROM
+			user_activity
+		WHERE
+			room_id &#x3D; ${roomID}::UUID
+		GROUP BY
+			user_id
+		HAVING
+			COUNT(user_id) &gt; 1;
+		&#x60;;
+		if (result.length &#x3D;&#x3D;&#x3D; 0) {
+			return returnVisits;
+		}
+		const returnCount: number &#x3D; result.length;
+		const averageVisits: number &#x3D;
+			result
+				.map((r) &#x3D;&gt; Number(r.user_count))
+				.reduce((a: number, b: number) &#x3D;&gt; a + b, 0) / result.length;
+		returnVisits.probability_of_return &#x3D; Number(returnCount / totalVisits);
+		returnVisits.expected_return_count &#x3D; Number(averageVisits);
+		return returnVisits;
+	}
+
+	async getMessageInteractionsAnalytics(
+		roomID: string,
+	): Promise&lt;RoomAnalyticsInteractionsDto[&quot;messages&quot;]&gt; {
+		console.log(&quot;Getting room analytics for room&quot;, roomID);
+		const messages: RoomAnalyticsInteractionsDto[&quot;messages&quot;] &#x3D; {
+			per_hour: [],
+			total: 0,
+		};
+		const today: Date &#x3D; new Date();
+		const yesterday: Date &#x3D; subHours(today, 24);
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.findUnique({
+			where: {
+				room_id: roomID,
+			},
+		});
+
+		const roomCreationDate: Date | null &#x3D; room?.date_created ?? null;
+		const messageActivityPerHour: {
+			hour: Date;
+			count: number;
+		}[] &#x3D; await this.prisma.$queryRaw&#x60;
+			SELECT DATE_TRUNC(&#x27;hour&#x27;, date_sent) AS hour,
+				COUNT(message.message_id)::INTEGER as count
+			FROM &quot;message&quot;
+			INNER JOIN room_message ON room_message.message_id &#x3D; message.message_id
+			WHERE room_id &#x3D; ${roomID}::UUID
+				AND date_sent &gt; ${yesterday}
+			GROUP BY hour, room_id
+			ORDER BY hour ASC;
+		&#x60;;
+
+		// fill in the missing hours
+		let allHours: Date[] &#x3D; [];
+		// from from the date the room was created, get all the hours until now if the room is not older than a day
+		let hour: Date &#x3D; roomCreationDate ?? new Date();
+		if (isBefore(hour, yesterday)) {
+			hour &#x3D; yesterday;
+		}
+		//floor the hour to the nearest hour
+		hour &#x3D; startOfHour(hour);
+
+		// let hour: Date &#x3D; messageActivityPerHour[0].hour ;
+		while (isBefore(hour, today)) {
+			allHours.push(hour);
+			hour &#x3D; addHours(hour, 1);
+		}
+		// remove the last element of the array
+		allHours &#x3D; allHours.slice(0, allHours.length - 1);
+		// add the missing hours
+		for (const h of allHours) {
+			const hourExists: boolean &#x3D;
+				messageActivityPerHour.find((u) &#x3D;&gt; u.hour &#x3D;&#x3D;&#x3D; h) !&#x3D;&#x3D; undefined;
+			if (!hourExists) {
+				messageActivityPerHour.push({ hour: h, count: 0 });
+			}
+		}
+		// sort the array
+		messageActivityPerHour.sort((a, b) &#x3D;&gt; a.hour.getTime() - b.hour.getTime());
+		for (const hour of messageActivityPerHour) {
+			const m &#x3D; {
+				count: 0,
+				hour: new Date(),
+			};
+			m.count &#x3D; Number(hour.count);
+			m.hour &#x3D; hour.hour;
+			messages.per_hour.push(m);
+		}
+		messages.total &#x3D; messages.per_hour
+			.map((m) &#x3D;&gt; m.count)
+			.reduce((a, b) &#x3D;&gt; a + b, 0);
+		return messages;
+	}
+
+	async getNumberOfReactions(roomID: string): Promise&lt;number&gt; {
+		const reactions: PrismaTypes.chat_reactions[] &#x3D;
+			await this.prisma.chat_reactions.findMany({
+				where: {
+					room_id: roomID,
+				},
+			});
+		if (!reactions || reactions &#x3D;&#x3D;&#x3D; null) {
+			return 0;
+		}
+		return reactions.length;
+	}
+
+	async getNumberOfBookmarks(roomID: string): Promise&lt;number&gt; {
+		const bookmarks: PrismaTypes.bookmark[] &#x3D;
+			await this.prisma.bookmark.findMany({
+				where: {
+					room_id: roomID,
+				},
+			});
+		if (!bookmarks || bookmarks &#x3D;&#x3D;&#x3D; null) {
+			return 0;
+		}
+		return bookmarks.length;
+	}
+
+	async getRoomInteractionAnalytics(
+		roomID: string,
+		userID: string,
+	): Promise&lt;RoomAnalyticsInteractionsDto&gt; {
+		console.log(
+			&quot;Getting room analytics for room&quot;,
+			roomID,
+			&quot; and given userID: &quot;,
+			userID,
+		);
+
+		const roomInteractionAnalytics: RoomAnalyticsInteractionsDto &#x3D;
+			new RoomAnalyticsInteractionsDto();
+		roomInteractionAnalytics.messages &#x3D;
+			await this.getMessageInteractionsAnalytics(roomID);
+		roomInteractionAnalytics.bookmarked_count &#x3D; await this.getNumberOfBookmarks(
+			roomID,
+		);
+		roomInteractionAnalytics.reactions_sent &#x3D; await this.getNumberOfReactions(
+			roomID,
+		);
+		return roomInteractionAnalytics;
+	}
+
+	async getKeyMetrics(
+		userID: string,
+		period: string,
+	): Promise&lt;RoomAnalyticsKeyMetricsDto&gt; {
+		console.log(&quot; and given userID: &quot;, userID);
+		const keyMetrics: RoomAnalyticsKeyMetricsDto &#x3D;
+			new RoomAnalyticsKeyMetricsDto();
+		keyMetrics.unique_visitors &#x3D; await this.getUniqueVisitors(userID, period);
+		keyMetrics.returning_visitors &#x3D; await this.getReturningVisitors(
+			userID,
+			period,
+		);
+		keyMetrics.average_session_duration &#x3D; await this.getAverageSessionDuration(
+			userID,
+			period,
+		);
+		return keyMetrics;
+	}
+
+	async getUniqueVisitors(
+		userID: string,
+		period: string,
+	): Promise&lt;RoomAnalyticsKeyMetricsDto[&quot;unique_visitors&quot;]&gt; {
+		const uniqueVisitors: RoomAnalyticsKeyMetricsDto[&quot;unique_visitors&quot;] &#x3D; {
+			count: 0,
+			percentage_change: 0,
+		};
+		// get the unique visitors for a user&#x27;s all rooms
+		const rooms: PrismaTypes.room[] &#x3D; await this.prisma.room.findMany({
+			where: {
+				room_creator: userID,
+			},
+		});
+		const roomIDs: Prisma.Sql[] &#x3D; rooms.map(
+			(r) &#x3D;&gt; Prisma.sql&#x60;${r.room_id}::UUID&#x60;,
+		);
+		// get unique visitors from more than 24 hours ago, then get unique visitors from the last 24 hours to calculate the percentage change
+		const today: Date &#x3D; new Date();
+		let multiple &#x3D; 1;
+		if (period &#x3D;&#x3D;&#x3D; &quot;week&quot;) {
+			multiple &#x3D; 7;
+		} else if (period &#x3D;&#x3D;&#x3D; &quot;month&quot;) {
+			multiple &#x3D; 30;
+		}
+		const yesterday: Date &#x3D; subHours(today, 24 * multiple);
+		const uniqueVisitorsYesterday: { count: number }[] &#x3D; await this.prisma
+			.$queryRaw(Prisma.sql&#x60;
+			SELECT
+				COUNT(DISTINCT user_id)::INTEGER as count
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time &lt; ${yesterday}
+			GROUP BY
+				user_id;
+		&#x60;);
+
+		const uniqueVisitorsToday: { count: number }[] &#x3D; await this.prisma
+			.$queryRaw(Prisma.sql&#x60;
+			SELECT
+				COUNT(DISTINCT user_id)::INTEGER as count
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time &gt;&#x3D; ${yesterday}
+			GROUP BY
+				user_id;
+		&#x60;);
+
+		const countYesterday &#x3D; Number(uniqueVisitorsYesterday.length);
+		const countToday &#x3D; Number(uniqueVisitorsToday.length);
+		uniqueVisitors.count &#x3D; countToday + countYesterday;
+		uniqueVisitors.percentage_change &#x3D;
+			countYesterday &#x3D;&#x3D;&#x3D; 0 ? 0 : (countToday - countYesterday) / countYesterday;
+		return uniqueVisitors;
+	}
+
+	async getAverageSessionDuration(
+		userID: string,
+		period: string,
+	): Promise&lt;RoomAnalyticsKeyMetricsDto[&quot;average_session_duration&quot;]&gt; {
+		const averageSessionDuration: RoomAnalyticsKeyMetricsDto[&quot;average_session_duration&quot;] &#x3D;
+			{
+				duration: 0,
+				percentage_change: 0,
+			};
+		// get the average session duration for a user&#x27;s all rooms
+		const rooms: PrismaTypes.room[] &#x3D; await this.prisma.room.findMany({
+			where: {
+				room_creator: userID,
+			},
+		});
+		const roomIDs: Prisma.Sql[] &#x3D; rooms.map(
+			(r) &#x3D;&gt; Prisma.sql&#x60;${r.room_id}::UUID&#x60;,
+		);
+		console.log(
+			&quot;Getting average session duration for user&quot;,
+			userID,
+			&quot;and rooms&quot;,
+			roomIDs,
+		);
+		// get the average session duration from more than 24 hours ago, then get the average session duration from the last 24 hours to calculate the percentage change
+		const today: Date &#x3D; new Date();
+		let multiple &#x3D; 1;
+		if (period &#x3D;&#x3D;&#x3D; &quot;week&quot;) {
+			multiple &#x3D; 7;
+		} else if (period &#x3D;&#x3D;&#x3D; &quot;month&quot;) {
+			multiple &#x3D; 30;
+		}
+		const yesterday: Date &#x3D; subHours(today, 24 * multiple);
+		const averageSessionDurationYesterday: { avg_duration: number }[] &#x3D;
+			await this.prisma.$queryRaw(Prisma.sql&#x60;
+			SELECT
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT as avg_duration
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time &lt; ${yesterday}
+		&#x60;);
+		const averageSessionDurationToday: { avg_duration: number }[] &#x3D; await this
+			.prisma.$queryRaw(Prisma.sql&#x60;
+			SELECT
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT as avg_duration
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time &gt; ${yesterday}
+		&#x60;);
+
+		const averageSessionDurationAllTime: { avg_duration: number }[] &#x3D; await this
+			.prisma.$queryRaw(Prisma.sql&#x60;
+			SELECT
+				AVG(EXTRACT(EPOCH FROM (room_leave_time - room_join_time)))::FLOAT as avg_duration
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)});
+		&#x60;);
+		averageSessionDuration.duration &#x3D; Number(
+			averageSessionDurationAllTime[0]?.avg_duration,
+		);
+		averageSessionDuration.percentage_change &#x3D;
+			averageSessionDurationYesterday[0]?.avg_duration &#x3D;&#x3D;&#x3D; 0
+				? 0
+				: (Number(averageSessionDurationToday[0]?.avg_duration) -
+						Number(averageSessionDurationYesterday[0]?.avg_duration)) /
+				  Number(averageSessionDurationYesterday[0]?.avg_duration);
+		return averageSessionDuration;
+	}
+	async getReturningVisitors(
+		userID: string,
+		period: string,
+	): Promise&lt;RoomAnalyticsKeyMetricsDto[&quot;returning_visitors&quot;]&gt; {
+		const returningVisitors: RoomAnalyticsKeyMetricsDto[&quot;returning_visitors&quot;] &#x3D;
+			{
+				count: 0,
+				percentage_change: 0,
+			};
+
+		// get the returning visitors for a user&#x27;s all rooms
+		const rooms: PrismaTypes.room[] &#x3D; await this.prisma.room.findMany({
+			where: {
+				room_creator: userID,
+			},
+		});
+		const roomIDs: Prisma.Sql[] &#x3D; rooms.map(
+			(r) &#x3D;&gt; Prisma.sql&#x60;${r.room_id}::UUID&#x60;,
+		);
+		const today: Date &#x3D; new Date();
+		let multiple &#x3D; 1;
+		if (period &#x3D;&#x3D;&#x3D; &quot;week&quot;) {
+			multiple &#x3D; 7;
+		} else if (period &#x3D;&#x3D;&#x3D; &quot;month&quot;) {
+			multiple &#x3D; 30;
+		}
+		const yesterday: Date &#x3D; subHours(today, 24 * multiple);
+		const returningVisitorsYesterday: { count: number; user_id: string }[] &#x3D;
+			await this.prisma.$queryRaw(Prisma.sql&#x60;
+			SELECT
+				COUNT(user_id)::INTEGER as count,
+				user_id
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time &lt; ${yesterday}
+			GROUP BY
+				user_id
+			HAVING
+				COUNT(user_id) &gt; 1;
+		&#x60;);
+		const returningVisitorsToday: { count: number; user_id: string }[] &#x3D;
+			await this.prisma.$queryRaw(Prisma.sql&#x60;
+			SELECT
+				COUNT(user_id)::INTEGER as count,
+				user_id
+			FROM
+				user_activity
+			WHERE
+				room_id IN (${Prisma.join(roomIDs)})
+				AND room_join_time &gt; ${yesterday}
+			GROUP BY
+				user_id
+			HAVING
+				COUNT(user_id) &gt; 1;
+		&#x60;);
+		const countYesterday &#x3D; Number(returningVisitorsYesterday.length);
+		const countToday &#x3D; Number(returningVisitorsToday.length);
+		returningVisitors.count &#x3D; countToday + countYesterday;
+		returningVisitors.percentage_change &#x3D;
+			countYesterday &#x3D;&#x3D;&#x3D; 0 ? 0 : (countToday - countYesterday) / countYesterday;
+		return returningVisitors;
+	}
+}
+</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'RoomAnalyticsService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

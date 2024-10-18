@@ -22,45 +22,61 @@
 <text text-anchor="start" x="429.73" y="-15.4" font-family="Times-12" font-size="14.00"> &#160;Exports</text>
 <g id="clust1" class="cluster">
 <title>cluster_PrismaModule</title>
-<polygon fill="none" stroke="black" stroke-dasharray="1,5" points="165,-70 165,-268 331,-268 331,-70 165,-70"/>
-</g>
-<g id="clust4" class="cluster">
-<title>cluster_PrismaModule_exports</title>
-<polygon fill="none" stroke="black" points="190,-208 190,-260 306,-260 306,-208 190,-208"/>
+<polygon fill="none" stroke="black" stroke-dasharray="1,5" points="108,-70 108,-268 388,-268 388,-70 108,-70"/>
 </g>
 <g id="clust6" class="cluster">
 <title>cluster_PrismaModule_providers</title>
-<polygon fill="none" stroke="black" points="173,-78 173,-130 323,-130 323,-78 173,-78"/>
+<polygon fill="none" stroke="black" points="230,-78 230,-130 380,-130 380,-78 230,-78"/>
 </g>
-<!-- PrismaService  -->
+<g id="clust3" class="cluster">
+<title>cluster_PrismaModule_imports</title>
+<polygon fill="none" stroke="black" points="116,-78 116,-130 222,-130 222,-78 116,-78"/>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_PrismaModule_exports</title>
+<polygon fill="none" stroke="black" points="181,-208 181,-260 297,-260 297,-208 181,-208"/>
+</g>
+<!-- RetryModule -->
 <g id="node1" class="node">
-<title>PrismaService </title>
-<polygon fill="#fb8072" stroke="black" points="298.36,-252 197.64,-252 197.64,-216 298.36,-216 298.36,-252"/>
-<text text-anchor="middle" x="248" y="-229.8" font-family="Times,serif" font-size="14.00">PrismaService </text>
+<title>RetryModule</title>
+<polygon fill="#8dd3c7" stroke="black" points="214.15,-122 211.15,-126 190.15,-126 187.15,-122 123.85,-122 123.85,-86 214.15,-86 214.15,-122"/>
+<text text-anchor="middle" x="169" y="-99.8" font-family="Times,serif" font-size="14.00">RetryModule</text>
 </g>
 <!-- PrismaModule -->
 <g id="node2" class="node">
 <title>PrismaModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="297.43,-187 294.43,-191 273.43,-191 270.43,-187 198.57,-187 198.57,-151 297.43,-151 297.43,-187"/>
-<text text-anchor="middle" x="248" y="-164.8" font-family="Times,serif" font-size="14.00">PrismaModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="288.43,-187 285.43,-191 264.43,-191 261.43,-187 189.57,-187 189.57,-151 288.43,-151 288.43,-187"/>
+<text text-anchor="middle" x="239" y="-164.8" font-family="Times,serif" font-size="14.00">PrismaModule</text>
+</g>
+<!-- RetryModule&#45;&gt;PrismaModule -->
+<g id="edge1" class="edge">
+<title>RetryModule&#45;&gt;PrismaModule</title>
+<path fill="none" stroke="black" d="M202.05,-122.11C202.05,-122.11 202.05,-140.99 202.05,-140.99"/>
+<polygon fill="black" stroke="black" points="198.55,-140.99 202.05,-150.99 205.55,-140.99 198.55,-140.99"/>
+</g>
+<!-- PrismaService  -->
+<g id="node3" class="node">
+<title>PrismaService </title>
+<polygon fill="#fb8072" stroke="black" points="289.36,-252 188.64,-252 188.64,-216 289.36,-216 289.36,-252"/>
+<text text-anchor="middle" x="239" y="-229.8" font-family="Times,serif" font-size="14.00">PrismaService </text>
 </g>
 <!-- PrismaModule&#45;&gt;PrismaService  -->
-<g id="edge1" class="edge">
+<g id="edge2" class="edge">
 <title>PrismaModule&#45;&gt;PrismaService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M248,-187.11C248,-187.11 248,-205.99 248,-205.99"/>
-<polygon fill="black" stroke="black" points="244.5,-205.99 248,-215.99 251.5,-205.99 244.5,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M239,-187.11C239,-187.11 239,-205.99 239,-205.99"/>
+<polygon fill="black" stroke="black" points="235.5,-205.99 239,-215.99 242.5,-205.99 235.5,-205.99"/>
 </g>
 <!-- PrismaService -->
-<g id="node3" class="node">
+<g id="node4" class="node">
 <title>PrismaService</title>
-<ellipse fill="#fdb462" stroke="black" cx="248" cy="-104" rx="66.63" ry="18"/>
-<text text-anchor="middle" x="248" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaService</text>
+<ellipse fill="#fdb462" stroke="black" cx="305" cy="-104" rx="66.63" ry="18"/>
+<text text-anchor="middle" x="305" y="-99.8" font-family="Times,serif" font-size="14.00">PrismaService</text>
 </g>
 <!-- PrismaService&#45;&gt;PrismaModule -->
-<g id="edge2" class="edge">
+<g id="edge3" class="edge">
 <title>PrismaService&#45;&gt;PrismaModule</title>
-<path fill="none" stroke="black" d="M248,-122.11C248,-122.11 248,-140.99 248,-140.99"/>
-<polygon fill="black" stroke="black" points="244.5,-140.99 248,-150.99 251.5,-140.99 244.5,-140.99"/>
+<path fill="none" stroke="black" d="M263.2,-118.1C263.2,-118.1 263.2,-140.72 263.2,-140.72"/>
+<polygon fill="black" stroke="black" points="259.7,-140.72 263.2,-150.72 266.7,-140.72 259.7,-140.72"/>
 </g>
 </g>
 </svg>

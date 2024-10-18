@@ -141,6 +141,7 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#token" >token</a>
                             </li>
                         </ul>
@@ -169,6 +170,7 @@
                     <a name="token"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>token</b></span>
                         <a href="#token"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -185,13 +187,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty()<br />
+                            @ApiProperty({description: &#x27;The Cognito JWT token&#x27;})<br />@IsString()<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="45" class="link-to-prism">src/auth/auth.service.ts:45</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="61" class="link-to-prism">src/auth/auth.service.ts:61</a></div>
                         </td>
                     </tr>
 
@@ -210,15 +212,27 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, UnauthorizedException } from &quot;@nestjs/common&quot;;
-import * as AWS from &quot;aws-sdk&quot;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	UnauthorizedException,
+} from &quot;@nestjs/common&quot;;
+import {
+	AdminInitiateAuthCommandInput,
+	AttributeType,
+	AuthenticationResultType,
+	CognitoIdentityProvider,
+	ListUsersCommandOutput,
+} from &quot;@aws-sdk/client-cognito-identity-provider&quot;;
 import { ConfigService } from &quot;@nestjs/config&quot;;
 import { PrismaService } from &quot;../../prisma/prisma.service&quot;;
 import { Prisma } from &quot;@prisma/client&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
 import * as jwt from &quot;jsonwebtoken&quot;;
 import { CognitoJwtVerifier } from &quot;aws-jwt-verify&quot;;
 import { ApiProperty } from &quot;@nestjs/swagger&quot;;
-//import { CreateUserDto } from &quot;src/modules/users/dto/create-user.dto&quot;;
+import { IsString } from &quot;class-validator&quot;;
 
 export type CognitoDecodedToken &#x3D; {
 	sub: string;
@@ -242,24 +256,34 @@ export type JWTPayload &#x3D; {
 };
 
 export class RegisterBody {
-	@ApiProperty()
+	@ApiProperty({ description: &quot;The user&#x27;s username&quot; })
+	@IsString()
 	username: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: &quot;The user&#x27;s Cognito sub/ID&quot; })
+	@IsString()
 	userCognitoSub: string;
 
-	@ApiProperty()
+	@ApiProperty({ description: &quot;The user&#x27;s email address&quot; })
+	@IsString()
 	email: string;
 }
 
 export class LoginBody {
-	@ApiProperty()
+	@ApiProperty({ description: &quot;The Cognito JWT token&quot; })
+	@IsString()
 	token: string;
+}
+
+export class RefreshBody {
+	@ApiProperty({ description: &quot;The JWT token to be refreshed&quot; })
+	@IsString()
+	refreshToken: string;
 }
 
 @Injectable()
 export class AuthService {
-	private cognitoIdentityServiceProvider: AWS.CognitoIdentityServiceProvider;
+	private cognitoIdentityServiceProvider: CognitoIdentityProvider;
 	private accessKeyId: string;
 	private secretAccessKey: string;
 	private userPoolId: string;
@@ -267,7 +291,7 @@ export class AuthService {
 
 	constructor(
 		private configService: ConfigService,
-		private prisma: PrismaService,
+		private readonly prisma: PrismaService,
 	) {
 		// Set the AWS credentials
 		const accessKeyId &#x3D; this.configService.get&lt;string&gt;(&quot;AWS_ACCESS_KEY_ID&quot;);
@@ -298,41 +322,50 @@ export class AuthService {
 		}
 		this.clientId &#x3D; clientId;
 
-		this.cognitoIdentityServiceProvider &#x3D;
-			new AWS.CognitoIdentityServiceProvider({
-				region: &quot;af-south-1&quot;,
+		this.cognitoIdentityServiceProvider &#x3D; new CognitoIdentityProvider({
+			region: &quot;af-south-1&quot;,
+
+			credentials: {
 				accessKeyId: this.accessKeyId,
 				secretAccessKey: this.secretAccessKey,
-			});
+			},
+		});
 	}
 
-	async validateUser(username: string, password: string): Promise&lt;any&gt; {
+	async validateUser(
+		username: string,
+		password: string,
+	): Promise&lt;{
+		username: string;
+		attributes: AttributeType[];
+		authenticationResult: AuthenticationResultType;
+	}&gt; {
 		if (!this.userPoolId || !this.clientId) {
 			throw new Error(&quot;Missing Cognito configuration&quot;);
 		}
 
-		const params: AWS.CognitoIdentityServiceProvider.AdminInitiateAuthRequest &#x3D;
-			{
-				AuthFlow: &quot;ADMIN_NO_SRP_AUTH&quot;,
-				ClientId: this.clientId,
-				UserPoolId: this.userPoolId,
-				AuthParameters: {
-					USERNAME: username,
-					PASSWORD: password,
-				},
-			};
+		const params: AdminInitiateAuthCommandInput &#x3D; {
+			AuthFlow: &quot;ADMIN_NO_SRP_AUTH&quot;,
+			ClientId: this.clientId,
+			UserPoolId: this.userPoolId,
+			AuthParameters: {
+				USERNAME: username,
+				PASSWORD: password,
+			},
+		};
 
 		try {
-			const authResponse &#x3D; await this.cognitoIdentityServiceProvider
-				.adminInitiateAuth(params)
-				.promise();
+			const authResponse &#x3D;
+				await this.cognitoIdentityServiceProvider.adminInitiateAuth(params);
 			if (authResponse.AuthenticationResult) {
-				const user &#x3D; await this.cognitoIdentityServiceProvider
-					.adminGetUser({
-						UserPoolId: this.userPoolId,
-						Username: username,
-					})
-					.promise();
+				const user &#x3D; await this.cognitoIdentityServiceProvider.adminGetUser({
+					UserPoolId: this.userPoolId,
+					Username: username,
+				});
+
+				if (!user || !user.Username || !user.UserAttributes) {
+					throw new UnauthorizedException(&quot;Invalid credentials&quot;);
+				}
 
 				return {
 					username: user.Username,
@@ -340,21 +373,20 @@ export class AuthService {
 					authenticationResult: authResponse.AuthenticationResult,
 				};
 			}
+			throw new UnauthorizedException(&quot;Invalid credentials&quot;);
 		} catch (error) {
 			throw new UnauthorizedException(&quot;Invalid credentials&quot;);
 		}
 	}
 
-	// eslint-disable-next-line prettier/prettier
-  	async listUsers(): Promise&lt;AWS.CognitoIdentityServiceProvider.ListUsersResponse&gt; {
+	async listUsers(): Promise&lt;ListUsersCommandOutput&gt; {
 		const params &#x3D; {
 			UserPoolId: this.userPoolId,
 		};
 
 		try {
-			const responsePromise &#x3D; await this.cognitoIdentityServiceProvider
-				.listUsers(params)
-				.promise();
+			const responsePromise &#x3D;
+				await this.cognitoIdentityServiceProvider.listUsers(params);
 			const response &#x3D; await responsePromise;
 			return response;
 		} catch (error) {
@@ -404,6 +436,38 @@ export class AuthService {
 		return token;
 	}
 
+	async refreshJWT(jwt_token: string): Promise&lt;JWTPayload&gt; {
+		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
+		if (!secretKey || secretKey &#x3D;&#x3D;&#x3D; undefined || secretKey &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT secret key&quot;);
+		}
+
+		const decoded: jwt.JwtPayload &#x3D; jwt.decode(jwt_token) as jwt.JwtPayload;
+		console.log(&quot;decoded&quot;, decoded);
+
+		//ensure user data in Payload is valid
+		const user: PrismaTypes.users | null &#x3D; await this.prisma.users.findUnique({
+			where: {
+				user_id: decoded.id,
+				email: decoded.email,
+				username: decoded.username,
+			},
+		});
+
+		console.log(&quot;user&quot;, user);
+
+		if (!user) {
+			throw new UnauthorizedException(&quot;Invalid JWT token&quot;);
+		}
+
+		const result: JWTPayload &#x3D; {
+			id: decoded.id as string,
+			email: decoded.email as string,
+			username: decoded.username as string,
+		};
+		return result;
+	}
+
 	/*
 	async getUserInfo(jwt_token: string): Promise&lt;any&gt; {
 		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
@@ -435,12 +499,11 @@ export class AuthService {
 
 	// this funciton will be passed a Request object from the NestJS controller eg:
 	/*
-	getRoomInfo(@Request() req: any, @Param(&quot;roomID&quot;) roomID: string): RoomDto {
+	getRoomInfo(@Request() req: Request, @Param(&quot;roomID&quot;) roomID: string): RoomDto {
 		return this.roomsService.getRoomInfo(roomID);
 	}
 	*/
 	getUserInfo(req: any): JWTPayload {
-		console.log(&quot;req&quot;, req);
 		const result &#x3D; req.user as JWTPayload;
 		console.log(result);
 		if (!result) {
@@ -456,6 +519,33 @@ export class AuthService {
 		return result;
 	}
 
+	async getUsernameAndEmail(userID: string): Promise&lt;{
+		username: string;
+		email: string;
+	}&gt; {
+		const user: PrismaTypes.users | null &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!user || user &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. getUsernameAndEmailError01&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		if (!user.email || user.email &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;User (&quot; +
+					user.username +
+					&quot;) does not have an email address. getUsernameAndEmailError02&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		return { username: user.username, email: user.email };
+	}
+
 	async decodeAndVerifyCognitoJWT(
 		jwt_token: string,
 	): Promise&lt;CognitoDecodedToken&gt; {
@@ -467,9 +557,11 @@ export class AuthService {
 
 		try {
 			const payload &#x3D; await verifier.verify(jwt_token);
+			console.log(&quot;Cognito Verification&quot;, payload);
 			const result: CognitoDecodedToken &#x3D; payload as CognitoDecodedToken;
 			return result;
 		} catch (error) {
+			console.log(error);
 			throw new UnauthorizedException(&quot;Invalid JWT token&quot;);
 		}
 	}

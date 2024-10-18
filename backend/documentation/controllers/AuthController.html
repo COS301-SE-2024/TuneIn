@@ -146,9 +146,18 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#login" >login</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#refresh" >refresh</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -188,7 +197,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>login</b></span>
                         <a href="#login"><span class="icon ion-ios-link"></span></a>
@@ -206,14 +214,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;login&#x27;)<br />@ApiTags(&#x27;auth&#x27;)<br />@ApiOperation({summary: &#x27;Login in the API using Cognito&#x27;})<br />@ApiBody({type: LoginBody})<br />@ApiResponse({status: 201, description: &#x27;The record has been successfully created.&#x27;, type: String})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
+                    <code>@Post(&#x27;login&#x27;)<br />@ApiOperation({summary: &#x27;Authenticate a user using a Cognito JWT token&#x27;, description: &#x27;This method will authenticate a user using a Cognito JWT token. The token is decoded and verified, and a new JWT token is generated and returned. See https://jwt.io/ for more information on JWT tokens.&#x27;, operationId: &#x27;login&#x27;})<br />@ApiBody({type: LoginBody, required: true, description: &#x27;Cognito JWT token&#x27;, examples: undefined})<br />@ApiResponse({status: 200, description: &#x27;User successfully logged in. JWT token returned.&#x27;, type: String})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="36"
-                                    class="link-to-prism">src/auth/auth.controller.ts:36</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="46"
+                                    class="link-to-prism">src/auth/auth.controller.ts:46</a></div>
                         </td>
                     </tr>
 
@@ -237,6 +245,88 @@
                                                 <td>loginInfo</td>
                                             <td>
                                                             <code><a href="../classes/LoginBody.html" target="_self" >LoginBody</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="refresh"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>refresh</b></span>
+                        <a href="#refresh"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>refresh(rb: <a href="../classes/RefreshBody.html" target="_self">RefreshBody</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Post(&#x27;refresh&#x27;)<br />@ApiOperation({summary: &#x27;Refresh an expired (or almost expired) JWT token&#x27;, description: &#x27;This method will refresh an expired (or almost expired) JWT token. The expired token is sent in the request body, and a new JWT token is generated and returned. The new token will have a new expiration date.&#x27;, operationId: &#x27;refresh&#x27;})<br />@ApiBody({type: RefreshBody, required: true, description: &#x27;The expired JWT token&#x27;, examples: undefined})<br />@ApiResponse({status: 200, description: &#x27;JWT token successfully refreshed.&#x27;, type: String})<br />@ApiResponse({status: 400, description: &#x27;Bad request.&#x27;})<br />@ApiResponse({status: 401, description: &#x27;Unauthorized.&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="152"
+                                    class="link-to-prism">src/auth/auth.controller.ts:152</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>rb</td>
+                                            <td>
+                                                            <code><a href="../classes/RefreshBody.html" target="_self" >RefreshBody</a></code>
                                             </td>
 
                                             <td>
@@ -288,14 +378,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;register&#x27;)<br />@ApiTags(&#x27;auth&#x27;)<br />@ApiOperation({summary: &#x27;Register a new user in the API using Cognito&#x27;})<br />@ApiBody({type: RegisterBody})<br />@ApiResponse({status: 201, description: &#x27;The record has been successfully created.&#x27;, type: RegisterBody})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
+                    <code>@Post(&#x27;register&#x27;)<br />@ApiOperation({summary: &#x27;Register a new user in the API using Cognito&#x27;, description: &#x27;This method will register a new user in the API using Cognito. The user&#x27;s Cognito username, email, and Cognito sub ID are required. The user will be created in the our database and will be able to authenticate using the Cognito JWT token.&#x27;, operationId: &#x27;register&#x27;})<br />@ApiBody({type: RegisterBody, required: true, description: &#x27;User info&#x27;})<br />@ApiBody({type: RegisterBody, required: true, description: &#x27;User&#x27;s Cognito information&#x27;, examples: undefined})<br />@ApiResponse({status: 200, description: &#x27;User successfully registered.&#x27;, type: RegisterBody})<br />@ApiResponse({status: 400, description: &#x27;Bad request.&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="160"
-                                    class="link-to-prism">src/auth/auth.controller.ts:160</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="107"
+                                    class="link-to-prism">src/auth/auth.controller.ts:107</a></div>
                         </td>
                     </tr>
 
@@ -358,97 +448,39 @@ import {
 	JWTPayload,
 	RegisterBody,
 	LoginBody,
+	RefreshBody,
 } from &quot;./auth.service&quot;;
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from &quot;@nestjs/swagger&quot;;
-import { UsersService } from &quot;src/modules/users/users.service&quot;;
-import * as PrismaTypes from &quot;@prisma/client&quot;;
 
 @Controller(&quot;auth&quot;)
+@ApiTags(&quot;auth&quot;)
 export class AuthController {
-	constructor(
-		private readonly authService: AuthService,
-		private readonly usersService: UsersService,
-	) {}
+	constructor(private readonly authService: AuthService) {}
 
 	@Post(&quot;login&quot;)
-	@ApiTags(&quot;auth&quot;)
-	@ApiOperation({ summary: &quot;Login in the API using Cognito&quot; })
-	@ApiBody({ type: LoginBody })
+	@ApiOperation({
+		summary: &quot;Authenticate a user using a Cognito JWT token&quot;,
+		description:
+			&quot;This method will authenticate a user using a Cognito JWT token. The token is decoded and verified, and a new JWT token is generated and returned. See https://jwt.io/ for more information on JWT tokens.&quot;,
+		operationId: &quot;login&quot;,
+	})
+	@ApiBody({
+		type: LoginBody,
+		required: true,
+		description: &quot;Cognito JWT token&quot;,
+		examples: {
+			token: {
+				value: &quot;(see https://jwt.io/)&quot;,
+			},
+		},
+	})
 	@ApiResponse({
-		status: 201,
-		description: &quot;The record has been successfully created.&quot;,
+		status: 200,
+		description: &quot;User successfully logged in. JWT token returned.&quot;,
 		type: String,
 	})
 	@ApiResponse({ status: 403, description: &quot;Forbidden.&quot; })
 	async login(@Body() loginInfo: LoginBody) {
-		/*
-		const users &#x3D; await this.authService.listUsers();
-		console.log(users);
-		console.log(users.Users);
-		if (!users) {
-			throw new HttpException(
-				&quot;Invalid credentials. Could not create user. AuthError01&quot;,
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-
-		if (!users.Users || users.Users.length &#x3D;&#x3D;&#x3D; 0) {
-			throw new HttpException(
-				&quot;Invalid credentials. Could not create user. AuthError02&quot;,
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-
-		//match the email address given with the email in the UserPool
-		let userMatch &#x3D; null;
-		let userEmail &#x3D; &quot;&quot;;
-		for (let i &#x3D; 0; i &lt; users.Users.length; i++) {
-			if (!users.Users[i] || users.Users[i] &#x3D;&#x3D;&#x3D; undefined) {
-				continue;
-			}
-			console.log(&quot;users.Users[i]&quot;, users.Users[i]);
-			const attrs &#x3D; users.Users[i].Attributes;
-			console.log(&quot;attrs&quot;, attrs);
-			if (!attrs || attrs &#x3D;&#x3D;&#x3D; undefined || attrs.length &#x3D;&#x3D;&#x3D; 0) {
-				continue;
-			}
-
-			// if &quot;email&quot; is the Name of an attribute in users.Users[i].Attributes
-			if (attrs.find((attribute) &#x3D;&gt; attribute.Name &#x3D;&#x3D;&#x3D; &quot;email&quot;)) {
-				const attr &#x3D; attrs.find((attribute) &#x3D;&gt; attribute.Name &#x3D;&#x3D;&#x3D; &quot;email&quot;);
-				if (!attr || attr &#x3D;&#x3D;&#x3D; undefined) {
-					continue;
-				}
-				//if the userCognitoSub matches the UserSub in the UserPool
-				if (users.Users[i].Username &#x3D;&#x3D;&#x3D; authInfo.userCognitoSub &amp;&amp; attr.Value) {
-					userMatch &#x3D; users.Users[i];
-					userEmail &#x3D; attr.Value;
-					break;
-				}
-			}
-		}
-
-		if (userMatch &#x3D;&#x3D;&#x3D; null || !userMatch) {
-			throw new HttpException(
-				&quot;Invalid credentials. Could not create user. AuthError03&quot;,
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-
-		// add users to table
-		const successful: boolean &#x3D; await this.authService.createUser(
-			authInfo.username,
-			userEmail,
-			authInfo.userCognitoSub,
-		);
-
-		if (!successful) {
-			throw new HttpException(
-				&quot;Invalid credentials. Could not create user. AuthError04&quot;,
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-		*/
 		if (!loginInfo.token || loginInfo.token &#x3D;&#x3D;&#x3D; null) {
 			throw new HttpException(
 				&quot;Invalid request. Missing Cognito access token. AuthControllerLoginError01&quot;,
@@ -462,27 +494,14 @@ export class AuthController {
 		const userID: string &#x3D; authInfo.username;
 		console.log(&quot;authInfo&quot;, authInfo);
 
-		const user: PrismaTypes.users | null &#x3D;
-			await this.usersService.findOne(userID);
-		if (!user || user &#x3D;&#x3D;&#x3D; null) {
-			throw new HttpException(
-				&quot;Invalid credentials. Could not create user. AuthControllerLoginError01&quot;,
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
-		if (!user.email || user.email &#x3D;&#x3D;&#x3D; null) {
-			throw new HttpException(
-				&quot;User (&quot; +
-					user.username +
-					&quot;) does not have an email address. AuthControllerLoginError02&quot;,
-				HttpStatus.UNAUTHORIZED,
-			);
-		}
+		const { username, email } &#x3D; await this.authService.getUsernameAndEmail(
+			userID,
+		);
 
 		const payload: JWTPayload &#x3D; {
 			id: authInfo.username,
-			username: user.username,
-			email: user.email,
+			username: username,
+			email: email,
 		};
 
 		console.log(&quot;payload&quot;, payload);
@@ -495,15 +514,33 @@ export class AuthController {
 	}
 
 	@Post(&quot;register&quot;)
-	@ApiTags(&quot;auth&quot;)
-	@ApiOperation({ summary: &quot;Register a new user in the API using Cognito&quot; })
-	@ApiBody({ type: RegisterBody })
+	@ApiOperation({
+		summary: &quot;Register a new user in the API using Cognito&quot;,
+		description:
+			&quot;This method will register a new user in the API using Cognito. The user&#x27;s Cognito username, email, and Cognito sub ID are required. The user will be created in the our database and will be able to authenticate using the Cognito JWT token.&quot;,
+		operationId: &quot;register&quot;,
+	})
+	@ApiBody({ type: RegisterBody, required: true, description: &quot;User info&quot; })
+	@ApiBody({
+		type: RegisterBody,
+		required: true,
+		description: &quot;User&#x27;s Cognito information&quot;,
+		examples: {
+			register: {
+				value: {
+					username: &quot;cognito-username&quot;,
+					email: &quot;john@example.com&quot;,
+					userCognitoSub: &quot;cognito-sub-id&quot;,
+				},
+			},
+		},
+	})
 	@ApiResponse({
-		status: 201,
-		description: &quot;The record has been successfully created.&quot;,
+		status: 200,
+		description: &quot;User successfully registered.&quot;,
 		type: RegisterBody,
 	})
-	@ApiResponse({ status: 403, description: &quot;Forbidden.&quot; })
+	@ApiResponse({ status: 400, description: &quot;Bad request.&quot; })
 	async register(@Body() registerInfo: RegisterBody) {
 		const successful: boolean &#x3D; await this.authService.createUser(
 			registerInfo.username,
@@ -514,14 +551,65 @@ export class AuthController {
 		if (!successful) {
 			throw new HttpException(
 				&quot;Invalid credentials. Could not create user. AuthRegisterError01&quot;,
-				HttpStatus.UNAUTHORIZED,
+				HttpStatus.BAD_REQUEST,
 			);
 		}
 
 		throw new HttpException(&quot;Successfully created user.&quot;, HttpStatus.CREATED);
 	}
 
-	//TODO: Add a POST method to refresh an expired JWT token
+	@Post(&quot;refresh&quot;)
+	@ApiOperation({
+		summary: &quot;Refresh an expired (or almost expired) JWT token&quot;,
+		description:
+			&quot;This method will refresh an expired (or almost expired) JWT token. The expired token is sent in the request body, and a new JWT token is generated and returned. The new token will have a new expiration date.&quot;,
+		operationId: &quot;refresh&quot;,
+	})
+	@ApiBody({
+		type: RefreshBody,
+		required: true,
+		description: &quot;The expired JWT token&quot;,
+		examples: {
+			register: {
+				value: {
+					username: &quot;cognito-username&quot;,
+					email: &quot;john@example.com&quot;,
+					userCognitoSub: &quot;cognito-sub-id&quot;,
+				},
+			},
+		},
+	})
+	@ApiResponse({
+		status: 200,
+		description: &quot;JWT token successfully refreshed.&quot;,
+		type: String,
+	})
+	@ApiResponse({ status: 400, description: &quot;Bad request.&quot; })
+	@ApiResponse({ status: 401, description: &quot;Unauthorized.&quot; })
+	async refresh(@Body() rb: RefreshBody) {
+		if (!rb || rb &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;Invalid request. Missing JWT token. AuthControllerRefreshError01&quot;,
+				HttpStatus.BAD_REQUEST,
+			);
+		}
+		try {
+			console.log(&quot;rb&quot;);
+			console.log(rb);
+			console.log(typeof rb);
+			const token: string &#x3D; rb.refreshToken;
+			const payload: JWTPayload &#x3D; await this.authService.refreshJWT(token);
+			const newToken: string &#x3D; await this.authService.generateJWT(payload);
+			return { token: newToken };
+		} catch (e) {
+			console.error(e);
+			throw new HttpException(
+				&quot;Invalid JWT token. AuthControllerRefreshError02&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+	}
+
 	//TODO: Add a POST method to logout a user
 }
 </code></pre>

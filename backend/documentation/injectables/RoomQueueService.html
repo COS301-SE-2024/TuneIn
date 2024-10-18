@@ -1,0 +1,2945 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >RoomQueueService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/modules/rooms/roomqueue/roomqueue.service.ts</code>
+        </p>
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Public</span>
+                                <a href="#roomQueues" >roomQueues</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#addSongs" >addSongs</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#clearRoomQueue" >clearRoomQueue</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#createRoomQueue" >createRoomQueue</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#flushToDB" >flushToDB</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getCurrentSong" >getCurrentSong</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getQueueState" >getQueueState</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRoom" >getRoom</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getSongAsRoomSongDto" >getSongAsRoomSongDto</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#isPaused" >isPaused</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#isPlaying" >isPlaying</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#pauseSong" >pauseSong</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#play" >play</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#playNext" >playNext</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#refreshQueue" >refreshQueue</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#removeSongs" >removeSongs</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(dtogen: <a href="../injectables/DtoGenService.html" target="_self">DtoGenService</a>, prisma: <a href="../injectables/PrismaService.html" target="_self">PrismaService</a>, spotify: <a href="../injectables/SpotifyService.html" target="_self">SpotifyService</a>, murLockService: MurLockService)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="1154" class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1154</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>dtogen</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/DtoGenService.html" target="_self" >DtoGenService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>prisma</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/PrismaService.html" target="_self" >PrismaService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>spotify</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/SpotifyService.html" target="_self" >SpotifyService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>murLockService</td>
+                                                  
+                                                        <td>
+                                                                    <code>MurLockService</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="addSongs"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>addSongs</b></span>
+                        <a href="#addSongs"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>addSongs(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, songs: RoomSongDto[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1216"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1216</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>songs</td>
+                                            <td>
+                                                        <code>RoomSongDto[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="clearRoomQueue"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>clearRoomQueue</b></span>
+                        <a href="#clearRoomQueue"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>clearRoomQueue(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1198"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1198</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="createRoomQueue"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>createRoomQueue</b></span>
+                        <a href="#createRoomQueue"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>createRoomQueue(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1167"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1167</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="flushToDB"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>flushToDB</b></span>
+                        <a href="#flushToDB"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>flushToDB(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1193"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1193</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getCurrentSong"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getCurrentSong</b></span>
+                        <a href="#getCurrentSong"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getCurrentSong(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1336"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1336</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;RoomSongDto | null&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getQueueState"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getQueueState</b></span>
+                        <a href="#getQueueState"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getQueueState(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1314"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1314</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRoom"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRoom</b></span>
+                        <a href="#getRoom"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRoom(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1203"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1203</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/ActiveRoom.html" target="_self" >Promise&lt;ActiveRoom&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getSongAsRoomSongDto"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getSongAsRoomSongDto</b></span>
+                        <a href="#getSongAsRoomSongDto"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getSongAsRoomSongDto(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, spotifyID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1328"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1328</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>spotifyID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;RoomSongDto | null&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="isPaused"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>isPaused</b></span>
+                        <a href="#isPaused"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>isPaused(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1353"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1353</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="isPlaying"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>isPlaying</b></span>
+                        <a href="#isPlaying"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>isPlaying(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1348"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1348</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="pauseSong"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>pauseSong</b></span>
+                        <a href="#pauseSong"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>pauseSong(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1370"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1370</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="play"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>play</b></span>
+                        <a href="#play"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>play(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, startTime: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1358"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1358</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>startTime</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;RoomSongDto | null&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="playNext"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>playNext</b></span>
+                        <a href="#playNext"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>playNext(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, startTime: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1375"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1375</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>startTime</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="refreshQueue"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>refreshQueue</b></span>
+                        <a href="#refreshQueue"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>refreshQueue(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1188"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1188</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="removeSongs"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>removeSongs</b></span>
+                        <a href="#removeSongs"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>removeSongs(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, songs: RoomSongDto[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1235"
+                                    class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1235</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>songs</td>
+                                            <td>
+                                                        <code>RoomSongDto[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+            <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="roomQueues"></a>
+                    <span class="name">
+                            <span class="modifier">Public</span>
+                        <span ><b>roomQueues</b></span>
+                        <a href="#roomQueues"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="../classes/ActiveRoom.html" target="_self" >Map&lt;string | ActiveRoom&gt;</a></code>
+
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="1154" class="link-to-prism">src/modules/rooms/roomqueue/roomqueue.service.ts:1154</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &quot;@nestjs/common&quot;;
+import { PrismaService } from &quot;../../../../prisma/prisma.service&quot;;
+import { DtoGenService } from &quot;../../dto-gen/dto-gen.service&quot;;
+// import { DbUtilsService } from &quot;../../db-utils/db-utils.service&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import { Prisma } from &quot;@prisma/client&quot;;
+import {
+	MinPriorityQueue,
+	// MaxPriorityQueue,
+	IGetCompareValue,
+	PriorityQueue,
+	ICompare,
+} from &quot;@datastructures-js/priority-queue&quot;;
+import { RoomDto } from &quot;../dto/room.dto&quot;;
+import { VoteDto } from &quot;../dto/vote.dto&quot;;
+import { RoomSongDto } from &quot;../dto/roomsong.dto&quot;;
+// import { SpotifyApi } from &quot;@spotify/web-api-ts-sdk&quot;;
+import * as Spotify from &quot;@spotify/web-api-ts-sdk&quot;;
+import { SpotifyService } from &quot;../../../spotify/spotify.service&quot;;
+// import { SpotifyAuthService } from &quot;src/auth/spotify/spotifyauth.service&quot;;
+import { MurLockService } from &quot;murlock&quot;;
+// import { TasksService } from &quot;../../../tasks/tasks.service&quot;;
+
+const QUEUE_LOCK_TIMEOUT &#x3D; 20000;
+// const MIN_PLAYLIST_UPDATE_INTERVAL &#x3D; 60000;
+
+export class RoomSong {
+	private _score: number;
+	public readonly userID: string;
+	public readonly spotifyID: string;
+	private votes: VoteDto[];
+	public readonly insertTime: number;
+	private playbackStartTime: number | null;
+	public pauseTime: number | null &#x3D; null;
+	public readonly songDurationMs: number;
+
+	constructor(
+		spotifyID: string,
+		userID: string,
+		durationMs: number,
+		insertTime: Date &#x3D; new Date(),
+		playbackStartTime: Date | null &#x3D; null,
+	) {
+		this._score &#x3D; 0;
+		this.userID &#x3D; userID;
+		this.spotifyID &#x3D; spotifyID;
+		this.votes &#x3D; [];
+		this.insertTime &#x3D; insertTime.valueOf();
+		this.playbackStartTime &#x3D;
+			playbackStartTime !&#x3D;&#x3D; null ? playbackStartTime.valueOf() : null;
+		this.songDurationMs &#x3D; durationMs;
+	}
+
+	private calculateScore(): number {
+		let result &#x3D; 0;
+		for (const vote of this.votes) {
+			if (vote.isUpvote) {
+				result++;
+			} else {
+				result--;
+			}
+		}
+		return result;
+	}
+
+	addVote(vote: VoteDto): boolean {
+		if (this.votes.find((v) &#x3D;&gt; v.userID &#x3D;&#x3D;&#x3D; vote.userID)) {
+			return false;
+		}
+		this.votes.push(vote);
+		this._score &#x3D; this.calculateScore();
+		return true;
+	}
+
+	addVotes(votes: PrismaTypes.vote[]) {
+		const voteDtos: VoteDto[] &#x3D; votes.map((v) &#x3D;&gt; ({
+			isUpvote: v.is_upvote,
+			userID: v.user_id,
+			spotifyID: v.queue_id,
+			createdAt: v.vote_time.valueOf(),
+		}));
+		this.votes.push(...voteDtos);
+		this._score &#x3D; this.calculateScore();
+	}
+
+	removeVote(vote: VoteDto): boolean {
+		const index &#x3D; this.votes.findIndex(
+			(v) &#x3D;&gt; v.userID &#x3D;&#x3D;&#x3D; vote.userID &amp;&amp; v.spotifyID &#x3D;&#x3D;&#x3D; vote.spotifyID,
+		);
+		if (index &#x3D;&#x3D;&#x3D; -1) {
+			return false;
+		}
+		this.votes.splice(index, 1);
+		this._score &#x3D; this.calculateScore();
+		return true;
+	}
+
+	swapVote(userID: string, swapTime: number): boolean {
+		const index &#x3D; this.votes.findIndex((v) &#x3D;&gt; v.userID &#x3D;&#x3D;&#x3D; userID);
+		if (
+			index &#x3D;&#x3D;&#x3D; -1 ||
+			this.votes[index] &#x3D;&#x3D;&#x3D; null ||
+			this.votes[index] &#x3D;&#x3D;&#x3D; undefined
+		) {
+			return false;
+		}
+		const vote &#x3D; this.votes[index];
+		if (!vote || vote &#x3D;&#x3D;&#x3D; null) {
+			return false;
+		}
+		vote.isUpvote &#x3D; !vote.isUpvote;
+		vote.createdAt &#x3D; swapTime;
+		this.votes[index] &#x3D; vote;
+		this._score &#x3D; this.calculateScore();
+		return true;
+	}
+
+	getUserVote(userID: string): VoteDto | null {
+		const vote &#x3D; this.votes.find((v) &#x3D;&gt; v.userID &#x3D;&#x3D;&#x3D; userID);
+		if (!vote || vote &#x3D;&#x3D;&#x3D; null) {
+			return null;
+		}
+		return vote;
+	}
+
+	get score(): number {
+		return this._score;
+	}
+
+	get voteCount(): number {
+		return this.votes.length;
+	}
+
+	asRoomSongDto(): RoomSongDto {
+		const result: RoomSongDto &#x3D; {
+			spotifyID: this.spotifyID,
+			userID: this.userID,
+			score: this._score,
+			index: -1,
+			insertTime: this.insertTime,
+			playlistIndex: -1,
+		};
+		if (this.playbackStartTime) {
+			result.startTime &#x3D; this.playbackStartTime;
+		}
+		if (this.pauseTime !&#x3D;&#x3D; null) {
+			result.pauseTime &#x3D; this.pauseTime;
+		}
+		return result;
+	}
+
+	getVotes(): VoteDto[] {
+		return this.votes;
+	}
+
+	exportVotes(): Prisma.voteCreateManyQueueInput[] {
+		const votes: Prisma.voteCreateManyQueueInput[] &#x3D; [];
+		for (const vote of this.votes) {
+			votes.push({
+				is_upvote: vote.isUpvote,
+				vote_time: new Date(vote.createdAt),
+				user_id: vote.userID,
+			});
+		}
+		return votes;
+	}
+
+	getPlaybackStartTime(): number | null {
+		return this.playbackStartTime;
+	}
+
+	setPlaybackStartTime(startTime: number): void {
+		this.playbackStartTime &#x3D; startTime;
+	}
+
+	isPlaying(): boolean {
+		if (!this.playbackStartTime || this.playbackStartTime &#x3D;&#x3D;&#x3D; null) {
+			return false;
+		}
+		if (this.pauseTime !&#x3D;&#x3D; null) {
+			return false;
+		}
+		return (
+			this.playbackStartTime.valueOf() + this.songDurationMs &gt;&#x3D;
+			new Date().valueOf()
+		);
+	}
+
+	isPaused(): boolean {
+		if (!this.playbackStartTime || this.playbackStartTime &#x3D;&#x3D;&#x3D; null) {
+			return false;
+		}
+		if (this.pauseTime !&#x3D;&#x3D; null) {
+			return true;
+		}
+		return false;
+	}
+}
+
+function sortRoomSongs(queue: RoomSong[]): RoomSong[] {
+	if (queue.length &#x3D;&#x3D;&#x3D; 0) {
+		return queue;
+	}
+	console.log(&quot;###################################&quot;);
+	console.log(&quot;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&quot;);
+	console.log(&quot;SORTING QUEUE&quot;);
+	console.log(&quot;Pre-sorted queue:&quot;);
+	for (const song of queue) {
+		console.log(
+			song.spotifyID +
+				&quot; - score: &quot; +
+				song.score +
+				&quot; - insertTime: &quot; +
+				song.insertTime +
+				&quot; - startTime: &quot; +
+				song.getPlaybackStartTime(),
+		);
+	}
+	queue &#x3D; queue.sort((a, b) &#x3D;&gt; {
+		if (a.score &#x3D;&#x3D;&#x3D; b.score) {
+			return a.insertTime.valueOf() - b.insertTime.valueOf();
+		}
+		return b.score - a.score;
+	});
+	const head: RoomSong &#x3D; queue[0];
+	const currentStartTime &#x3D; head.getPlaybackStartTime();
+	if (currentStartTime !&#x3D;&#x3D; null) {
+		//update all start times to be sequential
+		let pos &#x3D; currentStartTime;
+		for (let i &#x3D; 0; i &lt; queue.length; i++) {
+			const song: RoomSong &#x3D; queue[i];
+			song.setPlaybackStartTime(pos);
+			queue[i] &#x3D; song;
+			pos +&#x3D; song.songDurationMs;
+		}
+	}
+	console.log(&quot;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&quot;);
+	console.log(&quot;Sorted queue:&quot;);
+	for (const song of queue) {
+		console.log(
+			song.spotifyID +
+				&quot; - score: &quot; +
+				song.score +
+				&quot; - insertTime: &quot; +
+				song.insertTime +
+				&quot; - startTime: &quot; +
+				song.getPlaybackStartTime(),
+		);
+	}
+	console.log(&quot;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&quot;);
+	console.log(&quot;###################################&quot;);
+	return queue;
+}
+
+export class ActiveRoom {
+	public readonly room: RoomDto;
+	private queue: PriorityQueue&lt;RoomSong&gt;; //priority queue of songs (automatically ordered by score)
+	private historicQueue: MinPriorityQueue&lt;RoomSong&gt;; //priority queue of songs that have already been played
+	private compareRoomSongs: ICompare&lt;RoomSong&gt; &#x3D; (a: RoomSong, b: RoomSong) &#x3D;&gt; {
+		if (a.score &#x3D;&#x3D;&#x3D; b.score) {
+			return a.insertTime.valueOf() - b.insertTime.valueOf();
+		}
+		return b.score - a.score;
+	};
+	public inactive &#x3D; false;
+	public minutesInactive &#x3D; 0;
+	// private lastPlaylistUpdate &#x3D; 0;
+
+	constructor(room: RoomDto, murLockService: MurLockService) {
+		this.room &#x3D; room;
+		this.createQueues(murLockService);
+	}
+
+	/**
+	 * Creates the queue objects for the room
+	 * @param murLockService
+	 */
+	async createQueues(murLockService: MurLockService) {
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;createQueues&#x27;&#x60;,
+				);
+				try {
+					this.queue &#x3D; new PriorityQueue&lt;RoomSong&gt;(this.compareRoomSongs);
+					const playbackStartTime: IGetCompareValue&lt;RoomSong&gt; &#x3D; (song) &#x3D;&gt; {
+						const playbackTime: number | null &#x3D; song.getPlaybackStartTime();
+						if (!playbackTime || playbackTime &#x3D;&#x3D;&#x3D; null) {
+							throw new Error(&quot;Song has no playback start time&quot;);
+						}
+						return playbackTime.valueOf();
+					};
+					this.historicQueue &#x3D; new MinPriorityQueue&lt;RoomSong&gt;(
+						playbackStartTime,
+					);
+				} catch (e) {
+					console.error(&quot;Error in createQueues&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;createQueues&#x27;&#x60;,
+				);
+			},
+		);
+	}
+
+	/**
+	 * Sets the room queue to the given songs
+	 * @param songs The songs to set the queue to
+	 * @param murLockService
+	 */
+	async setQueue(
+		songs: RoomSong[],
+		// spotify: SpotifyService,
+		murLockService: MurLockService,
+	) {
+		this.inactive &#x3D; false;
+		this.minutesInactive &#x3D; 0;
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;setQueue&#x27;&#x60;,
+				);
+				try {
+					this.queue &#x3D; PriorityQueue.fromArray(
+						sortRoomSongs(songs),
+						this.compareRoomSongs,
+					);
+					// const queueIDs: string[] &#x3D;
+					// 	this.historicQueue.size() &gt; 0
+					// 		? this.historicQueue.toArray().map((s) &#x3D;&gt; s.spotifyID)
+					// 		: [];
+
+					// if (this.queue.size() &gt; 0) {
+					// 	queueIDs.push(...this.queue.toArray().map((s) &#x3D;&gt; s.spotifyID));
+					// }
+
+					// if (queueIDs.length &#x3D;&#x3D;&#x3D; 0) {
+					// 	return;
+					// }
+
+					// if (
+					// 	this.lastPlaylistUpdate + MIN_PLAYLIST_UPDATE_INTERVAL &lt;
+					// 	Date.now()
+					// ) {
+					// 	console.log(&quot;Queue has changed, updating spotify playlist&quot;);
+					// 	await spotify
+					// 		.updateRoomPlaylist(this.room.spotifyPlaylistID, queueIDs)
+					// 		.then(() &#x3D;&gt; {
+					// 			this.lastPlaylistUpdate &#x3D; Date.now();
+					// 		});
+					// }
+				} catch (e) {
+					console.error(&quot;Error in setQueue&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;setQueue&#x27;&#x60;,
+				);
+			},
+		);
+	}
+
+	/**
+	 * Refreshes the song order in the queue
+	 * @param murLockService
+	 */
+	async refreshQueue(murLockService: MurLockService) {
+		await this.setQueue(this.queue.toArray(), murLockService);
+	}
+
+	/**
+	 * Reloads the queue from the database
+	 * @param prisma
+	 * @param murLockService
+	 */
+	async reloadQueue(
+		prisma: PrismaService,
+		// spotify: SpotifyService,
+		murLockService: MurLockService,
+	) {
+		//load historic queue from db
+		const roomID &#x3D; this.room.roomID;
+		const queueItems &#x3D; await prisma.queue.findMany({
+			where: {
+				room_id: roomID,
+			},
+			orderBy: {
+				start_time: &quot;asc&quot;,
+			},
+			include: {
+				vote: true,
+				song: true,
+			},
+		});
+		if (!queueItems || queueItems &#x3D;&#x3D;&#x3D; null) {
+			throw new Error(&quot;There was an issue fetching the queue&quot;);
+		}
+
+		// assume first person who voted for the song is the enqueuer
+		const songEnqueuers: string[] &#x3D; [];
+		for (const queueItem of queueItems) {
+			if (queueItem.vote.length &#x3D;&#x3D;&#x3D; 0) {
+				// assign song to room owner
+				songEnqueuers.push(this.room.creator.userID);
+			} else {
+				if (queueItem.vote[0]) {
+					const enqueuer &#x3D; queueItem.vote[0].user_id;
+					songEnqueuers.push(enqueuer);
+				}
+			}
+		}
+
+		const rs: RoomSong[] &#x3D; [];
+		for (let i &#x3D; 0; i &lt; queueItems.length; i++) {
+			const queueItem &#x3D; queueItems[i];
+			if (queueItem) {
+				const songEnqueuer &#x3D; songEnqueuers[i];
+				if (queueItem.song.spotify_id &amp;&amp; songEnqueuer) {
+					try {
+						const songInfo: Spotify.Track &#x3D; JSON.parse(
+							queueItem.song.track_info as string,
+						);
+						const song &#x3D; new RoomSong(
+							queueItem.song.spotify_id,
+							songEnqueuer,
+							songInfo.duration_ms,
+							queueItem.insert_time,
+							queueItem.start_time,
+						);
+						song.addVotes(queueItem.vote);
+						rs.push(song);
+					} catch (e) {
+						console.error(
+							&quot;Error in reloadQueue. Song could not be loaded from database queue&quot;,
+						);
+						console.error(e);
+					}
+				}
+			}
+		}
+		await this.createQueues(murLockService);
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				try {
+					for (let i &#x3D; 0; i &lt; rs.length; i++) {
+						const song &#x3D; rs[i];
+						if (song) {
+							const startTime &#x3D; song.getPlaybackStartTime();
+							if (
+								startTime !&#x3D;&#x3D; null &amp;&amp;
+								startTime.valueOf() &lt; Date.now().valueOf()
+							) {
+								this.historicQueue.enqueue(song);
+							} else {
+								this.queue.enqueue(song);
+							}
+						}
+					}
+				} catch (e) {
+					console.error(&quot;Error in reloadQueue&quot;);
+					console.error(e);
+				}
+			},
+		);
+		// const ids: string[] &#x3D; rs.map((s) &#x3D;&gt; s.spotifyID);
+		// await spotify
+		// 	.updateRoomPlaylist(this.room.spotifyPlaylistID, ids)
+		// 	.then(() &#x3D;&gt; {
+		// 		this.lastPlaylistUpdate &#x3D; Date.now();
+		// 	});
+	}
+
+	async clearQueue(murLockService: MurLockService) {
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;clearQueue&#x27;&#x60;,
+				);
+				try {
+					this.queue.clear();
+				} catch (e) {
+					console.error(&quot;Error in clearQueue&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;clearQueue&#x27;&#x60;,
+				);
+			},
+		);
+	}
+
+	getQueueLockName(): string {
+		return &#x60;EDIT_QUEUE_LOCK_${this.room.roomID}&#x60;;
+	}
+
+	/**
+	 * Updates the queue by removing played songs and adding them to the historic queue
+	 * @param murLockService
+	 */
+	async updateQueue(murLockService: MurLockService) {
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;updateQueue&#x27;&#x60;,
+				);
+				try {
+					// handle played songs
+					if (this.queue.isEmpty()) {
+						return;
+					}
+					let song &#x3D; this.queue.front();
+					if (song &#x3D;&#x3D;&#x3D; null) {
+						return;
+					}
+					let t &#x3D; song.getPlaybackStartTime();
+					// while there are songs in the queue that have played already
+					while (t &amp;&amp; t &lt; new Date().valueOf()) {
+						const expectedEnd &#x3D; t + song.songDurationMs;
+						const now &#x3D; new Date().valueOf();
+						if (now &lt; expectedEnd) {
+							break;
+						}
+						// add them to the historic queue, if not there yet
+						const s &#x3D; this.historicQueue
+							.toArray()
+							.find(
+								(s) &#x3D;&gt;
+									s.spotifyID &#x3D;&#x3D;&#x3D; song.spotifyID &amp;&amp;
+									s.getPlaybackStartTime() &#x3D;&#x3D;&#x3D; t,
+							);
+						if (!s) {
+							this.historicQueue.enqueue(song);
+						}
+
+						// remove them from the queue until we find an unplayed song
+						console.log(&quot;Removing song from queue, since it&#x27;s already played&quot;);
+						console.log(song);
+						this.queue.dequeue();
+						if (this.queue.isEmpty()) {
+							return;
+						}
+						song &#x3D; this.queue.front();
+						t &#x3D; song.getPlaybackStartTime();
+					}
+				} catch (e) {
+					console.error(&quot;Error in updateQueue&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;updateQueue&#x27;&#x60;,
+				);
+			},
+		);
+	}
+
+	async flushToDB(
+		spotify: SpotifyService,
+		prisma: PrismaService,
+		murLockService: MurLockService,
+	) {
+		//flush queue to db
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(&#x60;Acquire lock: ${this.getQueueLockName()}&#x60;);
+				try {
+					//ensure individual songs are in db
+
+					//get all songs in queue
+					const historicQueue: RoomSong[] &#x3D; this.historicQueue.toArray();
+					const upcomingQueue: RoomSong[] &#x3D; this.queue.toArray();
+					const queue: RoomSong[] &#x3D; historicQueue.concat(upcomingQueue);
+
+					//ensure enqueued songs are in db (songs table)
+					const tracks: Spotify.Track[] &#x3D; await spotify.getManyTracks(
+						queue.map((s) &#x3D;&gt; s.spotifyID),
+					);
+					const dbSongs: PrismaTypes.song[] &#x3D; await spotify.addTracksToDB(
+						tracks,
+					);
+
+					//create new queue items in 1 new transaction
+					const newQueueItems: Prisma.queueCreateInput[] &#x3D; [];
+					historicQueue.forEach((song) &#x3D;&gt; {
+						const dbSong &#x3D; dbSongs.find((s) &#x3D;&gt; s.spotify_id &#x3D;&#x3D;&#x3D; song.spotifyID);
+						if (!dbSong) {
+							console.log(dbSong);
+							throw new Error(&quot;Song is not in the queue somehow?&quot;);
+						}
+						const startTime &#x3D; song.getPlaybackStartTime();
+						const queueItem: Prisma.queueCreateInput &#x3D; {
+							room: {
+								connect: {
+									room_id: this.room.roomID,
+								},
+							},
+							song: {
+								connect: {
+									song_id: dbSong.song_id,
+								},
+							},
+							is_done_playing: true,
+							start_time: startTime !&#x3D;&#x3D; null ? new Date(startTime) : null,
+							insert_time: new Date(song.insertTime),
+						};
+						const songVotes: Prisma.voteCreateManyQueueInput[] &#x3D;
+							song.exportVotes();
+						if (songVotes.length &gt; 0) {
+							queueItem.vote &#x3D; {
+								createMany: {
+									data: songVotes,
+								},
+							};
+						}
+						newQueueItems.push(queueItem);
+					});
+					upcomingQueue.forEach((song) &#x3D;&gt; {
+						const dbSong &#x3D; dbSongs.find((s) &#x3D;&gt; s.spotify_id &#x3D;&#x3D;&#x3D; song.spotifyID);
+						if (!dbSong) {
+							console.log(dbSong);
+							throw new Error(&quot;Song is not in the queue somehow?&quot;);
+						}
+						const startTime &#x3D; song.getPlaybackStartTime();
+						const queueItem: Prisma.queueCreateInput &#x3D; {
+							room: {
+								connect: {
+									room_id: this.room.roomID,
+								},
+							},
+							song: {
+								connect: {
+									song_id: dbSong.song_id,
+								},
+							},
+							is_done_playing: false,
+							start_time: startTime !&#x3D;&#x3D; null ? new Date(startTime) : null,
+							insert_time: new Date(song.insertTime),
+						};
+						const songVotes: Prisma.voteCreateManyQueueInput[] &#x3D;
+							song.exportVotes();
+						if (songVotes.length &gt; 0) {
+							queueItem.vote &#x3D; {
+								createMany: {
+									data: songVotes,
+								},
+							};
+						}
+						newQueueItems.push(queueItem);
+					});
+
+					console.log(&#x60;Sending new queue data to db...&#x60;);
+					const start &#x3D; Date.now();
+					await prisma.$transaction([
+						prisma.queue.deleteMany({
+							where: {
+								room_id: this.room.roomID,
+							},
+						}),
+						...newQueueItems.map((q) &#x3D;&gt; prisma.queue.create({ data: q })),
+					]);
+					console.log(&#x60;Queue flush transaction took ${Date.now() - start}ms&#x60;);
+					console.log(&#x60;Release lock: ${this.getQueueLockName()}&#x60;);
+				} catch (e) {
+					console.error(&quot;Error in flushToDB&quot;);
+					console.error(e);
+				}
+			},
+		);
+	}
+
+	async getCurrentSong(
+		murLockService: MurLockService,
+	): Promise&lt;RoomSong | null&gt; {
+		await this.refreshQueue(murLockService);
+		console.log(&quot;historicQueue&quot;);
+		console.log(this.historicQueue.toArray());
+		console.log(&quot;currentQueue&quot;);
+		console.log(this.queue.toArray());
+		if (this.queue.isEmpty()) {
+			return null;
+		} else {
+			await this.updateQueue(murLockService);
+			return this.queue.front();
+		}
+	}
+
+	// async addVote(
+	// 	vote: VoteDto,
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// ): Promise&lt;boolean&gt; {
+	// 	let result &#x3D; false;
+	// 	this.printQueueBrief();
+	// 	const songs: RoomSong[] &#x3D; this.queue.toArray();
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () &#x3D;&gt; {
+	// 			console.log(
+	// 				&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;addVote&#x27;&#x60;,
+	// 			);
+	// 			try {
+	// 				const index &#x3D; songs.findIndex((s) &#x3D;&gt; s.spotifyID &#x3D;&#x3D;&#x3D; vote.spotifyID);
+	// 				if (index &#x3D;&#x3D;&#x3D; -1 || !songs[index]) {
+	// 					result &#x3D; false;
+	// 					return;
+	// 				}
+	// 				result &#x3D; songs[index].addVote(vote);
+	// 			} catch (e) {
+	// 				console.error(&quot;Error in addVote&quot;);
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;addVote&#x27;&#x60;,
+	// 			);
+	// 		},
+	// 	);
+	// 	if (result) await this.setQueue(songs, murLockService);
+	// 	this.printQueueBrief();
+	// 	return result;
+	// }
+
+	// async removeVote(
+	// 	vote: VoteDto,
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// ): Promise&lt;boolean&gt; {
+	// 	let result &#x3D; false;
+	// 	this.printQueueBrief();
+	// 	const songs: RoomSong[] &#x3D; this.queue.toArray();
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () &#x3D;&gt; {
+	// 			console.log(
+	// 				&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;removeVote&#x27;&#x60;,
+	// 			);
+	// 			try {
+	// 				const index &#x3D; songs.findIndex((s) &#x3D;&gt; s.spotifyID &#x3D;&#x3D;&#x3D; vote.spotifyID);
+	// 				if (index &#x3D;&#x3D;&#x3D; -1 || songs[index] &#x3D;&#x3D;&#x3D; null || !songs[index]) {
+	// 					result &#x3D; false;
+	// 					return;
+	// 				}
+	// 				result &#x3D; songs[index].removeVote(vote);
+	// 			} catch (e) {
+	// 				console.error(&quot;Error in removeVote&quot;);
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;removeVote&#x27;&#x60;,
+	// 			);
+	// 		},
+	// 	);
+	// 	if (result) await this.setQueue(songs, murLockService);
+	// 	this.printQueueBrief();
+	// 	return result;
+	// }
+
+	// async swapVote(
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	swapTime: number,
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// ): Promise&lt;boolean&gt; {
+	// 	let result &#x3D; false;
+	// 	await this.refreshQueue(murLockService);
+	// 	this.printQueueBrief();
+	// 	const songs: RoomSong[] &#x3D; this.queue.toArray();
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () &#x3D;&gt; {
+	// 			console.log(
+	// 				&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;swapVote&#x27;&#x60;,
+	// 			);
+	// 			try {
+	// 				const index &#x3D; songs.findIndex((s) &#x3D;&gt; s.spotifyID &#x3D;&#x3D;&#x3D; spotifyID);
+	// 				if (index &#x3D;&#x3D;&#x3D; -1 || songs[index] &#x3D;&#x3D;&#x3D; null || !songs[index]) {
+	// 					result &#x3D; false;
+	// 					return;
+	// 				}
+	// 				result &#x3D; songs[index].swapVote(userID, swapTime);
+	// 			} catch (e) {
+	// 				console.error(&quot;Error in swapVote&quot;);
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;swapVote&#x27;&#x60;,
+	// 			);
+	// 		},
+	// 	);
+	// 	if (result) await this.setQueue(songs, murLockService);
+	// 	this.printQueueBrief();
+	// 	return result;
+	// }
+
+	async addSongs(
+		songs: RoomSongDto[],
+		tracks: Spotify.Track[],
+		userID: string,
+		spotify: SpotifyService,
+		murLockService: MurLockService,
+	): Promise&lt;boolean&gt; {
+		if (songs.length &#x3D;&#x3D;&#x3D; 0) {
+			return false;
+		}
+		console.log(&#x60;Attempting to add ${songs.length} songs to the queue&#x60;);
+		let result &#x3D; false;
+		const roomSongs: RoomSong[] &#x3D; this.queue.toArray();
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;addSong&#x27;&#x60;,
+				);
+				try {
+					for (let i &#x3D; 0, n &#x3D; songs.length; i &lt; n; i++) {
+						const song &#x3D; songs[i];
+						if (!roomSongs.find((s) &#x3D;&gt; s.spotifyID &#x3D;&#x3D;&#x3D; song.spotifyID)) {
+							this.queue.enqueue(
+								new RoomSong(
+									song.spotifyID,
+									userID,
+									tracks[i].duration_ms,
+									new Date(song.insertTime),
+								),
+							);
+							result &#x3D; true;
+						}
+					}
+				} catch (e) {
+					console.error(&quot;Error in addSongs&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;addSong&#x27;&#x60;,
+				);
+			},
+		);
+		await this.updateQueue(murLockService);
+		await spotify.addSongsToRoomPlaylist(
+			this.room,
+			songs.map((s) &#x3D;&gt; s.spotifyID),
+		);
+		return result;
+	}
+
+	async removeSongs(
+		songs: RoomSongDto[],
+		userID: string,
+		spotify: SpotifyService,
+		murLockService: MurLockService,
+	): Promise&lt;boolean&gt; {
+		console.log(&#x60;Attempting to remove ${songs.length} songs&#x60;);
+		let result &#x3D; false;
+		await this.refreshQueue(murLockService);
+		const roomSongs: RoomSong[] &#x3D; this.queue.toArray();
+		const oldQueue &#x3D; roomSongs.map((s) &#x3D;&gt; s.spotifyID);
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;removeSong&#x27;&#x60;,
+				);
+				try {
+					for (const song of songs) {
+						const index &#x3D; roomSongs.findIndex(
+							(s) &#x3D;&gt; s.spotifyID &#x3D;&#x3D;&#x3D; song.spotifyID,
+						);
+						console.log(
+							&#x60;Found song with id: ${song.spotifyID} at index: ${index}&#x60;,
+						);
+						if (
+							index &#x3D;&#x3D;&#x3D; -1 ||
+							roomSongs[index] &#x3D;&#x3D;&#x3D; null ||
+							!roomSongs[index]
+						) {
+							console.log(
+								&#x60;Not removing because one of these is true: &#x27;index &#x3D;&#x3D;&#x3D; -1&#x27;: ${
+									index &#x3D;&#x3D;&#x3D; -1
+								}, &#x27;roomSongs[index] &#x3D;&#x3D;&#x3D; null&#x27;: ${
+									roomSongs[index] &#x3D;&#x3D;&#x3D; null
+								}, &#x27;!roomSongs[index]&#x27;: ${!roomSongs[index]}&#x60;,
+							);
+							continue;
+						}
+						if (roomSongs[index].userID !&#x3D;&#x3D; userID) {
+							if (this.room.creator.userID !&#x3D;&#x3D; userID) {
+								console.log(
+									&#x60;Not removing because the user ${userID} is not the enqueuer or room owner&#x60;,
+								);
+								continue;
+							}
+						}
+						roomSongs.splice(index, 1);
+						result &#x3D; true;
+					}
+				} catch (e) {
+					console.error(&quot;Error in removeSongs&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;removeSong&#x27;&#x60;,
+				);
+			},
+		);
+		// if (result) await this.setQueue(roomSongs, spotify, murLockService);
+		await this.updateQueue(murLockService);
+		let i &#x3D; 0;
+		for (i &#x3D; 0; i &lt; roomSongs.length; i++) {
+			if (roomSongs[i].spotifyID !&#x3D;&#x3D; oldQueue[i]) {
+				break;
+			}
+		}
+		await spotify.replaceSongsFromRoomPlaylist(
+			this.room,
+			i,
+			roomSongs.slice(i).map((s) &#x3D;&gt; s.spotifyID),
+		);
+		return result;
+	}
+
+	queueAsRoomSongDto(): RoomSongDto[] {
+		const tempQueue: RoomSong[] &#x3D; this.queue.toArray();
+		const playedSongs: number &#x3D; this.historicQueue.size();
+		const result: RoomSongDto[] &#x3D; tempQueue.map((rs) &#x3D;&gt; {
+			const i &#x3D; tempQueue.indexOf(rs);
+			const s: RoomSongDto &#x3D; rs.asRoomSongDto();
+			s.index &#x3D; i;
+			s.playlistIndex &#x3D; i + playedSongs;
+			return s;
+		});
+		return result;
+	}
+
+	songAsRoomSongDto(spotifyID: string): RoomSongDto | null {
+		const tempQueue: RoomSong[] &#x3D; this.queue.toArray();
+		const song &#x3D; tempQueue.find((s) &#x3D;&gt; s.spotifyID &#x3D;&#x3D;&#x3D; spotifyID);
+		if (!song || song &#x3D;&#x3D;&#x3D; null) {
+			return null;
+		}
+		const result: RoomSongDto &#x3D; song.asRoomSongDto();
+		const i &#x3D; tempQueue.indexOf(song);
+		result.index &#x3D; i;
+		result.playlistIndex &#x3D; i + this.historicQueue.size();
+		return result;
+	}
+
+	allVotes(): VoteDto[] {
+		const songs: RoomSong[] &#x3D; this.queue.toArray();
+		const votes: VoteDto[] &#x3D; [];
+		for (const song of songs) {
+			votes.push(...song.getVotes());
+		}
+		return votes;
+	}
+
+	async play(
+		murLockService: MurLockService,
+		startTime: number,
+	): Promise&lt;RoomSong | null&gt; {
+		if (this.queue.isEmpty()) {
+			return null;
+		}
+		let result: RoomSong | null &#x3D; null;
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;ActiveRoom.play&#x27;&#x60;,
+				);
+				try {
+					const song &#x3D; this.queue.front();
+					const st &#x3D; song.getPlaybackStartTime();
+					if (song.isPaused() &amp;&amp; song.pauseTime !&#x3D;&#x3D; null &amp;&amp; st !&#x3D;&#x3D; null) {
+						const offset &#x3D; song.pauseTime.valueOf() - st.valueOf();
+						const adjustedStart &#x3D; Date.now() + offset;
+						this.queue.front().setPlaybackStartTime(adjustedStart);
+						this.queue.front().pauseTime &#x3D; null;
+					} else {
+						this.queue.front().setPlaybackStartTime(startTime);
+					}
+					result &#x3D; this.queue.front();
+				} catch (e) {
+					console.error(&quot;Error in removeSongs&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;ActiveRoom.play&#x27;&#x60;,
+				);
+			},
+		);
+		if (result !&#x3D;&#x3D; null) await this.updateQueue(murLockService);
+		return result;
+	}
+
+	async pauseSong() {
+		if (this.queue.isEmpty()) {
+			return;
+		}
+		this.queue.front().pauseTime &#x3D; new Date().valueOf();
+	}
+
+	async playNext(
+		murLockService: MurLockService,
+		startTime: number,
+	): Promise&lt;RoomSong | null&gt; {
+		if (this.queue.isEmpty()) {
+			return null;
+		}
+		let result: RoomSong | null &#x3D; null;
+		await murLockService.runWithLock(
+			this.getQueueLockName(),
+			QUEUE_LOCK_TIMEOUT,
+			async () &#x3D;&gt; {
+				console.log(
+					&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;ActiveRoom.playNext&#x27;&#x60;,
+				);
+				try {
+					const prev &#x3D; this.queue.dequeue();
+					// add song to the historic queue, if not there yet
+					const s &#x3D; this.historicQueue
+						.toArray()
+						.find(
+							(s) &#x3D;&gt;
+								s.spotifyID &#x3D;&#x3D;&#x3D; prev.spotifyID &amp;&amp;
+								s.getPlaybackStartTime() &#x3D;&#x3D;&#x3D; prev.getPlaybackStartTime(),
+						);
+					if (!s) {
+						this.historicQueue.enqueue(prev);
+					}
+
+					if (this.queue.isEmpty()) {
+						return;
+					}
+					this.queue.front().setPlaybackStartTime(startTime);
+					result &#x3D; this.queue.front();
+				} catch (e) {
+					console.error(&quot;Error in playNext&quot;);
+					console.error(e);
+				}
+				console.log(
+					&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;ActiveRoom.playNext&#x27;&#x60;,
+				);
+			},
+		);
+		// await this.updateQueue(murLockService);
+		return result;
+	}
+
+	// async playPrev(
+	// 	spotify: SpotifyService,
+	// 	murLockService: MurLockService,
+	// 	startTime: number,
+	// ): Promise&lt;RoomSong | null&gt; {
+	// 	// if paused, remove pause time
+	// 	await murLockService.runWithLock(
+	// 		this.getQueueLockName(),
+	// 		QUEUE_LOCK_TIMEOUT,
+	// 		async () &#x3D;&gt; {
+	// 			console.log(
+	// 				&#x60;Acquire lock: ${this.getQueueLockName()} in function &#x27;playPrev&#x27;&#x60;,
+	// 			);
+	// 			try {
+	// 				if (!this.queue.isEmpty()) {
+	// 					const song &#x3D; this.queue.front();
+	// 					if (song.isPaused()) {
+	// 						this.queue.front().pauseTime &#x3D; null;
+	// 					}
+	// 				}
+	// 			} catch (e) {
+	// 				console.error(&quot;Error in playPrev&quot;);
+	// 				console.error(e);
+	// 			}
+	// 			console.log(
+	// 				&#x60;Release lock: ${this.getQueueLockName()} in function &#x27;playPrev&#x27;&#x60;,
+	// 			);
+	// 		},
+	// 	);
+
+	// 	//find newest song in historic queue
+	// 	if (this.historicQueue.isEmpty()) {
+	// 		return null;
+	// 	}
+	// 	const lastSong &#x3D; this.historicQueue.dequeue();
+	// 	lastSong.setPlaybackStartTime(startTime);
+	// 	const oldQueue &#x3D; this.queue.toArray();
+	// 	oldQueue.unshift(lastSong);
+	// 	for (let i &#x3D; 1, n &#x3D; oldQueue.length; i &lt; n; i++) {
+	// 		oldQueue[i].setPlaybackStartTime(Number.MAX_SAFE_INTEGER);
+	// 	}
+	// 	await this.setQueue(oldQueue, spotify, murLockService);
+	// 	// await this.updateQueue(murLockService);
+	// 	return this.queue.front();
+	// }
+
+	async isPlaying(): Promise&lt;boolean&gt; {
+		if (this.queue.isEmpty()) {
+			return false;
+		}
+		const song &#x3D; this.queue.front();
+		return song.isPlaying();
+	}
+
+	async isPaused(): Promise&lt;boolean&gt; {
+		if (this.queue.isEmpty()) {
+			return false;
+		}
+		const song &#x3D; this.queue.front();
+		return song.isPaused();
+	}
+
+	printQueueBrief() {
+		const songs &#x3D; this.queue.toArray();
+		console.log(&quot;Queue:&quot;);
+		for (const song of songs) {
+			console.log(
+				song.spotifyID +
+					&quot; - score: &quot; +
+					song.score +
+					&quot; - insertTime: &quot; +
+					song.insertTime,
+			);
+		}
+	}
+
+	get playedSongs(): RoomSong[] {
+		return this.historicQueue.toArray();
+	}
+
+	get songs(): RoomSong[] {
+		return this.queue.toArray();
+	}
+}
+
+@Injectable()
+export class RoomQueueService {
+	public roomQueues: Map&lt;string, ActiveRoom&gt;; //map roomID to room data structure
+
+	constructor(
+		// private readonly dbUtils: DbUtilsService,
+		private readonly dtogen: DtoGenService,
+		private readonly prisma: PrismaService,
+		private readonly spotify: SpotifyService,
+		// private readonly spotifyAuth: SpotifyAuthService,
+		private readonly murLockService: MurLockService, // private readonly tasksService: TasksService,
+	) {
+		this.roomQueues &#x3D; new Map&lt;string, ActiveRoom&gt;();
+	}
+
+	async createRoomQueue(roomID: string): Promise&lt;void&gt; {
+		const [room]: RoomDto[] &#x3D; await this.dtogen.generateMultipleRoomDto([
+			roomID,
+		]);
+		if (room.spotifyPlaylistID &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			const playlist: Spotify.Playlist&lt;Spotify.TrackItem&gt; &#x3D;
+				await this.spotify.getRoomPlaylist(room);
+			room.spotifyPlaylistID &#x3D; playlist.id;
+		}
+		const activeRoom &#x3D; new ActiveRoom(room, this.murLockService);
+		await activeRoom.reloadQueue(
+			this.prisma,
+			// this.spotify,
+			this.murLockService,
+		);
+		this.roomQueues.set(roomID, activeRoom);
+		console.log(
+			&#x60;Created room queue for room ${roomID} with active room: ${activeRoom}&#x60;,
+		);
+	}
+
+	async refreshQueue(roomID: string): Promise&lt;void&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		await activeRoom.refreshQueue(this.murLockService);
+	}
+
+	async flushToDB(roomID: string): Promise&lt;void&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		await activeRoom.flushToDB(this.spotify, this.prisma, this.murLockService);
+	}
+
+	async clearRoomQueue(roomID: string): Promise&lt;void&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		await activeRoom.clearQueue(this.murLockService);
+	}
+
+	async getRoom(roomID: string): Promise&lt;ActiveRoom&gt; {
+		if (!this.roomQueues.has(roomID)) {
+			await this.createRoomQueue(roomID);
+		}
+		const activeRoom: ActiveRoom | undefined &#x3D; this.roomQueues.get(roomID);
+		if (!activeRoom || activeRoom &#x3D;&#x3D;&#x3D; undefined) {
+			throw new Error(
+				&quot;Weird error. HashMap is broken: RoomQueueService.getQueueState&quot;,
+			);
+		}
+		return activeRoom;
+	}
+
+	async addSongs(
+		roomID: string,
+		userID: string,
+		songs: RoomSongDto[],
+	): Promise&lt;boolean&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		const tracks: Spotify.Track[] &#x3D; await this.spotify.getManyTracks(
+			songs.map((s) &#x3D;&gt; s.spotifyID),
+		);
+		const result: boolean &#x3D; await activeRoom.addSongs(
+			songs,
+			tracks,
+			userID,
+			this.spotify,
+			this.murLockService,
+		);
+		return result;
+	}
+
+	async removeSongs(
+		roomID: string,
+		userID: string,
+		songs: RoomSongDto[],
+	): Promise&lt;boolean&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		return await activeRoom.removeSongs(
+			songs,
+			userID,
+			this.spotify,
+			this.murLockService,
+		);
+	}
+
+	// async upvoteSong(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	createdAt: number,
+	// ): Promise&lt;boolean&gt; {
+	// 	const vote: VoteDto &#x3D; {
+	// 		isUpvote: true,
+	// 		userID: userID,
+	// 		spotifyID: spotifyID,
+	// 		createdAt: createdAt,
+	// 	};
+	// 	console.log(&quot;upvoteSong for spotifyID: &quot;, spotifyID);
+	// 	const activeRoom &#x3D; await this.getRoom(roomID);
+	// 	return await activeRoom.addVote(vote, this.spotify, this.murLockService);
+	// }
+
+	// async downvoteSong(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	createdAt: number,
+	// ): Promise&lt;boolean&gt; {
+	// 	const vote: VoteDto &#x3D; {
+	// 		isUpvote: false,
+	// 		userID: userID,
+	// 		spotifyID: spotifyID,
+	// 		createdAt: createdAt,
+	// 	};
+	// 	console.log(&quot;upvoteSong for spotifyID: &quot;, spotifyID);
+	// 	const activeRoom &#x3D; await this.getRoom(roomID);
+	// 	return await activeRoom.addVote(vote, this.spotify, this.murLockService);
+	// }
+
+	// async undoSongVote(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// ): Promise&lt;boolean&gt; {
+	// 	const vote: VoteDto &#x3D; {
+	// 		isUpvote: true,
+	// 		userID: userID,
+	// 		spotifyID: spotifyID,
+	// 		createdAt: new Date().valueOf(),
+	// 	};
+	// 	const activeRoom &#x3D; await this.getRoom(roomID);
+	// 	return await activeRoom.removeVote(vote, this.spotify, this.murLockService);
+	// }
+
+	// async swapSongVote(
+	// 	roomID: string,
+	// 	spotifyID: string,
+	// 	userID: string,
+	// 	insertTime: number,
+	// ): Promise&lt;boolean&gt; {
+	// 	const activeRoom &#x3D; await this.getRoom(roomID);
+	// 	return await activeRoom.swapVote(
+	// 		spotifyID,
+	// 		userID,
+	// 		insertTime,
+	// 		this.spotify,
+	// 		this.murLockService,
+	// 	);
+	// }
+
+	async getQueueState(roomID: string): Promise&lt;{
+		room: RoomDto;
+		songs: RoomSongDto[];
+		votes: VoteDto[];
+	}&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		await activeRoom.updateQueue(this.murLockService);
+		return {
+			room: activeRoom.room,
+			songs: activeRoom.queueAsRoomSongDto(),
+			votes: activeRoom.allVotes(),
+		};
+	}
+
+	async getSongAsRoomSongDto(
+		roomID: string,
+		spotifyID: string,
+	): Promise&lt;RoomSongDto | null&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		return activeRoom.songAsRoomSongDto(spotifyID);
+	}
+
+	async getCurrentSong(roomID: string): Promise&lt;RoomSongDto | null&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		const song &#x3D; await activeRoom.getCurrentSong(this.murLockService);
+		if (!song || song &#x3D;&#x3D;&#x3D; null) {
+			return null;
+		}
+		const result &#x3D; song.asRoomSongDto();
+		result.index &#x3D; 0;
+		result.playlistIndex &#x3D; activeRoom.playedSongs.length;
+		return result;
+	}
+
+	async isPlaying(roomID: string): Promise&lt;boolean&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		return await activeRoom.isPlaying();
+	}
+
+	async isPaused(roomID: string): Promise&lt;boolean&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		return await activeRoom.isPaused();
+	}
+
+	async play(roomID: string, startTime: number): Promise&lt;RoomSongDto | null&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		const song &#x3D; await activeRoom.play(this.murLockService, startTime);
+		if (!song || song &#x3D;&#x3D;&#x3D; null) {
+			return null;
+		}
+		const result &#x3D; song.asRoomSongDto();
+		result.index &#x3D; 0;
+		result.playlistIndex &#x3D; activeRoom.playedSongs.length;
+		return result;
+	}
+
+	async pauseSong(roomID: string): Promise&lt;void&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		await activeRoom.pauseSong();
+	}
+
+	async playNext(roomID: string, startTime: number): Promise&lt;void&gt; {
+		const activeRoom &#x3D; await this.getRoom(roomID);
+		await activeRoom.playNext(this.murLockService, startTime);
+	}
+
+	// async playPrev(roomID: string, startTime: number): Promise&lt;void&gt; {
+	// 	const activeRoom &#x3D; await this.getRoom(roomID);
+	// 	await activeRoom.playPrev(this.spotify, this.murLockService, startTime);
+	// }
+}
+</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'RoomQueueService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

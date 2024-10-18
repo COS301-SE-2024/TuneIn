@@ -126,6 +126,21 @@
     <h3 id="index">Index</h3>
     <table class="table table-sm table-bordered index-table">
         <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Private</span>
+                                <a href="#salt" >salt</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
 
                 <tr>
                     <td class="col-md-4">
@@ -137,7 +152,57 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#generateHash" >generateHash</a>
+                            </li>
+                            <li>
+                                <a href="#getActivity" >getActivity</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getDMIndex" >getDMIndex</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getFriendRequests" >getFriendRequests</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getFullyQualifiedRooms" >getFullyQualifiedRooms</a>
+                            </li>
+                            <li>
+                                <a href="#getLinks" >getLinks</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getMutualFriends" >getMutualFriends</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getPendingRequests" >getPendingRequests</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getPotentialFriends" >getPotentialFriends</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getPreferences" >getPreferences</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#getRandomRooms" >getRandomRooms</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRelationshipStatus" >getRelationshipStatus</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRoomSongs" >getRoomSongs</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getUserFavoriteSongs" >getUserFavoriteSongs</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -145,11 +210,39 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#getUserFollowersAndFollowing" >getUserFollowersAndFollowing</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getUserFollowersAndFollowingCount" >getUserFollowersAndFollowingCount</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#getUserFollowing" >getUserFollowing</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#getUserFriends" >getUserFriends</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getUsersWithAuth" >getUsersWithAuth</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#isBlocked" >isBlocked</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#isFollowing" >isFollowing</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#isFriendsOrPending" >isFriendsOrPending</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#isMutualFollow" >isMutualFollow</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -166,6 +259,10 @@
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#userExists" >userExists</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#usersExist" >usersExist</a>
                             </li>
                         </ul>
                     </td>
@@ -185,12 +282,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(prisma: <a href="../injectables/PrismaService.html" target="_self">PrismaService</a>)</code>
+<code>constructor(configService: ConfigService, prisma: <a href="../injectables/PrismaService.html" target="_self">PrismaService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/modules/db-utils/db-utils.service.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="23" class="link-to-prism">src/modules/db-utils/db-utils.service.ts:23</a></div>
                             </td>
                         </tr>
 
@@ -207,6 +304,18 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+                                                <tr>
+                                                        <td>configService</td>
+                                                  
+                                                        <td>
+                                                                    <code>ConfigService</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
                                                 <tr>
                                                         <td>prisma</td>
                                                   
@@ -237,6 +346,728 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="generateHash"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>generateHash</b></span>
+                        <a href="#generateHash"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>generateHash(input: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="524"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:524</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>input</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;string&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getActivity"></a>
+                    <span class="name">
+                        <span ><b>getActivity</b></span>
+                        <a href="#getActivity"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getActivity(user: PrismaTypes.users)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="214"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:214</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                        <code>PrismaTypes.users</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>literal type</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getDMIndex"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getDMIndex</b></span>
+                        <a href="#getDMIndex"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getDMIndex(participant1: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, participant2: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, messageID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="529"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:529</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>participant1</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>participant2</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>messageID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getFriendRequests"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getFriendRequests</b></span>
+                        <a href="#getFriendRequests"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getFriendRequests(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="378"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:378</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.friends[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getFullyQualifiedRooms"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getFullyQualifiedRooms</b></span>
+                        <a href="#getFullyQualifiedRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getFullyQualifiedRooms(roomIDs: string[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="244"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:244</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomIDs</td>
+                                            <td>
+                                                        <code>string[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#FullyQualifiedRoom" target="_self" >Promise&lt;FullyQualifiedRoom[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getLinks"></a>
+                    <span class="name">
+                        <span ><b>getLinks</b></span>
+                        <a href="#getLinks"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getLinks(user: PrismaTypes.users)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="141"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:141</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                        <code>PrismaTypes.users</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>literal type</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getMutualFriends"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getMutualFriends</b></span>
+                        <a href="#getMutualFriends"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getMutualFriends(userID1: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userID2: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="704"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:704</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID1</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID2</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.users[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getPendingRequests"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getPendingRequests</b></span>
+                        <a href="#getPendingRequests"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getPendingRequests(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="389"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:389</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.friends[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getPotentialFriends"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getPotentialFriends</b></span>
+                        <a href="#getPotentialFriends"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getPotentialFriends(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="401"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:401</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.users[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getPreferences"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getPreferences</b></span>
+                        <a href="#getPreferences"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getPreferences(user: PrismaTypes.users)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="169"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:169</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                        <code>PrismaTypes.users</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="getRandomRooms"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -255,8 +1086,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="87"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:87</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="263"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:263</a></div>
                         </td>
                     </tr>
 
@@ -292,7 +1123,226 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;[] | null&gt;</code>
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.room[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRelationshipStatus"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRelationshipStatus</b></span>
+                        <a href="#getRelationshipStatus"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRelationshipStatus(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, accountFriendId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="473"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:473</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>accountFriendId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&quot;following&quot; | &quot;follower&quot; | &quot;mutual&quot; | &quot;friend&quot; | &quot;pending&quot; | &quot;none&quot; | &quot;blocked&quot;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getRoomSongs"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getRoomSongs</b></span>
+                        <a href="#getRoomSongs"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRoomSongs(roomID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="658"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:658</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>roomID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.song[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserFavoriteSongs"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUserFavoriteSongs</b></span>
+                        <a href="#getUserFavoriteSongs"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUserFavoriteSongs(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="668"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:668</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.song[]&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -324,8 +1374,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="53"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:53</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="67"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:67</a></div>
                         </td>
                     </tr>
 
@@ -361,7 +1411,145 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;[] | null&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#UserWithAuth" target="_self" >Promise&lt;UserWithAuth[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserFollowersAndFollowing"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUserFollowersAndFollowing</b></span>
+                        <a href="#getUserFollowersAndFollowing"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUserFollowersAndFollowing(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="80"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:80</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserFollowersAndFollowingCount"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUserFollowersAndFollowingCount</b></span>
+                        <a href="#getUserFollowersAndFollowingCount"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUserFollowersAndFollowingCount(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="113"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:113</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -393,8 +1581,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="14"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:14</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="49"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:49</a></div>
                         </td>
                     </tr>
 
@@ -430,7 +1618,226 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;[] | null&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#UserWithAuth" target="_self" >Promise&lt;UserWithAuth[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserFriends"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUserFriends</b></span>
+                        <a href="#getUserFriends"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUserFriends(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="679"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:679</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;PrismaTypes.users[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUsersWithAuth"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getUsersWithAuth</b></span>
+                        <a href="#getUsersWithAuth"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUsersWithAuth(userIDs: string[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="37"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:37</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userIDs</td>
+                                            <td>
+                                                        <code>string[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#UserWithAuth" target="_self" >Promise&lt;UserWithAuth[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="isBlocked"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>isBlocked</b></span>
+                        <a href="#isBlocked"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>isBlocked(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, accountBlockedId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="454"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:454</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>accountBlockedId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -462,8 +1869,182 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="172"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:172</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="359"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:359</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>accountFollowedId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="isFriendsOrPending"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>isFriendsOrPending</b></span>
+                        <a href="#isFriendsOrPending"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>isFriendsOrPending(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, accountFriendId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, isPending?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="604"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:604</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>accountFriendId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>isPending</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="isMutualFollow"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>isMutualFollow</b></span>
+                        <a href="#isMutualFollow"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>isMutualFollow(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, accountFollowedId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="573"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:573</a></div>
                         </td>
                     </tr>
 
@@ -543,8 +2124,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="128"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:128</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="301"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:301</a></div>
                         </td>
                     </tr>
 
@@ -612,8 +2193,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="108"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:108</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="281"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:281</a></div>
                         </td>
                     </tr>
 
@@ -681,8 +2262,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="158"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:158</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="345"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:345</a></div>
                         </td>
                     </tr>
 
@@ -750,8 +2331,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="148"
-                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:148</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="321"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:321</a></div>
                         </td>
                     </tr>
 
@@ -797,6 +2378,108 @@
             </tr>
         </tbody>
     </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="usersExist"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>usersExist</b></span>
+                        <a href="#usersExist"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>usersExist(userIDs: string[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="331"
+                                    class="link-to-prism">src/modules/db-utils/db-utils.service.ts:331</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userIDs</td>
+                                            <td>
+                                                        <code>string[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;literal type[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+            <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="salt"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                        <span ><b>salt</b></span>
+                        <a href="#salt"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="23" class="link-to-prism">src/modules/db-utils/db-utils.service.ts:23</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
 </section>
 
     </div>
@@ -805,49 +2488,63 @@
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &quot;@nestjs/common&quot;;
 import { PrismaService } from &quot;../../../prisma/prisma.service&quot;;
-import * as Prisma from &quot;@prisma/client&quot;;
+//import Prisma from &quot;@prisma/client&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import { SongInfoDto } from &quot;../rooms/dto/songinfo.dto&quot;;
+import * as bcrypt from &quot;bcrypt&quot;;
+import { ConfigService } from &quot;@nestjs/config&quot;;
+
+export type FullyQualifiedRoom &#x3D; {
+	child_room_child_room_parent_room_idToroom: PrismaTypes.child_room[];
+	participate: PrismaTypes.participate[];
+	private_room: PrismaTypes.private_room | null;
+	public_room: PrismaTypes.public_room | null;
+	scheduled_room: PrismaTypes.scheduled_room | null;
+} &amp; PrismaTypes.room;
+
+export type UserWithAuth &#x3D; {
+	authentication: PrismaTypes.authentication | null;
+} &amp; PrismaTypes.users;
 
 @Injectable()
 export class DbUtilsService {
-	constructor(private readonly prisma: PrismaService) {}
+	private salt: string;
+
+	constructor(
+		private configService: ConfigService,
+		private prisma: PrismaService,
+	) {
+		// Set the salt for hashing
+		const salt &#x3D; this.configService.get&lt;string&gt;(&quot;SALT&quot;);
+		if (!salt) {
+			throw new Error(&quot;Missing SALT&quot;);
+		}
+		this.salt &#x3D; salt;
+	}
+
+	async getUsersWithAuth(userIDs: string[]): Promise&lt;UserWithAuth[]&gt; {
+		return await this.prisma.users.findMany({
+			where: { user_id: { in: userIDs } },
+			include: { authentication: true },
+		});
+	}
 
 	//get user following (people the user is following)
 	/*
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowing(userID: string): Promise&lt;Prisma.users[] | null&gt; {
-		const following: Prisma.follows[] | null &#x3D;
-			await this.prisma.follows.findMany({
-				where: { follower: userID },
-			});
-
-		if (!following || following &#x3D;&#x3D;&#x3D; null) {
-			return null;
-		}
-
-		const result: Prisma.users[] &#x3D; [];
-		const ids: string[] &#x3D; [];
-		for (let i &#x3D; 0; i &lt; following.length; i++) {
-			const f &#x3D; following[i];
-			if (f &amp;&amp; f !&#x3D;&#x3D; null) {
-				if (f.followee &amp;&amp; f.followee !&#x3D;&#x3D; null) {
-					ids.push(f.followee);
-				}
-			}
-		}
-
-		const users: Prisma.users[] &#x3D; await this.prisma.users.findMany({
-			where: { user_id: { in: ids } },
-		});
-
-		for (let i &#x3D; 0; i &lt; users.length; i++) {
-			const u &#x3D; users[i];
-			if (u &amp;&amp; u !&#x3D;&#x3D; null) {
-				result.push(u);
-			}
-		}
-		return result;
+	async getUserFollowing(userID: string): Promise&lt;UserWithAuth[]&gt; {
+		return await this.prisma.users.findMany({
+			where: {
+				follows_follows_followeeTousers: {
+					some: {
+						follower: userID,
+					},
+				},
+			},
+			include: { authentication: true },
+		}); // people userID is following
 	}
 
 	//get user followers (people following the user)
@@ -855,75 +2552,234 @@ export class DbUtilsService {
 		follower: the person who does the following
 		followee (leader): the person being followed
 	*/
-	async getUserFollowers(userID: string): Promise&lt;Prisma.users[] | null&gt; {
-		const followers: Prisma.follows[] | null &#x3D;
-			await this.prisma.follows.findMany({
-				where: { followee: userID },
-			});
-
-		if (!followers || followers &#x3D;&#x3D;&#x3D; null) {
-			return null;
-		}
-
-		const result: Prisma.users[] &#x3D; [];
-		const ids: string[] &#x3D; [];
-		for (let i &#x3D; 0; i &lt; followers.length; i++) {
-			const f &#x3D; followers[i];
-			if (f &amp;&amp; f !&#x3D;&#x3D; null) {
-				if (f.follower &amp;&amp; f.follower !&#x3D;&#x3D; null) {
-					ids.push(f.follower);
-				}
-			}
-		}
-
-		const users: Prisma.users[] &#x3D; await this.prisma.users.findMany({
-			where: { user_id: { in: ids } },
-		});
-
-		for (let i &#x3D; 0; i &lt; users.length; i++) {
-			const u &#x3D; users[i];
-			if (u &amp;&amp; u !&#x3D;&#x3D; null) {
-				result.push(u);
-			}
-		}
-		return result;
+	async getUserFollowers(userID: string): Promise&lt;UserWithAuth[]&gt; {
+		return await this.prisma.users.findMany({
+			where: {
+				follows_follows_followerTousers: {
+					some: {
+						followee: userID,
+					},
+				},
+			},
+			include: { authentication: true },
+		}); // people following userID
 	}
 
-	async getRandomRooms(count: number): Promise&lt;Prisma.room[] | null&gt; {
-		const rooms: Prisma.room[] | null &#x3D; await this.prisma.room.findMany();
+	async getUserFollowersAndFollowing(userID: string): Promise&lt;{
+		following: UserWithAuth[];
+		followers: UserWithAuth[];
+	}&gt; {
+		const result: UserWithAuth[][] &#x3D; await this.prisma.$transaction([
+			this.prisma.users.findMany({
+				where: {
+					follows_follows_followeeTousers: {
+						some: {
+							follower: userID,
+						},
+					},
+				},
+				include: { authentication: true },
+			}), // people following userID
+			this.prisma.users.findMany({
+				where: {
+					follows_follows_followerTousers: {
+						some: {
+							followee: userID,
+						},
+					},
+				},
+				include: { authentication: true },
+			}), // people userID is following
+		]);
+		console.log(&quot;result for following and followers: &quot;, result);
+		return {
+			following: result[0],
+			followers: result[1],
+		};
+	}
 
-		if (!rooms || rooms &#x3D;&#x3D;&#x3D; null) {
-			return null;
+	async getUserFollowersAndFollowingCount(userID: string): Promise&lt;{
+		following: number;
+		followers: number;
+	}&gt; {
+		const result: number[] &#x3D; await this.prisma.$transaction([
+			this.prisma.follows.count({
+				where: {
+					follower: userID,
+				},
+			}), // number of people following userID
+			this.prisma.follows.count({
+				where: {
+					followee: userID,
+				},
+			}), // number of people userID is following
+		]);
+		console.log(
+			&quot;result for following and followers: &quot;,
+			result,
+			&quot; for user: &quot;,
+			userID,
+		);
+		return {
+			following: result[0],
+			followers: result[1],
+		};
+	}
+
+	getLinks(user: PrismaTypes.users): {
+		count: number;
+		data: Record&lt;string, string[]&gt;;
+	} {
+		if (JSON.stringify(user.external_links || {}) &#x3D;&#x3D;&#x3D; &quot;{}&quot;) {
+			return { count: 0, data: {} };
 		}
+
+		try {
+			// Parse the JSON string
+			const links &#x3D; JSON.parse(JSON.stringify(user.external_links));
+			const totalLinks &#x3D; Object.values(links).flat().length; // Flatten the arrays into a single array
+
+			// Ensure the parsed object has the required properties
+			if (links &amp;&amp; typeof links &#x3D;&#x3D;&#x3D; &quot;object&quot;) {
+				return {
+					count: totalLinks,
+					data: links,
+				};
+			} else {
+				throw new Error(&quot;Invalid links format&quot;);
+			}
+		} catch (error) {
+			console.error(&quot;Failed to parse external_links: &quot;, error);
+			return { count: 0, data: {} };
+		}
+	}
+
+	async getPreferences(user: PrismaTypes.users): Promise&lt;{
+		fav_genres: { count: number; data: string[] };
+		fav_songs: { count: number; data: SongInfoDto[] };
+	}&gt; {
+		if (!user.preferences) {
+			return {
+				fav_genres: { count: 0, data: [] },
+				fav_songs: { count: 0, data: [] },
+			};
+		}
+
+		try {
+			// Parse the JSON string
+			const preferences &#x3D; JSON.parse(JSON.stringify(user.preferences));
+			// console.log(preferences);
+
+			// Ensure the parsed object has the required properties
+			if (
+				preferences &amp;&amp;
+				typeof preferences &#x3D;&#x3D;&#x3D; &quot;object&quot; &amp;&amp;
+				&quot;fav_genres&quot; in preferences &amp;&amp;
+				&quot;fav_songs&quot; in preferences
+			) {
+				return {
+					fav_genres: {
+						count: preferences.fav_genres.length,
+						data: preferences.fav_genres,
+					},
+					fav_songs: {
+						count: preferences.fav_songs.length,
+						data: preferences.fav_songs,
+					},
+				};
+			} else {
+				throw new Error(&quot;Invalid preferences format&quot;);
+			}
+		} catch (error) {
+			console.error(&quot;Failed to parse preferences: &quot;, error);
+			return {
+				fav_genres: { count: 0, data: [] },
+				fav_songs: { count: 0, data: [] },
+			};
+		}
+	}
+
+	getActivity(user: PrismaTypes.users): { count: number; data: string[] } {
+		if (!user.activity) {
+			return {
+				count: 0,
+				data: [],
+			};
+		}
+
+		try {
+			// Parse the JSON string
+			const activity &#x3D; JSON.parse(JSON.stringify(user.activity));
+
+			// Ensure the parsed object has the required properties
+			if (typeof activity &#x3D;&#x3D;&#x3D; &quot;object&quot; &amp;&amp; &quot;recent_rooms&quot; in activity) {
+				return {
+					count: activity.recent_rooms.length,
+					data: activity.recent_rooms,
+				};
+			} else {
+				throw new Error(&quot;Invalid activity format&quot;);
+			}
+		} catch (error) {
+			console.error(&quot;Failed to parse activity: &quot;, error);
+			return {
+				count: 0,
+				data: [],
+			};
+		}
+	}
+
+	async getFullyQualifiedRooms(
+		roomIDs: string[],
+	): Promise&lt;FullyQualifiedRoom[]&gt; {
+		return await this.prisma.room.findMany({
+			where: {
+				room_id: {
+					in: roomIDs,
+				},
+			},
+			include: {
+				child_room_child_room_parent_room_idToroom: true,
+				participate: true,
+				private_room: true,
+				public_room: true,
+				scheduled_room: true,
+			},
+		});
+	}
+
+	async getRandomRooms(count: number): Promise&lt;PrismaTypes.room[]&gt; {
+		const rooms: PrismaTypes.room[] &#x3D; await this.prisma.room.findMany();
 
 		if (rooms.length &lt;&#x3D; count) {
 			return rooms;
 		}
 
-		const result: Prisma.room[] &#x3D; [];
+		const result: PrismaTypes.room[] &#x3D; [];
 		while (result.length &lt; count) {
 			const random &#x3D; Math.floor(Math.random() * rooms.length);
-			if (!result.includes(rooms[random])) {
-				result.push(rooms[random]);
+			const randomRoom &#x3D; rooms[random];
+			if (randomRoom &amp;&amp; !result.includes(randomRoom)) {
+				result.push(randomRoom);
 			}
 		}
 		return rooms;
 	}
 
 	async isRoomPublic(roomID: string): Promise&lt;boolean&gt; {
-		const room: Prisma.room | null &#x3D; await this.prisma.room.findUnique({
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
-		if (!room || room &#x3D;&#x3D;&#x3D; null) {
+		if (room &#x3D;&#x3D;&#x3D; null) {
 			throw new Error(&quot;Room not found. Probably doesn&#x27;t exist.&quot;);
 		}
 
-		const publicRoom: Prisma.public_room | null &#x3D;
+		const publicRoom: PrismaTypes.public_room | null &#x3D;
 			await this.prisma.public_room.findUnique({
 				where: { room_id: roomID },
 			});
 
-		if (!publicRoom || publicRoom &#x3D;&#x3D;&#x3D; null) {
+		if (publicRoom &#x3D;&#x3D;&#x3D; null) {
 			return false;
 		}
 
@@ -931,19 +2787,19 @@ export class DbUtilsService {
 	}
 
 	async isRoomPrivate(roomID: string): Promise&lt;boolean&gt; {
-		const room: Prisma.room | null &#x3D; await this.prisma.room.findUnique({
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
-		if (!room || room &#x3D;&#x3D;&#x3D; null) {
+		if (room &#x3D;&#x3D;&#x3D; null) {
 			throw new Error(&quot;Room not found. Probably doesn&#x27;t exist.&quot;);
 		}
 
-		const privateRoom: Prisma.private_room | null &#x3D;
+		const privateRoom: PrismaTypes.private_room | null &#x3D;
 			await this.prisma.private_room.findUnique({
 				where: { room_id: roomID },
 			});
 
-		if (!privateRoom || privateRoom &#x3D;&#x3D;&#x3D; null) {
+		if (privateRoom &#x3D;&#x3D;&#x3D; null) {
 			return false;
 		}
 
@@ -951,20 +2807,34 @@ export class DbUtilsService {
 	}
 
 	async userExists(userID: string): Promise&lt;boolean&gt; {
-		const user: Prisma.users | null &#x3D; await this.prisma.users.findUnique({
+		const user: PrismaTypes.users | null &#x3D; await this.prisma.users.findUnique({
 			where: { user_id: userID },
 		});
-		if (!user || user &#x3D;&#x3D;&#x3D; null) {
+		if (user &#x3D;&#x3D;&#x3D; null) {
 			return false;
 		}
 		return true;
 	}
 
+	async usersExist(
+		userIDs: string[],
+	): Promise&lt;{ userID: string; exists: boolean }[]&gt; {
+		const user: PrismaTypes.users[] &#x3D; await this.prisma.users.findMany({
+			where: { user_id: { in: userIDs } },
+		});
+		return userIDs.map((id) &#x3D;&gt; {
+			return {
+				userID: id,
+				exists: user.find((u) &#x3D;&gt; u.user_id &#x3D;&#x3D;&#x3D; id) !&#x3D;&#x3D; undefined,
+			};
+		});
+	}
+
 	async roomExists(roomID: string): Promise&lt;boolean&gt; {
-		const room: Prisma.room | null &#x3D; await this.prisma.room.findUnique({
+		const room: PrismaTypes.room | null &#x3D; await this.prisma.room.findUnique({
 			where: { room_id: roomID },
 		});
-		if (!room || room &#x3D;&#x3D;&#x3D; null) {
+		if (room &#x3D;&#x3D;&#x3D; null) {
 			return false;
 		}
 		return true;
@@ -978,15 +2848,12 @@ export class DbUtilsService {
 		userID: string,
 		accountFollowedId: string,
 	): Promise&lt;boolean&gt; {
-		const follow: Prisma.follows[] &#x3D; await this.prisma.follows.findMany({
+		const follow: PrismaTypes.follows[] &#x3D; await this.prisma.follows.findMany({
 			where: {
 				follower: userID,
 				followee: accountFollowedId,
 			},
 		});
-		if (!follow || follow &#x3D;&#x3D;&#x3D; null) {
-			return false;
-		}
 		if (follow.length &#x3D;&#x3D;&#x3D; 0) {
 			return false;
 		}
@@ -994,6 +2861,382 @@ export class DbUtilsService {
 			throw new Error(&quot;More than one follow found.&quot;);
 		}
 		return true;
+	}
+
+	async getFriendRequests(userID: string): Promise&lt;PrismaTypes.friends[]&gt; {
+		const friendRequests: PrismaTypes.friends[] &#x3D;
+			await this.prisma.friends.findMany({
+				where: {
+					friend2: userID,
+					is_pending: true,
+				},
+			});
+		return friendRequests;
+	}
+
+	async getPendingRequests(userID: string): Promise&lt;PrismaTypes.friends[]&gt; {
+		const pendingRequests: PrismaTypes.friends[] &#x3D;
+			await this.prisma.friends.findMany({
+				where: {
+					friend1: userID,
+					is_pending: true,
+				},
+			});
+		return pendingRequests;
+	}
+
+	// get users who aren&#x27;t friends with the user, but are mutual followers
+	async getPotentialFriends(userID: string): Promise&lt;PrismaTypes.users[]&gt; {
+		const follows: PrismaTypes.follows[] &#x3D; await this.prisma.follows.findMany({
+			where: { OR: [{ follower: userID }, { followee: userID }] },
+		});
+
+		const following &#x3D; follows.filter((f) &#x3D;&gt; f.follower &#x3D;&#x3D;&#x3D; userID);
+		const followers &#x3D; follows.filter((f) &#x3D;&gt; f.followee &#x3D;&#x3D;&#x3D; userID);
+
+		const followingIDs: string[] &#x3D; [];
+		for (let i &#x3D; 0; i &lt; following.length; i++) {
+			const f &#x3D; following[i];
+			if (f &amp;&amp; f !&#x3D;&#x3D; null) {
+				if (f.followee &amp;&amp; f.followee !&#x3D;&#x3D; null) {
+					followingIDs.push(f.followee);
+				}
+			}
+		}
+
+		const followerIDs: string[] &#x3D; [];
+		for (let i &#x3D; 0; i &lt; followers.length; i++) {
+			const f &#x3D; followers[i];
+			if (f &amp;&amp; f !&#x3D;&#x3D; null) {
+				if (f.follower &amp;&amp; f.follower !&#x3D;&#x3D; null) {
+					followerIDs.push(f.follower);
+				}
+			}
+		}
+
+		const mutualFollowers: string[] &#x3D; followingIDs.filter(
+			(id) &#x3D;&gt; followerIDs.includes(id) &amp;&amp; id !&#x3D;&#x3D; userID,
+		);
+
+		// potential friends are users who are mutual followers but not friends
+		const potentialFriends: PrismaTypes.users[] &#x3D; [];
+		for (let i &#x3D; 0; i &lt; mutualFollowers.length; i++) {
+			const id: string | undefined &#x3D; mutualFollowers[i];
+			if (id &#x3D;&#x3D;&#x3D; undefined) {
+				continue;
+			}
+			console.log(&quot;ID: &quot;, id);
+			if (!(await this.isFriendsOrPending(userID, id))) {
+				const user: PrismaTypes.users | null &#x3D;
+					await this.prisma.users.findUnique({
+						where: { user_id: id },
+					});
+				if (user &amp;&amp; user !&#x3D;&#x3D; null) {
+					potentialFriends.push(user);
+				}
+			}
+		}
+		return potentialFriends;
+	}
+
+	async isBlocked(userID: string, accountBlockedId: string): Promise&lt;boolean&gt; {
+		const blocked: PrismaTypes.blocked[] &#x3D; await this.prisma.blocked.findMany({
+			where: {
+				blocker: userID,
+				blockee: accountBlockedId,
+			},
+		});
+		if (!blocked || blocked &#x3D;&#x3D;&#x3D; null) {
+			return false;
+		}
+		if (blocked.length &#x3D;&#x3D;&#x3D; 0) {
+			return false;
+		}
+		if (blocked.length &gt; 1) {
+			throw new Error(&quot;More than one blocked found.&quot;);
+		}
+		return true;
+	}
+
+	async getRelationshipStatus(
+		userID: string,
+		accountFriendId: string,
+	): Promise&lt;
+		| &quot;following&quot;
+		| &quot;follower&quot;
+		| &quot;mutual&quot;
+		| &quot;friend&quot;
+		| &quot;pending&quot;
+		| &quot;none&quot;
+		| &quot;blocked&quot;
+	&gt; {
+		// check if user is following accountFriendId
+		const isBlocked &#x3D; await this.isBlocked(userID, accountFriendId);
+		if (isBlocked) {
+			return &quot;blocked&quot;;
+		}
+		const following: boolean &#x3D; await this.isFollowing(userID, accountFriendId);
+
+		// check if accountFriendId is following user
+		const follower: boolean &#x3D; await this.isFollowing(accountFriendId, userID);
+
+		// check if user is friends with accountFriendId
+		const friends: boolean &#x3D; await this.isFriendsOrPending(
+			userID,
+			accountFriendId,
+			false,
+		);
+
+		// check if user has a pending friend request from accountFriendId
+		const pending: boolean &#x3D; await this.isFriendsOrPending(
+			userID,
+			accountFriendId,
+			true,
+		);
+
+		if (friends) {
+			return &quot;friend&quot;;
+		} else if (pending) {
+			return &quot;pending&quot;;
+		} else if (following &amp;&amp; follower) {
+			return &quot;mutual&quot;;
+		} else if (following) {
+			return &quot;following&quot;;
+		} else if (follower) {
+			return &quot;follower&quot;;
+		} else {
+			return &quot;none&quot;;
+		}
+	}
+
+	async generateHash(input: string): Promise&lt;string&gt; {
+		const hash &#x3D; await bcrypt.hash(input, this.salt);
+		return hash;
+	}
+
+	async getDMIndex(
+		participant1: string,
+		participant2: string,
+		messageID: string,
+	): Promise&lt;number&gt; {
+		const dms: ({
+			message: PrismaTypes.message;
+		} &amp; PrismaTypes.private_message)[] &#x3D;
+			await this.prisma.private_message.findMany({
+				where: {
+					OR: [
+						{
+							AND: [
+								{ message: { sender: participant1 } },
+								{ recipient: participant2 },
+							],
+						},
+						{
+							AND: [
+								{ message: { sender: participant2 } },
+								{ recipient: participant1 },
+							],
+						},
+					],
+				},
+				include: {
+					message: true,
+				},
+			});
+
+		const index &#x3D; dms.findIndex(
+			(dm) &#x3D;&gt;
+				dm.p_message_id &#x3D;&#x3D;&#x3D; messageID || dm.message.message_id &#x3D;&#x3D;&#x3D; messageID,
+		);
+		if (index &#x3D;&#x3D;&#x3D; -1) {
+			throw new Error(
+				&quot;Message with id &quot; +
+					messageID +
+					&quot; does not exist. DTOGenService.getDMIndex():ERROR02&quot;,
+			);
+		}
+		return index;
+	}
+
+	async isMutualFollow(
+		userID: string,
+		accountFollowedId: string,
+	): Promise&lt;boolean&gt; {
+		// check if user is following accountFollowedId and accountFollowedId is following user
+		// query must look like this
+		// SELECT * FROM follows WHERE follower &#x3D; userID AND followee &#x3D; accountFollowedId
+		// SELECT * FROM follows WHERE follower &#x3D; accountFollowedId AND followee &#x3D; userID
+		const follow1: PrismaTypes.follows[] &#x3D; await this.prisma.follows.findMany({
+			where: {
+				OR: [
+					{
+						follower: userID,
+						followee: accountFollowedId,
+					},
+					{
+						follower: accountFollowedId,
+						followee: userID,
+					},
+				],
+			},
+		});
+		if (follow1.length &#x3D;&#x3D;&#x3D; 0 || follow1.length &#x3D;&#x3D;&#x3D; 1) {
+			return false;
+		}
+		if (follow1.length &gt; 2) {
+			throw new Error(&quot;More than two follows found.&quot;);
+		}
+		return true;
+	}
+
+	async isFriendsOrPending(
+		userID: string,
+		accountFriendId: string,
+		isPending?: boolean,
+	): Promise&lt;boolean&gt; {
+		// check if user is friends with accountFriendId
+		// userId can be friend1 or friend2, so check both
+		// additional condition, the is_pending field must be false
+
+		// query must look like this
+		// SELECT * FROM friends WHERE (friend1 &#x3D; userID AND friend2 &#x3D; accountFriendId) OR (friend1 &#x3D; accountFriendId AND friend2 &#x3D; userID) AND is_pending &#x3D; false;
+		const getWhere &#x3D; (isPending?: boolean) &#x3D;&gt; {
+			if (isPending !&#x3D;&#x3D; undefined) {
+				return {
+					OR: [
+						{
+							friend1: userID,
+							friend2: accountFriendId,
+						},
+						{
+							friend1: accountFriendId,
+							friend2: userID,
+						},
+					],
+					is_pending: isPending,
+				};
+			}
+
+			return {
+				OR: [
+					{
+						friend1: userID,
+						friend2: accountFriendId,
+					},
+					{
+						friend1: accountFriendId,
+						friend2: userID,
+					},
+				],
+			};
+		};
+
+		const friends: PrismaTypes.friends[] &#x3D; await this.prisma.friends.findMany({
+			where: getWhere(isPending),
+		});
+		if (friends.length &#x3D;&#x3D;&#x3D; 0) {
+			return false;
+		}
+		if (friends.length &gt; 1) {
+			throw new Error(&quot;More than one friend found.&quot;);
+		}
+		return true;
+	}
+
+	async getRoomSongs(roomID: string): Promise&lt;PrismaTypes.song[]&gt; {
+		// console.log(&quot;getting room songs:&quot;, roomID);
+		const queue: (PrismaTypes.queue &amp; { song: PrismaTypes.song })[] &#x3D;
+			await this.prisma.queue.findMany({
+				where: { room_id: roomID },
+				include: { song: true },
+			});
+
+		return queue.map((q) &#x3D;&gt; q.song);
+	}
+	async getUserFavoriteSongs(userID: string): Promise&lt;PrismaTypes.song[]&gt; {
+		const favorites:
+			| (PrismaTypes.favorite_songs &amp; { song: PrismaTypes.song })[] &#x3D;
+			await this.prisma.favorite_songs.findMany({
+				where: { user_id: userID },
+				include: { song: true },
+			});
+
+		return favorites.map((f) &#x3D;&gt; f.song);
+	}
+
+	async getUserFriends(userID: string): Promise&lt;PrismaTypes.users[]&gt; {
+		return await this.prisma.users.findMany({
+			where: {
+				OR: [
+					{
+						friends_friends_friend1Tousers: {
+							some: {
+								friend2: userID,
+								is_pending: false,
+							},
+						},
+					},
+					{
+						friends_friends_friend2Tousers: {
+							some: {
+								friend1: userID,
+								is_pending: false,
+							},
+						},
+					},
+				],
+			},
+		});
+	}
+
+	async getMutualFriends(
+		userID1: string,
+		userID2: string,
+	): Promise&lt;PrismaTypes.users[]&gt; {
+		const friends1: PrismaTypes.friends[] &#x3D; await this.prisma.friends.findMany({
+			where: {
+				OR: [
+					{ friend1: userID1, is_pending: false },
+					{ friend2: userID1, is_pending: false },
+				],
+			},
+		});
+		const friends2: PrismaTypes.friends[] &#x3D; await this.prisma.friends.findMany({
+			where: {
+				OR: [
+					{ friend1: userID2, is_pending: false },
+					{ friend2: userID2, is_pending: false },
+				],
+			},
+		});
+		const friends1IDs: string[] &#x3D; [];
+		const friends2IDs: string[] &#x3D; [];
+		friends1.forEach((f) &#x3D;&gt; {
+			if (f.friend1 &#x3D;&#x3D;&#x3D; userID1) {
+				friends1IDs.push(f.friend2);
+			} else {
+				friends1IDs.push(f.friend1);
+			}
+		});
+		friends2.forEach((f) &#x3D;&gt; {
+			if (f.friend1 &#x3D;&#x3D;&#x3D; userID2) {
+				friends2IDs.push(f.friend2);
+			} else {
+				friends2IDs.push(f.friend1);
+			}
+		});
+
+		const mutualFriends: string[] &#x3D; [];
+		friends1IDs.forEach((f1) &#x3D;&gt; {
+			if (friends2IDs.includes(f1)) {
+				mutualFriends.push(f1);
+			}
+		});
+
+		const users: PrismaTypes.users[] &#x3D; await this.prisma.users.findMany({
+			where: { user_id: { in: mutualFriends } },
+		});
+		return users;
 	}
 }
 </code></pre>

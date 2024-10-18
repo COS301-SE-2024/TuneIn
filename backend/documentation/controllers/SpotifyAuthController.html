@@ -1,0 +1,754 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content controller">
+                   <div class="content-data">
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Controllers</li>
+  <li class="breadcrumb-item" >SpotifyAuthController</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/auth/spotify/spotifyauth.controller.ts</code>
+        </p>
+
+            <p class="comment">
+                <h3>Prefix</h3>
+            </p>
+            <p class="comment">
+                <code>auth/spotify</code>
+            </p>
+
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleSpotifyAuthCallback" >handleSpotifyAuthCallback</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleSpotifyRefresh" >handleSpotifyRefresh</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleSpotifyTokens" >handleSpotifyTokens</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleSpotifyAuthCallback"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleSpotifyAuthCallback</b></span>
+                        <a href="#handleSpotifyAuthCallback"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleSpotifyAuthCallback(code: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, state: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;callback&#x27;)<br />@ApiTags(&#x27;auth&#x27;)<br />@ApiOperation({summary: &#x27;Callback for Spotify Auth&#x27;, description: &#x27;Handles the Spotify auth callback, creates an account for the user (if necessary), authenticates the user, and returns a JWT token&#x27;, operationId: &#x27;spotifyCallback&#x27;})<br />@ApiQuery({name: &#x27;code&#x27;, description: &#x27;The authorization code returned by Spotify after user consent&#x27;, required: true, type: String, example: &#x27;NApCCg..BkWtQ&#x27;, allowEmptyValue: false})<br />@ApiQuery({name: &#x27;state&#x27;, description: &#x27;A unique state value to prevent CSRF attacks&#x27;, required: true, type: String, example: &#x27;34fFs29kd09&#x27;, allowEmptyValue: false})<br />@ApiResponse({status: 201, description: &#x27;The record has been successfully created.&#x27;, type: SpotifyCallbackResponse})<br />@ApiResponse({status: 403, description: &#x27;Forbidden.&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="107"
+                                    class="link-to-prism">src/auth/spotify/spotifyauth.controller.ts:107</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>code</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>state</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SpotifyCallbackResponse.html" target="_self" >Promise&lt;SpotifyCallbackResponse&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleSpotifyRefresh"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleSpotifyRefresh</b></span>
+                        <a href="#handleSpotifyRefresh"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleSpotifyRefresh(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;refresh&#x27;)<br />@ApiTags(&#x27;auth&#x27;)<br />@ApiOperation({summary: &#x27;Manually Refresh Spotify Auth Tokens&#x27;, description: &#x27;This method will manually refresh the user&#x27;s Spotify Auth Tokens and return the new tokens&#x27;, operationId: &#x27;refreshSpotifyTokens&#x27;})<br />@ApiResponse({status: 200, description: &#x27;The user&#x27;s new Spotify Auth Tokens&#x27;, type: SpotifyTokenResponse})<br />@ApiResponse({status: 404, description: &#x27;User not found&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="186"
+                                    class="link-to-prism">src/auth/spotify/spotifyauth.controller.ts:186</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SpotifyTokenResponse.html" target="_self" >Promise&lt;SpotifyTokenResponse&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleSpotifyTokens"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>handleSpotifyTokens</b></span>
+                        <a href="#handleSpotifyTokens"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleSpotifyTokens(req: Request)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiBearerAuth()<br />@ApiSecurity(&#x27;bearer&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@Get(&#x27;tokens&#x27;)<br />@ApiTags(&#x27;auth&#x27;)<br />@ApiOperation({summary: &#x27;Get Spotify Auth Tokens&#x27;, description: &#x27;Returns the user&#x27;s Spotify Auth Tokens&#x27;, operationId: &#x27;getSpotifyTokens&#x27;})<br />@ApiResponse({status: 200, description: &#x27;The user&#x27;s Spotify Auth Tokens&#x27;, type: SpotifyTokenPair})<br />@ApiResponse({status: 404, description: &#x27;User not found&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="153"
+                                    class="link-to-prism">src/auth/spotify/spotifyauth.controller.ts:153</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>Request</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SpotifyTokenPair.html" target="_self" >Promise&lt;SpotifyTokenPair&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Controller, Get, Query, Request, UseGuards } from &quot;@nestjs/common&quot;;
+import {
+	SpotifyAuthService,
+	SpotifyCallbackResponse,
+	SpotifyTokenPair,
+	SpotifyTokenResponse,
+} from &quot;./spotifyauth.service&quot;;
+import {
+	ApiBearerAuth,
+	ApiOperation,
+	ApiQuery,
+	ApiResponse,
+	ApiSecurity,
+	ApiTags,
+} from &quot;@nestjs/swagger&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import { AuthService, JWTPayload } from &quot;../auth.service&quot;;
+import { JwtAuthGuard } from &quot;../jwt-auth.guard&quot;;
+
+@Controller(&quot;auth/spotify&quot;)
+export class SpotifyAuthController {
+	constructor(
+		private readonly spotifyAuth: SpotifyAuthService,
+		private readonly auth: AuthService,
+	) {}
+
+	/*
+	@Get(&quot;redirect&quot;)
+	@Redirect()
+	@ApiTags(&quot;auth&quot;)
+	@ApiQuery({
+		name: &quot;code&quot;,
+		description:
+			&quot;The authorization code returned by Spotify after user consent&quot;,
+		required: true,
+		type: String,
+		example: &quot;NApCCg..BkWtQ&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;state&quot;,
+		description: &quot;A unique state value to prevent CSRF attacks&quot;,
+		required: true,
+		type: String,
+		example: &quot;34fFs29kd09&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiOperation({
+		summary: &quot;Spotify OAuth Redirect&quot;,
+		description: &quot;Redirects to the Expo app with the Spotify auth code&quot;,
+		operationId: &quot;spotifyRedirect&quot;,
+	})
+	@ApiResponse({
+		status: 302,
+		description: &quot;Redirects to the Expo app with the Spotify auth code&quot;,
+	})
+	async performRedirect(
+		@Query(&quot;code&quot;) code: string,
+		@Query(&quot;state&quot;) state: string,
+	) {
+		//expecting &quot;/auth/redirect?code&#x3D;{code}&amp;state&#x3D;{state}&quot; from Spotify OAuth
+		const stateObj: {
+			&quot;expo-redirect&quot;: string;
+			&quot;ip-address&quot;: string;
+			&quot;redirect-used&quot;: string;
+		} &#x3D; this.spotifyAuth.getStateObject(state);
+
+		//now, redirect to the expo-redirect
+		const redirectURI: string &#x3D; stateObj[&quot;expo-redirect&quot;];
+		return {
+			url: redirectURI,
+		};
+	}
+	*/
+
+	@Get(&quot;callback&quot;)
+	@ApiTags(&quot;auth&quot;)
+	@ApiOperation({
+		summary: &quot;Callback for Spotify Auth&quot;,
+		description:
+			&quot;Handles the Spotify auth callback, creates an account for the user (if necessary), authenticates the user, and returns a JWT token&quot;,
+		operationId: &quot;spotifyCallback&quot;,
+	})
+	@ApiQuery({
+		name: &quot;code&quot;,
+		description:
+			&quot;The authorization code returned by Spotify after user consent&quot;,
+		required: true,
+		type: String,
+		example: &quot;NApCCg..BkWtQ&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiQuery({
+		name: &quot;state&quot;,
+		description: &quot;A unique state value to prevent CSRF attacks&quot;,
+		required: true,
+		type: String,
+		example: &quot;34fFs29kd09&quot;,
+		allowEmptyValue: false,
+	})
+	@ApiResponse({
+		status: 201,
+		description: &quot;The record has been successfully created.&quot;,
+		type: SpotifyCallbackResponse,
+	})
+	@ApiResponse({ status: 403, description: &quot;Forbidden.&quot; })
+	async handleSpotifyAuthCallback(
+		@Query(&quot;code&quot;) code: string,
+		@Query(&quot;state&quot;) state: string,
+	): Promise&lt;SpotifyCallbackResponse&gt; {
+		//expecting &quot;/auth/callback?code&#x3D;{code}&amp;state&#x3D;{state}&quot;
+		//&#x60;http://localhost:3000/auth/spotify/callback?code&#x3D;${code}&amp;state&#x3D;${state}&#x60;,
+		const tokens: SpotifyTokenResponse &#x3D;
+			await this.spotifyAuth.exchangeCodeForToken(code, state);
+		const tp: SpotifyTokenPair &#x3D; {
+			tokens: tokens,
+			epoch_expiry: new Date().getTime() + (tokens.expires_in - 300) * 1000,
+		};
+		console.log(tokens);
+		const user: PrismaTypes.users &#x3D; await this.spotifyAuth.createUser(tp);
+		await this.spotifyAuth.saveUserSpotifyTokens(tp, user.user_id);
+		const jwt: string &#x3D; await this.spotifyAuth.generateJWT(user);
+
+		const response: SpotifyCallbackResponse &#x3D; {
+			token: jwt,
+			spotifyTokens: tp,
+		};
+		return response;
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Get(&quot;tokens&quot;)
+	@ApiTags(&quot;auth&quot;)
+	@ApiOperation({
+		summary: &quot;Get Spotify Auth Tokens&quot;,
+		description: &quot;Returns the user&#x27;s Spotify Auth Tokens&quot;,
+		operationId: &quot;getSpotifyTokens&quot;,
+	})
+	@ApiResponse({
+		status: 200,
+		description: &quot;The user&#x27;s Spotify Auth Tokens&quot;,
+		type: SpotifyTokenPair,
+	})
+	@ApiResponse({ status: 404, description: &quot;User not found&quot; })
+	async handleSpotifyTokens(
+		@Request() req: Request,
+	): Promise&lt;SpotifyTokenPair&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		const tokens: SpotifyTokenPair &#x3D; await this.spotifyAuth.getSpotifyTokens(
+			userInfo.id,
+		);
+		return tokens;
+	}
+
+	@ApiBearerAuth()
+	@ApiSecurity(&quot;bearer&quot;)
+	@UseGuards(JwtAuthGuard)
+	/*
+	@ApiHeader({
+		name: &quot;Authorization&quot;,
+		description: &quot;Bearer token for authentication&quot;,
+	})
+	*/
+	@Get(&quot;refresh&quot;)
+	@ApiTags(&quot;auth&quot;)
+	@ApiOperation({
+		summary: &quot;Manually Refresh Spotify Auth Tokens&quot;,
+		description:
+			&quot;This method will manually refresh the user&#x27;s Spotify Auth Tokens and return the new tokens&quot;,
+		operationId: &quot;refreshSpotifyTokens&quot;,
+	})
+	@ApiResponse({
+		status: 200,
+		description: &quot;The user&#x27;s new Spotify Auth Tokens&quot;,
+		type: SpotifyTokenResponse,
+	})
+	@ApiResponse({ status: 404, description: &quot;User not found&quot; })
+	async handleSpotifyRefresh(
+		@Request() req: Request,
+	): Promise&lt;SpotifyTokenResponse&gt; {
+		const userInfo: JWTPayload &#x3D; this.auth.getUserInfo(req);
+		const currentTokens: SpotifyTokenPair &#x3D;
+			await this.spotifyAuth.getSpotifyTokens(userInfo.id);
+		const refreshedTokens: SpotifyTokenResponse &#x3D;
+			await this.spotifyAuth.refreshAccessToken(currentTokens.tokens);
+		const tk: SpotifyTokenPair &#x3D; {
+			tokens: refreshedTokens,
+			epoch_expiry:
+				new Date().getTime() + (refreshedTokens.expires_in - 300) * 1000,
+		};
+		await this.spotifyAuth.saveUserSpotifyTokens(tk, userInfo.id);
+		return refreshedTokens;
+	}
+}
+</code></pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'controller';
+            var COMPODOC_CURRENT_PAGE_URL = 'SpotifyAuthController.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

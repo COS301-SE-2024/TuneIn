@@ -1,0 +1,652 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content class">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >RefreshBody</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/auth/auth.service.ts</code>
+        </p>
+
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#refreshToken" >refreshToken</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+
+            <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="refreshToken"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>refreshToken</b></span>
+                        <a href="#refreshToken"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;The JWT token to be refreshed&#x27;})<br />@IsString()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="67" class="link-to-prism">src/auth/auth.service.ts:67</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+</section>
+
+
+
+
+
+
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	UnauthorizedException,
+} from &quot;@nestjs/common&quot;;
+import {
+	AdminInitiateAuthCommandInput,
+	AttributeType,
+	AuthenticationResultType,
+	CognitoIdentityProvider,
+	ListUsersCommandOutput,
+} from &quot;@aws-sdk/client-cognito-identity-provider&quot;;
+import { ConfigService } from &quot;@nestjs/config&quot;;
+import { PrismaService } from &quot;../../prisma/prisma.service&quot;;
+import { Prisma } from &quot;@prisma/client&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import * as jwt from &quot;jsonwebtoken&quot;;
+import { CognitoJwtVerifier } from &quot;aws-jwt-verify&quot;;
+import { ApiProperty } from &quot;@nestjs/swagger&quot;;
+import { IsString } from &quot;class-validator&quot;;
+
+export type CognitoDecodedToken &#x3D; {
+	sub: string;
+	iss: string;
+	client_id: string;
+	origin_jti: string;
+	event_id?: string;
+	token_use: string;
+	scope?: string;
+	auth_time: number;
+	exp: number;
+	iat: number;
+	jti: string;
+	username: string;
+};
+
+export type JWTPayload &#x3D; {
+	id: string;
+	email: string;
+	username: string;
+};
+
+export class RegisterBody {
+	@ApiProperty({ description: &quot;The user&#x27;s username&quot; })
+	@IsString()
+	username: string;
+
+	@ApiProperty({ description: &quot;The user&#x27;s Cognito sub/ID&quot; })
+	@IsString()
+	userCognitoSub: string;
+
+	@ApiProperty({ description: &quot;The user&#x27;s email address&quot; })
+	@IsString()
+	email: string;
+}
+
+export class LoginBody {
+	@ApiProperty({ description: &quot;The Cognito JWT token&quot; })
+	@IsString()
+	token: string;
+}
+
+export class RefreshBody {
+	@ApiProperty({ description: &quot;The JWT token to be refreshed&quot; })
+	@IsString()
+	refreshToken: string;
+}
+
+@Injectable()
+export class AuthService {
+	private cognitoIdentityServiceProvider: CognitoIdentityProvider;
+	private accessKeyId: string;
+	private secretAccessKey: string;
+	private userPoolId: string;
+	private clientId: string;
+
+	constructor(
+		private configService: ConfigService,
+		private readonly prisma: PrismaService,
+	) {
+		// Set the AWS credentials
+		const accessKeyId &#x3D; this.configService.get&lt;string&gt;(&quot;AWS_ACCESS_KEY_ID&quot;);
+		if (!accessKeyId) {
+			throw new Error(&quot;Missing AWS_ACCESS_KEY_ID&quot;);
+		}
+		this.accessKeyId &#x3D; accessKeyId;
+
+		const secretAccessKey &#x3D; this.configService.get&lt;string&gt;(
+			&quot;AWS_SECRET_ACCESS_KEY&quot;,
+		);
+		if (!secretAccessKey) {
+			throw new Error(&quot;Missing AWS_SECRET_ACCESS_KEY&quot;);
+		}
+		this.secretAccessKey &#x3D; secretAccessKey;
+
+		const userPoolId &#x3D; this.configService.get&lt;string&gt;(
+			&quot;AWS_COGNITO_USER_POOL_ID&quot;,
+		);
+		if (!userPoolId) {
+			throw new Error(&quot;Missing AWS_COGNITO_USER_POOL_ID&quot;);
+		}
+		this.userPoolId &#x3D; userPoolId;
+
+		const clientId &#x3D; this.configService.get&lt;string&gt;(&quot;AWS_COGNITO_CLIENT_ID&quot;);
+		if (!clientId) {
+			throw new Error(&quot;Missing AWS_COGNITO_CLIENT_ID&quot;);
+		}
+		this.clientId &#x3D; clientId;
+
+		this.cognitoIdentityServiceProvider &#x3D; new CognitoIdentityProvider({
+			region: &quot;af-south-1&quot;,
+
+			credentials: {
+				accessKeyId: this.accessKeyId,
+				secretAccessKey: this.secretAccessKey,
+			},
+		});
+	}
+
+	async validateUser(
+		username: string,
+		password: string,
+	): Promise&lt;{
+		username: string;
+		attributes: AttributeType[];
+		authenticationResult: AuthenticationResultType;
+	}&gt; {
+		if (!this.userPoolId || !this.clientId) {
+			throw new Error(&quot;Missing Cognito configuration&quot;);
+		}
+
+		const params: AdminInitiateAuthCommandInput &#x3D; {
+			AuthFlow: &quot;ADMIN_NO_SRP_AUTH&quot;,
+			ClientId: this.clientId,
+			UserPoolId: this.userPoolId,
+			AuthParameters: {
+				USERNAME: username,
+				PASSWORD: password,
+			},
+		};
+
+		try {
+			const authResponse &#x3D;
+				await this.cognitoIdentityServiceProvider.adminInitiateAuth(params);
+			if (authResponse.AuthenticationResult) {
+				const user &#x3D; await this.cognitoIdentityServiceProvider.adminGetUser({
+					UserPoolId: this.userPoolId,
+					Username: username,
+				});
+
+				if (!user || !user.Username || !user.UserAttributes) {
+					throw new UnauthorizedException(&quot;Invalid credentials&quot;);
+				}
+
+				return {
+					username: user.Username,
+					attributes: user.UserAttributes,
+					authenticationResult: authResponse.AuthenticationResult,
+				};
+			}
+			throw new UnauthorizedException(&quot;Invalid credentials&quot;);
+		} catch (error) {
+			throw new UnauthorizedException(&quot;Invalid credentials&quot;);
+		}
+	}
+
+	async listUsers(): Promise&lt;ListUsersCommandOutput&gt; {
+		const params &#x3D; {
+			UserPoolId: this.userPoolId,
+		};
+
+		try {
+			const responsePromise &#x3D;
+				await this.cognitoIdentityServiceProvider.listUsers(params);
+			const response &#x3D; await responsePromise;
+			return response;
+		} catch (error) {
+			throw new UnauthorizedException(&quot;Error listing users&quot;);
+		}
+	}
+
+	async createUser(
+		username: string,
+		email: string,
+		userID: string,
+	): Promise&lt;boolean&gt; {
+		const user: Prisma.usersCreateInput &#x3D; {
+			username: username,
+			email: email,
+			user_id: userID,
+		};
+		const existingUser &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+		if (existingUser) {
+			return true;
+		}
+		try {
+			const response &#x3D; await this.prisma.users.create({ data: user });
+			console.log(response);
+		} catch (err) {
+			console.log(err);
+			return false;
+		}
+		return true;
+	}
+
+	async generateJWT(payload: JWTPayload): Promise&lt;string&gt; {
+		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
+		const expiresIn &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_EXPIRATION_TIME&quot;);
+
+		if (!secretKey || secretKey &#x3D;&#x3D;&#x3D; undefined || secretKey &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT secret key&quot;);
+		}
+
+		if (!expiresIn || expiresIn &#x3D;&#x3D;&#x3D; undefined || expiresIn &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT expiration time&quot;);
+		}
+
+		const token &#x3D; jwt.sign(payload, secretKey, { expiresIn });
+		return token;
+	}
+
+	async refreshJWT(jwt_token: string): Promise&lt;JWTPayload&gt; {
+		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
+		if (!secretKey || secretKey &#x3D;&#x3D;&#x3D; undefined || secretKey &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT secret key&quot;);
+		}
+
+		const decoded: jwt.JwtPayload &#x3D; jwt.decode(jwt_token) as jwt.JwtPayload;
+		console.log(&quot;decoded&quot;, decoded);
+
+		//ensure user data in Payload is valid
+		const user: PrismaTypes.users | null &#x3D; await this.prisma.users.findUnique({
+			where: {
+				user_id: decoded.id,
+				email: decoded.email,
+				username: decoded.username,
+			},
+		});
+
+		console.log(&quot;user&quot;, user);
+
+		if (!user) {
+			throw new UnauthorizedException(&quot;Invalid JWT token&quot;);
+		}
+
+		const result: JWTPayload &#x3D; {
+			id: decoded.id as string,
+			email: decoded.email as string,
+			username: decoded.username as string,
+		};
+		return result;
+	}
+
+	/*
+	async getUserInfo(jwt_token: string): Promise&lt;any&gt; {
+		const secretKey &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_SECRET_KEY&quot;);
+		const expiresIn &#x3D; this.configService.get&lt;string&gt;(&quot;JWT_EXPIRATION_TIME&quot;);
+
+		if (!secretKey || secretKey &#x3D;&#x3D;&#x3D; undefined || secretKey &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT secret key&quot;);
+		}
+
+		if (!expiresIn || expiresIn &#x3D;&#x3D;&#x3D; undefined || expiresIn &#x3D;&#x3D;&#x3D; &quot;&quot;) {
+			throw new Error(&quot;Missing JWT expiration time&quot;);
+		}
+
+		const decoded &#x3D; jwt.verify(jwt_token, secretKey);
+		const userID &#x3D; decoded.sub;
+		if (!userID) {
+			throw new Error(&quot;Invalid JWT token&quot;);
+		}
+		if (typeof userID !&#x3D;&#x3D; &quot;string&quot;) {
+			throw new Error(&quot;Invalid JWT token&quot;);
+		}
+
+		const user &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+		return user;
+	}
+	*/
+
+	// this funciton will be passed a Request object from the NestJS controller eg:
+	/*
+	getRoomInfo(@Request() req: Request, @Param(&quot;roomID&quot;) roomID: string): RoomDto {
+		return this.roomsService.getRoomInfo(roomID);
+	}
+	*/
+	getUserInfo(req: any): JWTPayload {
+		const result &#x3D; req.user as JWTPayload;
+		console.log(result);
+		if (!result) {
+			throw new UnauthorizedException(
+				&quot;No user found in JWT token. Please log in again&quot;,
+			);
+		}
+		if (!result.id) {
+			throw new UnauthorizedException(
+				&quot;No user ID found in JWT token. Please log in again&quot;,
+			);
+		}
+		return result;
+	}
+
+	async getUsernameAndEmail(userID: string): Promise&lt;{
+		username: string;
+		email: string;
+	}&gt; {
+		const user: PrismaTypes.users | null &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userID },
+		});
+
+		if (!user || user &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;Invalid credentials. Could not create user. getUsernameAndEmailError01&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		if (!user.email || user.email &#x3D;&#x3D;&#x3D; null) {
+			throw new HttpException(
+				&quot;User (&quot; +
+					user.username +
+					&quot;) does not have an email address. getUsernameAndEmailError02&quot;,
+				HttpStatus.UNAUTHORIZED,
+			);
+		}
+
+		return { username: user.username, email: user.email };
+	}
+
+	async decodeAndVerifyCognitoJWT(
+		jwt_token: string,
+	): Promise&lt;CognitoDecodedToken&gt; {
+		const verifier &#x3D; CognitoJwtVerifier.create({
+			userPoolId: this.userPoolId,
+			tokenUse: &quot;access&quot;,
+			clientId: this.clientId,
+		});
+
+		try {
+			const payload &#x3D; await verifier.verify(jwt_token);
+			console.log(&quot;Cognito Verification&quot;, payload);
+			const result: CognitoDecodedToken &#x3D; payload as CognitoDecodedToken;
+			return result;
+		} catch (error) {
+			console.log(error);
+			throw new UnauthorizedException(&quot;Invalid JWT token&quot;);
+		}
+	}
+}
+</code></pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'RefreshBody.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

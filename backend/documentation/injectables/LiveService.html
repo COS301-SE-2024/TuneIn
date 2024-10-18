@@ -1,0 +1,459 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >LiveService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/live/live.service.ts</code>
+        </p>
+
+
+
+
+
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor()</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/live/live.service.ts:16</a></div>
+                            </td>
+                        </tr>
+
+            </tbody>
+        </table>
+</section>
+
+
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &quot;@nestjs/common&quot;;
+// import { Cron, SchedulerRegistry } from &quot;@nestjs/schedule&quot;;
+// import { Cron } from &quot;@nestjs/schedule&quot;;
+// import { CronJob } from &quot;cron&quot;;
+// import { Server } from &quot;socket.io&quot;;
+// import { PlaybackEventDto } from &quot;./dto/playbackevent.dto&quot;;
+// import { SOCKET_EVENTS } from &quot;../common/constants&quot;;
+import // RoomQueueService,
+// ActiveRoom,
+&quot;../modules/rooms/roomqueue/roomqueue.service&quot;;
+// import { RoomSongDto } from &quot;../modules/rooms/dto/roomsong.dto&quot;;
+
+// const MAX_ANNOUNCEMENTS_PER_ROOM &#x3D; 5;
+// const ROOM_ACTIVITY_TIMEOUT &#x3D; 5;
+@Injectable()
+export class LiveService {
+	// private server: Server;
+	// private roomJobs: Map&lt;string, CronJob[]&gt;;
+	constructor() {
+		// private readonly roomQueue: RoomQueueService, // private readonly schedulerRegistry: SchedulerRegistry,
+		// this.roomJobs &#x3D; new Map&lt;string, CronJob[]&gt;();
+	}
+
+	// async wait(ms: number) {
+	// 	return new Promise((resolve) &#x3D;&gt; setTimeout(resolve, ms));
+	// }
+
+	// serverSet(): boolean {
+	// 	return this.server !&#x3D;&#x3D; undefined;
+	// }
+
+	// setServer(server: Server): void {
+	// 	this.server &#x3D; server;
+	// }
+
+	// @Cron(&quot;0 * * * * *&quot;) // Run this every 1 minutes
+	// async checkRoomQueues() {
+	// 	// const jobs &#x3D; this.schedulerRegistry.getCronJobs();
+	// 	let now &#x3D; new Date().valueOf();
+	// 	console.log(
+	// 		&#x60;${new Date().valueOf()} Checking room queues (${new Date().toISOString()})&#x60;,
+	// 	);
+	// 	const rooms: Map&lt;string, ActiveRoom&gt; &#x3D; this.roomQueue.roomQueues;
+	// 	const roomsToRemove: string[] &#x3D; [];
+	// 	for (const room of rooms.values()) {
+	// 		console.log(&#x60;Checking room ${room.room.roomID}&#x60;);
+	// 		now &#x3D; new Date().valueOf();
+	// 		if (room.inactive) {
+	// 			room.minutesInactive++;
+	// 			console.log(
+	// 				&#x60;Room ${room.room.roomID} has been inactive for ${room.minutesInactive} minutes&#x60;,
+	// 			);
+	// 			if (room.minutesInactive &gt;&#x3D; ROOM_ACTIVITY_TIMEOUT) {
+	// 				console.log(
+	// 					&#x60;Will remove room ${room.room.roomID} from queue due to inactivity&#x60;,
+	// 				);
+	// 				roomsToRemove.push(room.room.roomID);
+	// 				continue;
+	// 			}
+	// 		}
+	// 		if (room.songs.length &#x3D;&#x3D;&#x3D; 0) {
+	// 			room.inactive &#x3D; true;
+	// 			console.log(
+	// 				&#x60;Room ${room.room.roomID} has no songs in the queue. Marking as inactive.&#x60;,
+	// 			);
+	// 			continue;
+	// 		}
+
+	// 		console.log(&#x60;Flushing room ${room.room.roomID} to DB&#x60;);
+	// 		const start: Date &#x3D; new Date();
+	// 		await this.roomQueue.flushToDB(room.room.roomID);
+	// 		console.log(
+	// 			&#x60;Finished flushing room ${room.room.roomID} to DB in ${
+	// 				new Date().valueOf() - start.valueOf()
+	// 			}ms&#x60;,
+	// 		);
+
+	// 		if (room.songs.length &gt; 0) {
+	// 			const head &#x3D; room.songs[0];
+	// 			const st &#x3D; head.getPlaybackStartTime();
+	// 			if (st !&#x3D;&#x3D; null) {
+	// 				const expectedEndTime &#x3D; st + head.songDurationMs + 5000; // 5 seconds of buffer for this code to run
+	// 				if (now &gt; expectedEndTime) {
+	// 					console.log(
+	// 						&#x60;Room ${room.room.roomID}: Removing played songs from queue&#x60;,
+	// 					);
+	// 					await this.roomQueue.getQueueState(room.room.roomID); // this will trigger played songs to be removed (via ActiveRoom.updateQueue)
+	// 				}
+	// 			}
+	// 			// this.cancelSongAnnouncements(room.room.roomID);
+	// 			// if (room.songs[0].getPlaybackStartTime() &#x3D;&#x3D;&#x3D; null) {
+	// 			// 	room.songs[0].setPlaybackStartTime(new Date().valueOf());
+	// 			// 	await this.roomQueue.refreshQueue(room.room.roomID);
+	// 			// }
+	// 			// let songsAsRoomSongDto: RoomSongDto[] &#x3D; room
+	// 			// 	.queueAsRoomSongDto()
+	// 			// 	.slice(0, 1 + MAX_ANNOUNCEMENTS_PER_ROOM);
+	// 			// const currentSong: RoomSongDto &#x3D; songsAsRoomSongDto[0];
+	// 			// if (!currentSong.startTime) {
+	// 			// 	console.warn(
+	// 			// 		&#x60;The current song in the queue for room ${room.room.roomID} has no start time. Skipping room entirely.&#x60;,
+	// 			// 	);
+	// 			// 	continue;
+	// 			// }
+	// 			// const currentSongEvent: PlaybackEventDto &#x3D; {
+	// 			// 	date_created: new Date(),
+	// 			// 	userID: null,
+	// 			// 	roomID: room.room.roomID,
+	// 			// 	spotifyID: currentSong.spotifyID,
+	// 			// 	song: currentSong,
+	// 			// 	UTC_time: currentSong.startTime,
+	// 			// };
+	// 			// if (currentSong.startTime &lt; now) {
+	// 			// 	if (!currentSong.pauseTime) {
+	// 			// 		this.server
+	// 			// 			.to(room.room.roomID)
+	// 			// 			.emit(SOCKET_EVENTS.CURRENT_MEDIA, currentSongEvent);
+	// 			// 	} else {
+	// 			// 		console.warn(
+	// 			// 			&#x60;The current song in the queue for room ${room.room.roomID} is paused. Skipping room entirely.&#x60;,
+	// 			// 		);
+	// 			// 	}
+	// 			// }
+	// 			// songsAsRoomSongDto &#x3D; room
+	// 			// 	.queueAsRoomSongDto()
+	// 			// 	.slice(1, 1 + MAX_ANNOUNCEMENTS_PER_ROOM);
+	// 			// for (const song of songsAsRoomSongDto) {
+	// 			// 	if (!song.startTime) {
+	// 			// 		console.warn(
+	// 			// 			&#x60;A song in the queue for room ${room.room.roomID} has no start time. Skipping queue.&#x60;,
+	// 			// 		);
+	// 			// 		break;
+	// 			// 	}
+	// 			// 	if (song.startTime &lt; now) {
+	// 			// 		console.warn(
+	// 			// 			&#x60;A song in the queue for room ${room.room.roomID} has a start time in the past. Skipping song.&#x60;,
+	// 			// 		);
+	// 			// 		continue;
+	// 			// 	}
+	// 			// 	const event: PlaybackEventDto &#x3D; {
+	// 			// 		date_created: new Date(),
+	// 			// 		userID: null,
+	// 			// 		roomID: room.room.roomID,
+	// 			// 		spotifyID: song.spotifyID,
+	// 			// 		song: song,
+	// 			// 		UTC_time: song.startTime,
+	// 			// 	};
+	// 			// 	this.createSongAnnouncement(
+	// 			// 		room.room.roomID,
+	// 			// 		new Date(song.startTime),
+	// 			// 		event,
+	// 			// 	);
+	// 			// }
+	// 		}
+	// 	}
+	// 	for (const roomID of roomsToRemove) {
+	// 		this.roomQueue.roomQueues.delete(roomID);
+	// 	}
+	// }
+
+	// createSongAnnouncement(
+	// 	roomID: string,
+	// 	startTime: Date,
+	// 	event: PlaybackEventDto,
+	// ): void {
+	// 	if (!this.serverSet()) {
+	// 		throw new Error(&quot;Server not set&quot;);
+	// 	}
+	// 	console.log(
+	// 		&#x60;Creating new song announcement for room ${roomID} at ${startTime.toISOString()}&#x60;,
+	// 	);
+	// 	const job &#x3D; new CronJob(startTime, async () &#x3D;&gt; {
+	// 		try {
+	// 			console.log(&#x60;${roomID}: New song announcement for room&#x60;);
+	// 			if (event.song) {
+	// 				console.log(
+	// 					&#x60;${roomID}: Play song (index&#x3D;${event.song.index}): ${event.song.spotifyID}&#x60;,
+	// 				);
+	// 			}
+	// 			for (let i &#x3D; 0; i &lt; 5; i++) {
+	// 				this.server.to(roomID).emit(SOCKET_EVENTS.CURRENT_MEDIA, event);
+	// 				console.log(&#x60;${roomID}: Sent announcement ${i + 1} of 5&#x60;);
+	// 				await this.wait(1000);
+	// 			}
+	// 			console.log(&#x60;${roomID}: New song announcement complete.&#x60;);
+	// 		} catch (err) {
+	// 			console.error(&#x60;${roomID}: Error sending song announcement&#x60;);
+	// 			console.error(err);
+	// 		}
+	// 	});
+	// 	this.schedulerRegistry.addCronJob(
+	// 		&#x60;songAnnouncement-${roomID}-${startTime.valueOf()}&#x60;,
+	// 		job,
+	// 	);
+	// 	if (!this.roomJobs.has(roomID)) {
+	// 		this.roomJobs.set(roomID, []);
+	// 	}
+	// 	const queue &#x3D; this.roomJobs.get(roomID);
+	// 	if (queue) queue.push(job);
+	// 	job.start();
+	// 	console.log(
+	// 		&#x60;Successfully created announcement for room ${roomID} at ${startTime.toISOString()}&#x60;,
+	// 	);
+	// }
+
+	// cancelSongAnnouncements(roomID: string): void {
+	// 	const localJobs &#x3D; this.roomJobs.get(roomID);
+	// 	if (localJobs) {
+	// 		this.roomJobs.delete(roomID);
+	// 	}
+	// 	const jobs &#x3D; this.schedulerRegistry.getCronJobs();
+	// 	jobs.forEach((job, key) &#x3D;&gt; {
+	// 		if (key.startsWith(&#x60;songAnnouncement-${roomID}&#x60;)) {
+	// 			job.stop();
+	// 			this.schedulerRegistry.deleteCronJob(key);
+	// 			console.warn(&#x60;Cancelled announcement ${key}&#x60;);
+	// 		}
+	// 	});
+	// }
+}
+</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'LiveService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

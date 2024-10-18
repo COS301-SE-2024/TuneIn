@@ -163,7 +163,7 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(authService: <a href="../injectables/AuthService.html" target="_self">AuthService</a>)</code>
+<code>constructor()</code>
                     </td>
                 </tr>
                         <tr>
@@ -172,36 +172,6 @@
                             </td>
                         </tr>
 
-                <tr>
-                    <td class="col-md-4">
-                            <div>
-                                    <b>Parameters :</b>
-                                    <table class="params">
-                                        <thead>
-                                            <tr>
-                                                <td>Name</td>
-                                                    <td>Type</td>
-                                                <td>Optional</td>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                                <tr>
-                                                        <td>authService</td>
-                                                  
-                                                        <td>
-                                                                        <code><a href="../injectables/AuthService.html" target="_self" >AuthService</a></code>
-                                                        </td>
-                                                  
-                                                    <td>
-                                                            No
-                                                    </td>
-                                                    
-                                                </tr>
-                                        </tbody>
-                                    </table>
-                            </div>
-                    </td>
-                </tr>
             </tbody>
         </table>
 </section>
@@ -270,7 +240,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#JWTPayload" target="_self" >Promise&lt;JWTPayload&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -289,11 +259,11 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Strategy, ExtractJwt } from &quot;passport-jwt&quot;;
 import { PassportStrategy } from &quot;@nestjs/passport&quot;;
 import { Injectable } from &quot;@nestjs/common&quot;;
-import { AuthService, JWTPayload } from &quot;./auth.service&quot;;
+import { JWTPayload } from &quot;./auth.service&quot;;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-	constructor(private authService: AuthService) {
+	constructor() {
 		const jwtSecret &#x3D; process.env.JWT_SECRET_KEY;
 		if (!jwtSecret || jwtSecret &#x3D;&#x3D;&#x3D; &quot;&quot;) {
 			throw new Error(&quot;Missing JWT_SECRET_KEY&quot;);
@@ -306,7 +276,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 		});
 	}
 
-	async validate(payload: any) {
+	async validate(payload: any): Promise&lt;JWTPayload&gt; {
 		const result: JWTPayload &#x3D; {
 			id: payload.id,
 			email: payload.email,

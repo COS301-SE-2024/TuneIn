@@ -147,11 +147,32 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Optional</span>
                                 <a href="#cover" >cover</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                <a href="#duration" >duration</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Optional</span>
+                                <a href="#songID" >songID</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#spotify_id" >spotify_id</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Optional</span>
                                 <a href="#start_time" >start_time</a>
                             </li>
                             <li>
@@ -202,13 +223,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty({type: undefined})<br />@IsArray()<br />
+                            @ApiProperty({type: String, description: &#x27;The artists that performed the song&#x27;, isArray: true})<br />@IsArray()<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:11</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="42" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:42</a></div>
                         </td>
                     </tr>
 
@@ -223,8 +244,123 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Optional</span>
                         <span ><b>cover</b></span>
                         <a href="#cover"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiPropertyOptional()<br />@IsOptional()<br />@IsString()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="47" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:47</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="duration"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>duration</b></span>
+                        <a href="#duration"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty()<br />@IsNumber()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="51" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:51</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="songID"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Optional</span>
+                        <span ><b>songID</b></span>
+                        <a href="#songID"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiPropertyOptional()<br />@IsOptional()<br />@IsString()<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:30</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="spotify_id"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>spotify_id</b></span>
+                        <a href="#spotify_id"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
@@ -245,7 +381,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="55" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:55</a></div>
                         </td>
                     </tr>
 
@@ -260,6 +396,8 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Optional</span>
                         <span ><b>start_time</b></span>
                         <a href="#start_time"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -276,13 +414,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @ApiProperty()<br />@IsDate()<br />
+                            @ApiPropertyOptional({description: &#x27;The time the song started playing&#x27;, type: Date, nullable: true})<br />@IsOptional()<br />@IsDate()<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:19</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="64" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:64</a></div>
                         </td>
                     </tr>
 
@@ -319,7 +457,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:7</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="34" class="link-to-prism">src/modules/rooms/dto/songinfo.dto.ts:34</a></div>
                         </td>
                     </tr>
 
@@ -338,25 +476,70 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { ApiProperty } from &quot;@nestjs/swagger&quot;;
-import { IsString, IsArray, IsDate } from &quot;class-validator&quot;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { ApiProperty, ApiPropertyOptional } from &quot;@nestjs/swagger&quot;;
+import {
+	IsString,
+	IsArray,
+	IsDate,
+	IsNumber,
+	IsOptional,
+} from &quot;class-validator&quot;;
+
+/*
+CREATE TABLE IF NOT EXISTS public.song
+(
+    song_id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    name text COLLATE pg_catalog.&quot;default&quot; NOT NULL,
+    artist text COLLATE pg_catalog.&quot;default&quot; NOT NULL,
+    genre text COLLATE pg_catalog.&quot;default&quot;,
+    lyrics_url text COLLATE pg_catalog.&quot;default&quot;,
+    duration integer DEFAULT 0,
+    genres text[] COLLATE pg_catalog.&quot;default&quot;,
+    artwork_url text COLLATE pg_catalog.&quot;default&quot;,
+    spotify_id text COLLATE pg_catalog.&quot;default&quot;,
+    CONSTRAINT song_pkey PRIMARY KEY (song_id)
+)
+*/
 
 export class SongInfoDto {
+	@ApiPropertyOptional()
+	@IsOptional()
+	@IsString()
+	songID?: string;
+
 	@ApiProperty()
 	@IsString()
 	title: string;
 
-	@ApiProperty({ type: [String] })
+	@ApiProperty({
+		type: String,
+		description: &quot;The artists that performed the song&quot;,
+		isArray: true,
+	})
 	@IsArray()
 	artists: string[];
 
-	@ApiProperty()
+	@ApiPropertyOptional()
+	@IsOptional()
 	@IsString()
-	cover: string;
+	cover?: string;
 
 	@ApiProperty()
+	@IsNumber()
+	duration: number;
+
+	@ApiProperty()
+	@IsString()
+	spotify_id: string;
+
+	@ApiPropertyOptional({
+		description: &quot;The time the song started playing&quot;,
+		type: Date,
+		nullable: true,
+	})
+	@IsOptional()
 	@IsDate()
-	start_time: Date;
+	start_time?: Date;
 }
 </code></pre>
     </div>

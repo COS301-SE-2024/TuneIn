@@ -115,7 +115,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/modules/profile/profile.service.ts</code>
+            <code>archive/modules/profile/profile.service.ts</code>
         </p>
 
 
@@ -140,19 +140,19 @@
                                 <a href="#followUser" >followUser</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#getProfile" >getProfile</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#getProfileByUsername" >getProfileByUsername</a>
-                            </li>
-                            <li>
-                                <a href="#patchProfile" >patchProfile</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#unfollowUser" >unfollowUser</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#updateProfile" >updateProfile</a>
                             </li>
                         </ul>
@@ -178,7 +178,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="9" class="link-to-prism">src/modules/profile/profile.service.ts:9</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">archive/modules/profile/profile.service.ts:11</a></div>
                             </td>
                         </tr>
 
@@ -267,8 +267,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="44"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:44</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="74"
+                                    class="link-to-prism">archive/modules/profile/profile.service.ts:74</a></div>
                         </td>
                     </tr>
 
@@ -332,6 +332,7 @@
                 <td class="col-md-4">
                     <a name="getProfile"></a>
                     <span class="name">
+                            <span class="modifier">Async</span>
                         <span ><b>getProfile</b></span>
                         <a href="#getProfile"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -339,15 +340,16 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>getProfile()</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getProfile(uid: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="16"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:16</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="18"
+                                    class="link-to-prism">archive/modules/profile/profile.service.ts:18</a></div>
                         </td>
                     </tr>
 
@@ -355,10 +357,40 @@
             <tr>
                 <td class="col-md-4">
 
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>uid</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >UserProfileDto</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto&gt;</a></code>
 
                         </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -369,6 +401,7 @@
                 <td class="col-md-4">
                     <a name="getProfileByUsername"></a>
                     <span class="name">
+                            <span class="modifier">Async</span>
                         <span ><b>getProfileByUsername</b></span>
                         <a href="#getProfileByUsername"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -376,15 +409,16 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>getProfileByUsername()</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getProfileByUsername(username: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="36"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:36</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="53"
+                                    class="link-to-prism">archive/modules/profile/profile.service.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -392,47 +426,40 @@
             <tr>
                 <td class="col-md-4">
 
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>username</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >UserProfileDto</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto&gt;</a></code>
 
                         </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="patchProfile"></a>
-                    <span class="name">
-                        <span ><b>patchProfile</b></span>
-                        <a href="#patchProfile"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-<code>patchProfile()</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="32"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:32</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >UserProfileDto</a></code>
-
-                        </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -459,8 +486,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="81"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:81</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="111"
+                                    class="link-to-prism">archive/modules/profile/profile.service.ts:111</a></div>
                         </td>
                     </tr>
 
@@ -524,6 +551,7 @@
                 <td class="col-md-4">
                     <a name="updateProfile"></a>
                     <span class="name">
+                            <span class="modifier">Async</span>
                         <span ><b>updateProfile</b></span>
                         <a href="#updateProfile"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -531,15 +559,16 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>updateProfile()</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>updateProfile(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateProfileDto: <a href="../classes/UpdateUserProfileDto.html" target="_self">UpdateUserProfileDto</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="28"
-                                    class="link-to-prism">src/modules/profile/profile.service.ts:28</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="23"
+                                    class="link-to-prism">archive/modules/profile/profile.service.ts:23</a></div>
                         </td>
                     </tr>
 
@@ -547,10 +576,52 @@
             <tr>
                 <td class="col-md-4">
 
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>updateProfileDto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateUserProfileDto.html" target="_self" >UpdateUserProfileDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >UserProfileDto</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/UserProfileDto.html" target="_self" >Promise&lt;UserProfileDto&gt;</a></code>
 
                         </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -564,9 +635,11 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &quot;@nestjs/common&quot;;
 import { UserProfileDto } from &quot;./dto/userprofile.dto&quot;;
 import { PrismaService } from &quot;../../../prisma/prisma.service&quot;;
-import { DtoGenService } from &quot;../dto-gen/dto-gen.service&quot;;
-import { DbUtilsService } from &quot;../db-utils/db-utils.service&quot;;
-import * as Prisma from &quot;@prisma/client&quot;;
+// import { DtoGenService } from &quot;../dto-gen/dto-gen.service&quot;;
+// import { DbUtilsService } from &quot;../db-utils/db-utils.service&quot;;
+import { UpdateUserProfileDto } from &quot;./dto/updateuserprofile.dto&quot;;
+import { DbUtilsService } from &quot;src/modules/db-utils/db-utils.service&quot;;
+import { DtoGenService } from &quot;src/modules/dto-gen/dto-gen.service&quot;;
 
 @Injectable()
 export class ProfileService {
@@ -576,27 +649,55 @@ export class ProfileService {
 		private readonly dbUtilsService: DbUtilsService,
 	) {}
 
-	getProfile(): UserProfileDto {
-		// an an example to generate a UserProfileDto
-		/*
-		const userID &#x3D; &quot;311ce2e8-8041-70bd-0ab5-be97283ee182&quot;
-		const user &#x3D; await this.dtogen.generateUserProfileDto(userID);
-		if (user) {
-			return user;
+	async getProfile(uid: string): Promise&lt;UserProfileDto&gt; {
+		const user &#x3D; await this.dtogen.generateUserDto(uid);
+		return new UserProfileDto();
+	}
+
+	async updateProfile(
+		userId: string,
+		updateProfileDto: UpdateUserProfileDto,
+	): Promise&lt;UserProfileDto&gt; {
+		const user &#x3D; await this.prisma.users.findUnique({
+			where: { user_id: userId },
+		});
+
+		if (!user) {
+			throw new Error(&quot;User not found&quot;);
 		}
-		*/
+
+		// const updateData &#x3D; this.dbUtilsService.buildUpdateData(
+		// 	user,
+		// 	updateProfileDto,
+		// );
+
+		// await this.prisma.users.update({
+		// 	where: { user_id: userId },
+		// 	data: updateData,
+		// });
+
+		const userProfile &#x3D; await this.dtogen.generateUserDto(userId);
+		if (!userProfile) {
+			throw new Error(&quot;Failed to generate user profile&quot;);
+		}
+
 		return new UserProfileDto();
 	}
 
-	updateProfile(): UserProfileDto {
-		return new UserProfileDto();
-	}
+	async getProfileByUsername(username: string): Promise&lt;UserProfileDto&gt; {
+		const userData &#x3D; await this.prisma.users.findFirst({
+			where: { username: username },
+		});
 
-	patchProfile(): UserProfileDto {
-		return new UserProfileDto();
-	}
+		if (!userData) {
+			throw new Error(&quot;User not found&quot;);
+		} else {
+			const user &#x3D; await this.dtogen.generateUserDto(userData.user_id);
+			if (user) {
+				return new UserProfileDto();
+			}
+		}
 
-	getProfileByUsername(): UserProfileDto {
 		return new UserProfileDto();
 	}
 

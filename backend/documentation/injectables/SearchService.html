@@ -1,0 +1,2707 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tunein-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tunein-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >SearchService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/modules/search/search.service.ts</code>
+        </p>
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#advancedRoomSearchQueryBuilder" >advancedRoomSearchQueryBuilder</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#advancedSearchRooms" >advancedSearchRooms</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#advancedSearchUsers" >advancedSearchUsers</a>
+                            </li>
+                            <li>
+                                <a href="#advancedUserSearchQueryBuilder" >advancedUserSearchQueryBuilder</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#clearRoomsHistory" >clearRoomsHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#clearSearchHistory" >clearSearchHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#clearUsersHistory" >clearUsersHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#combinedSearch" >combinedSearch</a>
+                            </li>
+                            <li>
+                                <a href="#getQueryParams" >getQueryParams</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#insertSearchHistory" >insertSearchHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchHistory" >searchHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchRooms" >searchRooms</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchRoomsHistory" >searchRoomsHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchRoomsSuggestions" >searchRoomsSuggestions</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchUsers" >searchUsers</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchUsersHistory" >searchUsersHistory</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#searchUsersSuggestions" >searchUsersSuggestions</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(prisma: <a href="../injectables/PrismaService.html" target="_self">PrismaService</a>, dtogen: <a href="../injectables/DtoGenService.html" target="_self">DtoGenService</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="50" class="link-to-prism">src/modules/search/search.service.ts:50</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>prisma</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/PrismaService.html" target="_self" >PrismaService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dtogen</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/DtoGenService.html" target="_self" >DtoGenService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="advancedRoomSearchQueryBuilder"></a>
+                    <span class="name">
+                        <span ><b>advancedRoomSearchQueryBuilder</b></span>
+                        <a href="#advancedRoomSearchQueryBuilder"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>advancedRoomSearchQueryBuilder(params: literal type)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="228"
+                                    class="link-to-prism">src/modules/search/search.service.ts:228</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="advancedSearchRooms"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>advancedSearchRooms</b></span>
+                        <a href="#advancedSearchRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>advancedSearchRooms(params: literal type, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="378"
+                                    class="link-to-prism">src/modules/search/search.service.ts:378</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="advancedSearchUsers"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>advancedSearchUsers</b></span>
+                        <a href="#advancedSearchUsers"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>advancedSearchUsers(params: literal type, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="746"
+                                    class="link-to-prism">src/modules/search/search.service.ts:746</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >Promise&lt;UserDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="advancedUserSearchQueryBuilder"></a>
+                    <span class="name">
+                        <span ><b>advancedUserSearchQueryBuilder</b></span>
+                        <a href="#advancedUserSearchQueryBuilder"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>advancedUserSearchQueryBuilder(params: literal type)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="647"
+                                    class="link-to-prism">src/modules/search/search.service.ts:647</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="clearRoomsHistory"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>clearRoomsHistory</b></span>
+                        <a href="#clearRoomsHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>clearRoomsHistory(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1040"
+                                    class="link-to-prism">src/modules/search/search.service.ts:1040</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="clearSearchHistory"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>clearSearchHistory</b></span>
+                        <a href="#clearSearchHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>clearSearchHistory(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1031"
+                                    class="link-to-prism">src/modules/search/search.service.ts:1031</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="clearUsersHistory"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>clearUsersHistory</b></span>
+                        <a href="#clearUsersHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>clearUsersHistory(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1061"
+                                    class="link-to-prism">src/modules/search/search.service.ts:1061</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="combinedSearch"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>combinedSearch</b></span>
+                        <a href="#combinedSearch"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>combinedSearch(params: literal type, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="113"
+                                    class="link-to-prism">src/modules/search/search.service.ts:113</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/CombinedSearchResults.html" target="_self" >Promise&lt;CombinedSearchResults&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getQueryParams"></a>
+                    <span class="name">
+                        <span ><b>getQueryParams</b></span>
+                        <a href="#getQueryParams"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getQueryParams(url: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="923"
+                                    class="link-to-prism">src/modules/search/search.service.ts:923</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>url</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>literal type</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="insertSearchHistory"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>insertSearchHistory</b></span>
+                        <a href="#insertSearchHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>insertSearchHistory(endpoint: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, params: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, user_id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="95"
+                                    class="link-to-prism">src/modules/search/search.service.ts:95</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>endpoint</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>user_id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchHistory"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>searchHistory</b></span>
+                        <a href="#searchHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchHistory(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="954"
+                                    class="link-to-prism">src/modules/search/search.service.ts:954</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/CombinedSearchHistory.html" target="_self" >Promise&lt;CombinedSearchHistory[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchRooms"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>searchRooms</b></span>
+                        <a href="#searchRooms"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchRooms(params: literal type, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="141"
+                                    class="link-to-prism">src/modules/search/search.service.ts:141</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>params</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/RoomDto.html" target="_self" >Promise&lt;RoomDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchRoomsHistory"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>searchRoomsHistory</b></span>
+                        <a href="#searchRoomsHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchRoomsHistory(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="456"
+                                    class="link-to-prism">src/modules/search/search.service.ts:456</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchRoomsSuggestions"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>searchRoomsSuggestions</b></span>
+                        <a href="#searchRoomsSuggestions"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchRoomsSuggestions(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="527"
+                                    class="link-to-prism">src/modules/search/search.service.ts:527</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchUsers"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>searchUsers</b></span>
+                        <a href="#searchUsers"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchUsers(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="585"
+                                    class="link-to-prism">src/modules/search/search.service.ts:585</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/UserDto.html" target="_self" >Promise&lt;UserDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchUsersHistory"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>searchUsersHistory</b></span>
+                        <a href="#searchUsersHistory"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchUsersHistory(userID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="807"
+                                    class="link-to-prism">src/modules/search/search.service.ts:807</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userID</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="searchUsersSuggestions"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>searchUsersSuggestions</b></span>
+                        <a href="#searchUsersSuggestions"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>searchUsersSuggestions(q: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="865"
+                                    class="link-to-prism">src/modules/search/search.service.ts:865</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>q</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/SearchHistoryDto.html" target="_self" >Promise&lt;SearchHistoryDto[]&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &quot;@nestjs/common&quot;;
+import { UserDto } from &quot;../users/dto/user.dto&quot;;
+import { RoomDto } from &quot;../rooms/dto/room.dto&quot;;
+import { SearchHistoryDto } from &quot;./dto/searchhistorydto&quot;;
+import { ApiProperty } from &quot;@nestjs/swagger&quot;;
+import { IsArray, ValidateNested } from &quot;class-validator&quot;;
+import * as PrismaTypes from &quot;@prisma/client&quot;;
+import { DtoGenService } from &quot;../dto-gen/dto-gen.service&quot;;
+import * as sqlstring from &quot;sqlstring&quot;;
+import { PrismaService } from &quot;../../../prisma/prisma.service&quot;;
+
+export class CombinedSearchResults {
+	@ApiProperty({
+		type: RoomDto,
+		description: &quot;List of rooms&quot;,
+		isArray: true,
+	})
+	@IsArray({ message: &quot;Rooms must be an array&quot; })
+	@ValidateNested({ each: true, message: &quot;Each room must be a valid RoomDto&quot; })
+	rooms: RoomDto[];
+
+	@ApiProperty({
+		type: UserDto,
+		description: &quot;List of users&quot;,
+		isArray: true,
+	})
+	@IsArray({ message: &quot;Users must be an array&quot; })
+	@ValidateNested({ each: true, message: &quot;Each user must be a valid UserDto&quot; })
+	users: UserDto[];
+}
+
+export class CombinedSearchHistory {
+	@ApiProperty({
+		description: &quot;Mixed list of rooms, users, or strings&quot;,
+		isArray: true,
+		type: &quot;object&quot;,
+		items: {
+			oneOf: [
+				{ $ref: &quot;#/components/schemas/RoomDto&quot; },
+				{ $ref: &quot;#/components/schemas/UserDto&quot; },
+				{ type: &quot;string&quot; },
+			],
+		},
+	})
+	@IsArray({ message: &quot;Results must be an array&quot; })
+	results: (RoomDto | UserDto | string)[];
+}
+
+@Injectable()
+export class SearchService {
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly dtogen: DtoGenService,
+	) {}
+
+	// Fuzzy search tutorial
+	/*
+	using pg_trgm to fuzzy search with threshold 0.4
+	&#x60;&#x60;&#x60;
+	SELECT
+	*
+	FROM artists
+	WHERE SIMILARITY(name,&#x27;Claud Monay&#x27;) &gt; 0.4 ;
+	&#x60;&#x60;&#x60;
+
+	using pg_trgm to fuzzy search to search part of a string (with default threshold 0.3)
+	&#x60;&#x60;&#x60;
+	SELECT
+	*
+	FROM artists
+	WHERE &#x27;Cadinsky&#x27; % ANY(STRING_TO_ARRAY(name,&#x27; &#x27;));
+	&#x60;&#x60;&#x60;
+
+	using Levenstein distances (for closest matching words)
+	&#x60;&#x60;&#x60;
+	SELECT
+		*,
+		LEVENSHTEIN(name, &#x27;Freda Kallo&#x27;)
+	FROM artists
+	ORDER BY LEVENSHTEIN(name, &#x27;Freda Kallo&#x27;) ASC
+	LIMIT 5
+	&#x60;&#x60;&#x60;
+	*/
+	// async demoSearch(ctx: Context) {
+	// 	const result &#x3D; await ctx.prisma.$queryRaw&lt;PrismaTypes.users&gt;&#x60;
+	// 	SELECT *,
+	// 	LEVENSHTEIN(username, &#x27;farmer&#x27;) AS distance
+	// 	FROM users
+	// 	WHERE similarity(username, &#x27;farmer) &gt; 0.2
+	// 	ORDER BY distance ASC
+	// 	LIMIT 5;&#x60;;
+	// 	console.log(result);
+	// }
+
+	async insertSearchHistory(endpoint: string, params: any, user_id: string) {
+		let url &#x3D; &#x60;${endpoint}?q&#x3D;${params.q}&#x60;;
+
+		if (params.creator) {
+			url +&#x3D; &#x60;&amp;creator&#x3D;${params.creator}&#x60;;
+		}
+
+		const result &#x3D; await this.prisma.search_history.create({
+			data: {
+				user_id: user_id,
+				search_term: params.q,
+				url: url,
+			},
+		});
+
+		console.log(&quot;Insertion result: &quot; + result);
+	}
+
+	async combinedSearch(
+		params: {
+			q: string;
+			creator?: string;
+		},
+		userID: string,
+	): Promise&lt;CombinedSearchResults&gt; {
+		// console.log(params);
+
+		const rooms &#x3D; await this.searchRooms(params, userID);
+		const users &#x3D; await this.searchUsers(params.q, userID);
+
+		console.log(&quot;Rooms: &quot; + rooms);
+		console.log(&quot;Users: &quot; + users);
+
+		if (users) {
+			return {
+				rooms: rooms,
+				users: users,
+			};
+		}
+
+		return {
+			rooms: rooms,
+			users: [],
+		};
+	}
+
+	async searchRooms(
+		params: {
+			q: string;
+			creator?: string;
+		},
+		userID: string, // this is the user who is searching. To check whether the room_creator has blocked this user
+	): Promise&lt;RoomDto[]&gt; {
+		// console.log(params);
+		// const result &#x3D; await ctx.prisma.$queryRaw&lt;PrismaTypes.room&gt;&#x60;
+		// SELECT room_id, name, description, username,
+		// LEAST(levenshtein(name, ${params.q}), levenshtein(username, ${params.creator})) AS distance
+		// FROM room INNER JOIN users ON room_creator &#x3D; user_id
+		// WHERE similarity(name, ${params.q}) &gt; 0.2
+		// OR similarity(username, ${params.creator}) &gt; 0.2
+		// ORDER BY distance ASC
+		// LIMIT 10;&#x60;;
+		const result &#x3D; await this.prisma.$queryRaw&lt;PrismaTypes.room&gt;&#x60;
+		SELECT room_id, name, description, username,
+       	LEAST(levenshtein(name, ${params.q}), levenshtein(username, ${params.creator})) AS distance
+		FROM room INNER JOIN users ON room_creator &#x3D; user_id
+		WHERE similarity(name, ${params.q}) &gt; 0.2
+		OR similarity(username, ${params.creator}) &gt; 0.2
+		ORDER BY distance ASC
+		LIMIT 10;&#x60;;
+
+		// console.log(result);
+
+		if (Array.isArray(result)) {
+			let roomIds &#x3D; result.map((row) &#x3D;&gt; row.room_id.toString());
+
+			//check if rooms are owned by users who have blocked the user
+			const usersWhoBlockedGivenUser: PrismaTypes.blocked[] &#x3D;
+				await this.prisma.blocked.findMany({
+					where: {
+						OR: [
+							{
+								blocker: userID,
+							},
+							{
+								blockee: userID,
+							},
+						],
+					},
+				});
+			const blocked_rooms: PrismaTypes.room[] &#x3D; await this.prisma.room.findMany(
+				{
+					where: {
+						room_id: {
+							in: roomIds,
+						},
+						room_creator: {
+							in: usersWhoBlockedGivenUser.map((user) &#x3D;&gt; {
+								if (user.blocker &#x3D;&#x3D;&#x3D; userID) {
+									return user.blockee;
+								} else {
+									return user.blocker;
+								}
+							}),
+						},
+					},
+				},
+			);
+			roomIds &#x3D; roomIds.filter(
+				(id) &#x3D;&gt;
+					!blocked_rooms.map((room) &#x3D;&gt; room.room_id.toString()).includes(id),
+			);
+
+			const roomDtos &#x3D; await this.dtogen.generateMultipleRoomDto(
+				roomIds,
+				userID,
+			);
+			// console.log(roomDtos);
+
+			if (roomDtos) {
+				const sortedRooms &#x3D; roomIds
+					.map((id) &#x3D;&gt; roomDtos.find((room) &#x3D;&gt; room.roomID &#x3D;&#x3D;&#x3D; id))
+					.filter((room): room is RoomDto &#x3D;&gt; room !&#x3D;&#x3D; undefined);
+
+				return sortedRooms;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [new RoomDto()];
+	}
+
+	advancedRoomSearchQueryBuilder(params: {
+		q: string;
+		creator_username?: string;
+		creator_name?: string;
+		participant_count?: number;
+		description?: string;
+		is_temp?: boolean;
+		is_priv?: boolean;
+		is_scheduled?: boolean;
+		start_date?: string;
+		end_date?: string;
+		lang?: string;
+		explicit?: boolean;
+		nsfw?: boolean;
+		tags?: string;
+	}): string {
+		let query &#x3D; &#x60;
+        SELECT room.*,&#x60;;
+
+		if (
+			params.creator_name &#x3D;&#x3D;&#x3D; undefined &amp;&amp;
+			params.creator_username &#x3D;&#x3D;&#x3D; undefined
+		) {
+			query +&#x3D; &#x60; levenshtein(name, ${sqlstring.escape(params.q)}) AS distance&#x60;;
+		} else if (
+			params.creator_name !&#x3D;&#x3D; undefined &amp;&amp;
+			params.creator_username !&#x3D;&#x3D; undefined
+		) {
+			query +&#x3D; &#x60; LEAST(levenshtein(name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance&#x60;;
+		} else if (params.creator_name !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEAST(levenshtein(name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance&#x60;;
+		} else if (params.creator_username !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEAST(levenshtein(name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)})) AS distance&#x60;;
+		}
+
+		if (params.description !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60;, levenshtein(description, &#x27;Get energized&#x27;) AS desc_distance&#x60;;
+		}
+
+		query +&#x3D; &#x60; FROM room INNER JOIN users ON room_creator &#x3D; user_id&#x60;;
+
+		// console.log(&quot;priv: &quot; + params.is_priv);
+
+		if (params.is_scheduled !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEFT JOIN scheduled_room on room.room_id &#x3D; scheduled_room.room_id&#x60;;
+		}
+		if (params.is_priv !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEFT JOIN private_room on room.room_id &#x3D; private_room.room_id&#x60;;
+		}
+		if (params.participant_count !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; INNER JOIN participate ON room.room_id &#x3D; participate.room_id&#x60;;
+		}
+
+		query +&#x3D; &#x60; WHERE (similarity(name, ${sqlstring.escape(params.q)}) &gt; 0.2&#x60;;
+
+		if (
+			params.creator_name !&#x3D;&#x3D; undefined &amp;&amp;
+			params.creator_username !&#x3D;&#x3D; undefined
+		) {
+			query +&#x3D; &#x60; OR similarity(username, ${sqlstring.escape(
+				params.creator_username,
+			)}) &gt; 0.2 OR similarity(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)}) &gt; 0.2&#x60;;
+		} else if (params.creator_name !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; OR similarity(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)}) &gt; 0.2&#x60;;
+		} else if (params.creator_username !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; OR similarity(username, ${sqlstring.escape(
+				params.creator_username,
+			)}) &gt; 0.2&#x60;;
+		}
+		query +&#x3D; &#x60; )&#x60;;
+
+		// Handle optional parameters
+
+		if (params.description !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; AND levenshtein(description, ${sqlstring.escape(
+				params.description,
+			)}) &lt; 100&#x60;;
+		}
+		if (params.is_temp !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; AND is_temporary &#x3D; ${params.is_temp}&#x60;;
+		}
+		if (params.is_scheduled !&#x3D;&#x3D; undefined) {
+			if (params.is_scheduled) {
+				query +&#x3D; &#x60; AND scheduled_date IS NOT NULL&#x60;;
+			} else {
+				query +&#x3D; &#x60; AND scheduled_date IS NULL&#x60;;
+			}
+		}
+		if (params.is_priv !&#x3D;&#x3D; undefined) {
+			if (params.is_priv) {
+				query +&#x3D; &#x60; AND is_listed IS NOT NULL&#x60;;
+			} else {
+				query +&#x3D; &#x60; AND is_listed IS NULL&#x60;;
+			}
+		}
+
+		if (params.is_scheduled !&#x3D;&#x3D; undefined &amp;&amp; params.start_date !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; AND scheduled_date AT TIME ZONE &#x27;UTC&#x27; &#x3D; ${sqlstring.escape(
+				params.start_date,
+			)}&#x60;;
+		}
+		if (params.lang !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; AND room_language &#x3D; ${sqlstring.escape(params.lang)}&#x60;;
+		}
+		if (params.explicit !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; AND explicit &#x3D; ${params.explicit}&#x60;;
+		}
+		if (params.nsfw !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; AND nsfw &#x3D; ${params.nsfw}&#x60;;
+		}
+		if (params.lang !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; AND room_language &#x3D; ${sqlstring.escape(params.lang)}&#x60;;
+		}
+
+		if (params.tags &amp;&amp; params.tags.length &gt; 0) {
+			const tags &#x3D; params.tags.split(&quot;,&quot;);
+			const tagsCondition &#x3D; tags
+				.map((tag) &#x3D;&gt; &#x60;tags @&gt; ARRAY[${sqlstring.escape(tag)}]&#x60;)
+				.join(&quot; OR &quot;);
+			query +&#x3D; &#x60; AND (${tagsCondition})&#x60;;
+		}
+		if (params.participant_count !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; GROUP BY room.room_id, users.username, users.full_name
+			HAVING COUNT(participate.room_id) &gt;&#x3D; ${params.participant_count}&#x60;;
+		}
+
+		query +&#x3D; &#x60; ORDER BY distance ASC LIMIT 10&#x60;;
+		console.log(query);
+
+		return query;
+	}
+
+	async advancedSearchRooms(
+		params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			participant_count?: number;
+			description?: string;
+			is_temp?: boolean;
+			is_priv?: boolean;
+			is_scheduled?: boolean;
+			start_date?: string;
+			end_date?: string;
+			lang?: string;
+			explicit?: boolean;
+			nsfw?: boolean;
+			tags?: string;
+		},
+		userID: string, // this is the user who is searching. To check whether the room_creator has blocked this user
+	): Promise&lt;RoomDto[]&gt; {
+		console.log(params);
+
+		const query &#x3D; this.advancedRoomSearchQueryBuilder(params);
+
+		// const result &#x3D; await ctx.prisma.$queryRawUnsafe&lt;PrismaTypes.room&gt;(
+		// 	sqlstring.format(query),
+		// );
+		const result &#x3D; await this.prisma.$queryRawUnsafe&lt;PrismaTypes.room&gt;(
+			sqlstring.format(query),
+		);
+
+		if (Array.isArray(result)) {
+			let roomIds &#x3D; result.map((row) &#x3D;&gt; row.room_id.toString());
+			//check if rooms are owned by users who have blocked the user
+			const usersWhoBlockedGivenUser: PrismaTypes.users[] &#x3D;
+				await this.prisma.users.findMany({
+					where: {
+						blocked_blocked_blockerTousers: {
+							some: {
+								blockee: userID,
+							},
+						},
+					},
+				});
+			const blocked_rooms: PrismaTypes.room[] &#x3D; await this.prisma.room.findMany(
+				{
+					where: {
+						room_id: {
+							in: roomIds,
+						},
+						room_creator: {
+							in: usersWhoBlockedGivenUser.map((user) &#x3D;&gt; user.user_id),
+						},
+					},
+				},
+			);
+			roomIds &#x3D; roomIds.filter(
+				(id) &#x3D;&gt;
+					!blocked_rooms.map((room) &#x3D;&gt; room.room_id.toString()).includes(id),
+			);
+			const roomDtos &#x3D; await this.dtogen.generateMultipleRoomDto(
+				roomIds,
+				userID,
+			);
+
+			if (roomDtos) {
+				const sortedRooms &#x3D; roomIds
+					.map((id) &#x3D;&gt; roomDtos.find((room) &#x3D;&gt; room.roomID &#x3D;&#x3D;&#x3D; id))
+					.filter((room): room is RoomDto &#x3D;&gt; room !&#x3D;&#x3D; undefined);
+
+				return sortedRooms;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [new RoomDto()];
+	}
+
+	async searchRoomsHistory(userID: string): Promise&lt;SearchHistoryDto[]&gt; {
+		console.log(userID);
+		// const result &#x3D; await ctx.prisma.$queryRaw&lt;PrismaTypes.room&gt;&#x60;
+		// SELECT *
+		// FROM search_history
+		// WHERE user_id::text &#x3D; ${userID}
+		// AND (url LIKE &#x27;/rooms/%&#x27;
+		// OR url LIKE &#x27;/search/rooms/%&#x27;)
+		// ORDER BY timestamp DESC
+		// LIMIT 10;&#x60;;
+		const result &#x3D; await this.prisma.search_history.findMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: &quot;/rooms/&quot;,
+						},
+					},
+					{
+						url: {
+							startsWith: &quot;/search/rooms?q&#x3D;&quot;,
+						},
+					},
+				],
+			},
+			orderBy: {
+				timestamp: &quot;desc&quot;,
+			},
+		});
+		// console.log(&quot;Result: &quot; + JSON.stringify(result));
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] &#x3D; result.map((row) &#x3D;&gt; ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap &#x3D; new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) &#x3D;&gt; {
+					if (
+						!uniqueRecordsMap.has(record.url) &amp;&amp;
+						record.search_term.trim() !&#x3D;&#x3D; &quot;&quot;
+					) {
+						const dto: SearchHistoryDto &#x3D; {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] &#x3D; Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [];
+	}
+
+	async searchRoomsSuggestions(q: string): Promise&lt;SearchHistoryDto[]&gt; {
+		const result &#x3D; await this.prisma.search_history.findMany({
+			where: {
+				search_term: {
+					startsWith: q,
+				},
+				OR: [
+					{
+						url: {
+							startsWith: &quot;/rooms/&quot;,
+						},
+					},
+					{
+						url: {
+							startsWith: &quot;/search/rooms?q&#x3D;&quot;,
+						},
+					},
+				],
+			},
+		});
+		console.log(&quot;Result: &quot; + JSON.stringify(result));
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] &#x3D; result.map((row) &#x3D;&gt; ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap &#x3D; new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) &#x3D;&gt; {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto &#x3D; {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] &#x3D; Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [new SearchHistoryDto()];
+	}
+
+	async searchUsers(q: string, userID: string): Promise&lt;UserDto[]&gt; {
+		// console.log(q);
+
+		// const result &#x3D; await ctx.prisma.$queryRaw&lt;PrismaTypes.users&gt;&#x60;
+		// SELECT *,
+		// LEVENSHTEIN(username, ${q}) AS distance
+		// FROM users
+		// WHERE similarity(username, ${q}) &gt; 0.2
+		// ORDER BY distance ASC
+		// LIMIT 5;&#x60;;
+		const result &#x3D; await this.prisma.$queryRaw&lt;PrismaTypes.users&gt;&#x60;
+		SELECT *,
+		LEAST(levenshtein(full_name, ${q}), levenshtein(username, ${q})) AS distance
+		FROM users
+		WHERE similarity(full_name, ${q}) &gt; 0.2
+		OR similarity(username, ${q}) &gt; 0.2
+		ORDER BY distance ASC
+		LIMIT 5;&#x60;;
+
+		console.log(&quot;Result &quot; + result);
+
+		if (Array.isArray(result)) {
+			console.log(&quot;Called&quot;);
+			console.log(&quot;Result &quot; + result);
+			let userIDs &#x3D; result.map((row) &#x3D;&gt; row.user_id.toString());
+			const usersWhoBlockedGivenUser: PrismaTypes.users[] &#x3D;
+				await this.prisma.users.findMany({
+					where: {
+						blocked_blocked_blockerTousers: {
+							some: {
+								blockee: userID,
+							},
+						},
+					},
+				});
+			userIDs &#x3D; userIDs.filter(
+				(id) &#x3D;&gt;
+					!usersWhoBlockedGivenUser
+						.map((user) &#x3D;&gt; user.user_id.toString())
+						.includes(id),
+			);
+			const userDtos &#x3D; await this.dtogen.generateMultipleUserDto(
+				userIDs,
+				userID,
+				true,
+			);
+			console.log(userDtos);
+
+			if (userDtos) {
+				const sortedUsers &#x3D; userIDs
+					.map((id) &#x3D;&gt; userDtos.find((user) &#x3D;&gt; user.userID &#x3D;&#x3D;&#x3D; id))
+					.filter((user): user is UserDto &#x3D;&gt; user !&#x3D;&#x3D; undefined);
+
+				return sortedUsers;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [new UserDto()];
+	}
+
+	advancedUserSearchQueryBuilder(params: {
+		q: string;
+		creator_username?: string;
+		creator_name?: string;
+		following?: number;
+		followers?: number;
+	}): string {
+		let query &#x3D; &#x60;
+        SELECT user_id,&#x60;;
+		console.log(params.q);
+
+		if (
+			params.creator_name &#x3D;&#x3D;&#x3D; undefined &amp;&amp;
+			params.creator_username &#x3D;&#x3D;&#x3D; undefined
+		) {
+			query +&#x3D; &#x60; LEAST(levenshtein(username, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(full_name, ${sqlstring.escape(params.q)})) AS distance&#x60;;
+		} else if (
+			params.creator_name !&#x3D;&#x3D; undefined &amp;&amp;
+			params.creator_username !&#x3D;&#x3D; undefined
+		) {
+			query +&#x3D; &#x60; LEAST(levenshtein(full_name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance&#x60;;
+		} else if (params.creator_name !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEAST(levenshtein(full_name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(full_name, ${sqlstring.escape(
+				params.creator_name,
+			)})) AS distance&#x60;;
+		} else if (params.creator_username !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEAST(levenshtein(full_name, ${sqlstring.escape(
+				params.q,
+			)}), levenshtein(username, ${sqlstring.escape(
+				params.creator_username,
+			)})) AS distance&#x60;;
+		}
+
+		if (params.following !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60;, COALESCE(f1.num_followers, 0) AS num_followers&#x60;;
+		}
+
+		if (params.followers !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60;, COALESCE(f2.num_following, 0) AS num_following&#x60;;
+		}
+
+		query +&#x3D; &#x60; FROM users&#x60;;
+
+		if (params.following !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEFT JOIN (
+				SELECT followee, COUNT(*) AS num_followers
+				FROM follows
+				GROUP BY followee
+			) f1 ON f1.followee &#x3D; users.user_id&#x60;;
+		}
+
+		if (params.followers !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; LEFT JOIN (
+				SELECT follower, COUNT(*) AS num_following
+				FROM follows
+				GROUP BY follower
+			) f2 ON f2.follower &#x3D; users.user_id&#x60;;
+		}
+
+		query +&#x3D; &#x60; WHERE similarity(username, ${sqlstring.escape(
+			params.q,
+		)}) &gt; 0.2 OR similarity(full_name, ${sqlstring.escape(params.q)}) &gt; 0.2&#x60;;
+
+		if (params.following !&#x3D;&#x3D; undefined || params.followers !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; GROUP BY users.user_id&#x60;;
+
+			if (params.following !&#x3D;&#x3D; undefined) {
+				query +&#x3D; &#x60;, f1.num_followers&#x60;;
+			}
+
+			if (params.followers !&#x3D;&#x3D; undefined) {
+				query +&#x3D; &#x60;, f2.num_following&#x60;;
+			}
+		}
+
+		if (params.following !&#x3D;&#x3D; undefined &amp;&amp; params.followers !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; HAVING COALESCE(f1.num_followers, 0) &gt;&#x3D; ${params.followers} 
+			AND COALESCE(f2.num_following, 0) &gt;&#x3D; ${params.following};&#x60;;
+		} else if (params.following !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; HAVING COALESCE(f1.num_followers, 0) &gt;&#x3D; ${params.following};&#x60;;
+		} else if (params.followers !&#x3D;&#x3D; undefined) {
+			query +&#x3D; &#x60; HAVING COALESCE(f2.num_following, 0) &gt;&#x3D; ${params.followers};&#x60;;
+		}
+
+		console.log(&quot;Query: &quot; + query);
+
+		return query;
+	}
+
+	async advancedSearchUsers(
+		params: {
+			q: string;
+			creator_username?: string;
+			creator_name?: string;
+			following?: number;
+			followers?: number;
+		},
+		userID: string,
+	): Promise&lt;UserDto[]&gt; {
+		console.log(params);
+
+		const query &#x3D; this.advancedUserSearchQueryBuilder(params);
+
+		// const result &#x3D; await ctx.prisma.$queryRawUnsafe&lt;PrismaTypes.room&gt;(
+		// 	sqlstring.format(query),
+		// );
+		const result &#x3D; await this.prisma.$queryRawUnsafe&lt;PrismaTypes.users&gt;(
+			sqlstring.format(query),
+		);
+
+		if (Array.isArray(result)) {
+			let userIDs &#x3D; result.map((row) &#x3D;&gt; row.user_id.toString());
+			//check if rooms are owned by users who have blocked the user
+			const usersWhoBlockedGivenUser: PrismaTypes.users[] &#x3D;
+				await this.prisma.users.findMany({
+					where: {
+						blocked_blocked_blockerTousers: {
+							some: {
+								blockee: userID,
+							},
+						},
+					},
+				});
+			userIDs &#x3D; userIDs.filter(
+				(id) &#x3D;&gt;
+					!usersWhoBlockedGivenUser
+						.map((user) &#x3D;&gt; user.user_id.toString())
+						.includes(id),
+			);
+			const userDtos &#x3D; await this.dtogen.generateMultipleUserDto(
+				userIDs,
+				userID,
+				true,
+			);
+			// console.log(userDtos);
+
+			if (userDtos) {
+				const sortedUsers &#x3D; userIDs
+					.map((id) &#x3D;&gt; userDtos.find((user) &#x3D;&gt; user.userID &#x3D;&#x3D;&#x3D; id))
+					.filter((user): user is UserDto &#x3D;&gt; user !&#x3D;&#x3D; undefined);
+
+				return sortedUsers;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [new UserDto()];
+	}
+
+	async searchUsersHistory(userID: string): Promise&lt;SearchHistoryDto[]&gt; {
+		const result &#x3D; await this.prisma.search_history.findMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: &quot;/users/&quot;,
+						},
+					},
+					{
+						url: {
+							startsWith: &quot;/search/users?q&#x3D;&quot;,
+						},
+					},
+				],
+			},
+			orderBy: {
+				timestamp: &quot;desc&quot;,
+			},
+		});
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] &#x3D; result.map((row) &#x3D;&gt; ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap &#x3D; new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) &#x3D;&gt; {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto &#x3D; {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] &#x3D; Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [];
+	}
+
+	async searchUsersSuggestions(q: string): Promise&lt;SearchHistoryDto[]&gt; {
+		const result &#x3D; await this.prisma.search_history.findMany({
+			where: {
+				search_term: {
+					startsWith: q,
+				},
+				OR: [
+					{
+						url: {
+							startsWith: &quot;/users/&quot;,
+						},
+					},
+					{
+						url: {
+							startsWith: &quot;/search/users?q&#x3D;&quot;,
+						},
+					},
+				],
+			},
+		});
+		console.log(&quot;Result: &quot; + JSON.stringify(result));
+
+		if (Array.isArray(result)) {
+			const searchIds: SearchHistoryDto[] &#x3D; result.map((row) &#x3D;&gt; ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url as string,
+			}));
+
+			if (searchIds) {
+				const uniqueRecordsMap &#x3D; new Map();
+
+				// Process records and filter duplicates
+				searchIds.forEach((record) &#x3D;&gt; {
+					if (!uniqueRecordsMap.has(record.url)) {
+						const dto: SearchHistoryDto &#x3D; {
+							search_term: record.search_term,
+							search_time: record.search_time,
+							url: record.url,
+						};
+						uniqueRecordsMap.set(record.url, dto);
+					}
+				});
+
+				// Convert the map values to an array of SearchHistoryDto
+				const uniqueRecords: SearchHistoryDto[] &#x3D; Array.from(
+					uniqueRecordsMap.values(),
+				);
+
+				return uniqueRecords;
+			}
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+
+		return [new SearchHistoryDto()];
+	}
+
+	getQueryParams(url: string): {
+		pathSegment: string | null;
+		queryParams: Record&lt;string, string&gt;;
+	} {
+		// Extract the path segment and query string part from the URL
+		const [pathAndQuery] &#x3D; url.split(&quot;?&quot;);
+		if (!pathAndQuery) {
+			return { pathSegment: null, queryParams: {} };
+		}
+		const [pathSegment] &#x3D; pathAndQuery.split(&quot;/&quot;).slice(-1);
+
+		// Extract the query string part
+		const paramsString &#x3D; url.split(&quot;?&quot;)[1] || &quot;&quot;;
+
+		// Process query parameters
+		const queryParams &#x3D; paramsString
+			.split(&quot;&amp;&quot;)
+			.reduce((params: Record&lt;string, string&gt;, param) &#x3D;&gt; {
+				const [key, value] &#x3D; param.split(&quot;&#x3D;&quot;);
+				if (key) {
+					params[key] &#x3D; value !&#x3D;&#x3D; undefined ? decodeURIComponent(value) : &quot;&quot;;
+				}
+				return params;
+			}, {});
+
+		return {
+			pathSegment: pathSegment || null,
+			queryParams,
+		};
+	}
+
+	async searchHistory(userID: string): Promise&lt;CombinedSearchHistory[]&gt; {
+		const result &#x3D; await this.prisma.$queryRaw&lt;PrismaTypes.room&gt;&#x60;
+		SELECT *
+		FROM search_history
+		WHERE user_id::text &#x3D; ${userID}
+		ORDER BY timestamp DESC
+		LIMIT 10;&#x60;;
+
+		if (Array.isArray(result)) {
+			const searchIds: (SearchHistoryDto &amp; {
+				params: {
+					pathSegment: string | null;
+					queryParams: Record&lt;string, string&gt;;
+				};
+			})[] &#x3D; result.map((row) &#x3D;&gt; ({
+				search_term: row.search_term,
+				search_time: row.timestamp,
+				url: row.url,
+				params: this.getQueryParams(row.url),
+			}));
+
+			const results: CombinedSearchHistory[] &#x3D; await Promise.all(
+				searchIds.map(async (id) &#x3D;&gt; {
+					let searchResult: (RoomDto | UserDto)[] | string &#x3D; &quot;&quot;;
+
+					if (id.params.pathSegment &#x3D;&#x3D;&#x3D; &quot;rooms&quot;) {
+						if (id.params.queryParams.creator) {
+							searchResult &#x3D; await this.searchRooms(
+								{
+									q: id.params.queryParams.q as string,
+									creator: id.params.queryParams.creator as string,
+								},
+								userID,
+							);
+						}
+						searchResult &#x3D; await this.searchRooms(
+							{
+								q: id.params.queryParams.q as string,
+							},
+							userID,
+						);
+					} else if (id.params.pathSegment &#x3D;&#x3D;&#x3D; &quot;users&quot;) {
+						searchResult &#x3D; await this.searchUsers(
+							id.params.queryParams.q as string,
+							userID,
+						);
+					} else {
+						if (id.params.queryParams.creator) {
+							const combo &#x3D; await this.combinedSearch(
+								{
+									q: id.params.queryParams.q as string,
+									creator: id.params.queryParams.creator as string,
+								},
+								userID,
+							);
+							searchResult &#x3D; [combo.rooms, combo.users].flat();
+						}
+						const combo &#x3D; await this.combinedSearch(
+							{
+								q: id.params.queryParams.q as string,
+								creator: id.params.queryParams.creator as string,
+							},
+							userID,
+						);
+						searchResult &#x3D; [combo.rooms, combo.users].flat();
+					}
+
+					return { results: [id.search_term, ...searchResult].flat() };
+				}),
+			);
+			return results;
+		} else {
+			console.error(&quot;Unexpected query result format, expected an array.&quot;);
+		}
+		return [];
+	}
+
+	async clearSearchHistory(userID: string): Promise&lt;void&gt; {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+			},
+		});
+		console.log(userID);
+	}
+
+	async clearRoomsHistory(userID: string): Promise&lt;void&gt; {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: &quot;/rooms/&quot;,
+						},
+					},
+					{
+						url: {
+							startsWith: &quot;/search/rooms?q&#x3D;&quot;,
+						},
+					},
+				],
+			},
+		});
+		console.log(userID);
+	}
+
+	async clearUsersHistory(userID: string): Promise&lt;void&gt; {
+		await this.prisma.search_history.deleteMany({
+			where: {
+				user_id: userID,
+				OR: [
+					{
+						url: {
+							startsWith: &quot;/users/&quot;,
+						},
+					},
+					{
+						url: {
+							startsWith: &quot;/search/users?q&#x3D;&quot;,
+						},
+					},
+				],
+			},
+		});
+		console.log(userID);
+	}
+}
+</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'SearchService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>
