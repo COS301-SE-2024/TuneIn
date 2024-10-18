@@ -413,12 +413,12 @@ export function useRoomControls({
 					// 	undefined,
 					// 	offsetMs,
 					// );
-					console.table({
-						deviceID: device.id,
-						playlistURI: playlistURI,
-						position: position,
-						offsetMs: offsetMs,
-					});
+					// console.table({
+					// 	deviceID: device.id,
+					// 	playlistURI: playlistURI,
+					// 	position: position,
+					// 	offsetMs: offsetMs,
+					// });
 					await spotify.player
 						.startResumePlayback(
 							device.id,
