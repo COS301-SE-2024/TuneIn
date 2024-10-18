@@ -123,10 +123,10 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	moreButtonText: {
-		fontSize: 38,
+		fontSize: 34,
 		color: "white",
 		fontWeight: "bold",
-		paddingBottom: 8,
+		paddingBottom: 10,
 	},
 	centeredButton: {
 		alignItems: "center",
