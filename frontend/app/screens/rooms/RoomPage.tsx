@@ -249,6 +249,16 @@ const RoomPage: React.FC = () => {
 	// };
 
 	const handleViewParticipants = () => {
+		if (!participants || !Array.isArray(participants)) {
+			console.error("Participants is undefined or not an array");
+			return;
+		}
+		if (!roomID) {
+			console.error("roomID is undefined");
+			return;
+		}
+
+		// Proceed with navigation if both participants and roomID are valid
 		router.navigate({
 			pathname: "/screens/rooms/ParticipantsPage",
 			params: {
@@ -319,7 +329,7 @@ const RoomPage: React.FC = () => {
 			}
 		};
 		fetchParticipants();
-	}, [userInRoom]);
+	}, [roomID, userInRoom]);
 
 	useEffect(() => {
 		return () => {
@@ -427,7 +437,7 @@ const RoomPage: React.FC = () => {
 			checkBookmarked();
 		}
 		checkBookmarked();
-	}, []);
+	}, [checkBookmarked, getAndSetRoomInfo, thisRoom]);
 	const handleUserPress = () => {
 		router.navigate(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
