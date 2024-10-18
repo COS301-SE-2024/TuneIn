@@ -7,7 +7,7 @@
 
 The purpose of this document is to serve as the Software Requirements Specification (SRS) for the development of TuneIn, a social music application. TuneIn aims to transform the way people experience music by making it a shared, interactive, and social activity. The app allows users to create and join interactive music rooms, discover new music based on their preferences, and engage with a community of like-minded music enthusiasts.
 
-The features of TuneIn include user registration and authentication, personalized user profiles, interactive music rooms, real-time music playback, social interactions, music discovery and recommendations, collaborative playlists, virtual concerts, lyrics display, notifications, music analytics, content moderation, event scheduling, advanced search and filters, security and privacy, and accessibility.
+The features of TuneIn include user registration and authentication, personalized user profiles, interactive music rooms, real-time music playback, social interactions, music discovery and recommendations, collaborative playlists, virtual concerts, notifications, music analytics, content moderation, event scheduling, advanced search and filters, security and privacy, and accessibility.
 
 This document will serve as a comprehensive guide for the development team, ensuring that all stakeholder needs are met and that the final product aligns with our client (TuneIn)'s expectations.
 
@@ -24,7 +24,6 @@ The scope of TuneIn includes the following major features and functionalities:
 - **Collaborative Playlists**: Creation, management, and sharing of collaborative playlists.
 - **Integration with Music Services**: API integration with popular streaming services for music playback and synchronization.
 - **Virtual Concerts**: Hosting and participation in virtual concerts.
-- **Lyrics Display**: Display of song lyrics using APIs from services like Last.fm or Musixmatch.
 - **Notification System**: Real-time notifications for various activities and events.
 - **Music Analytics and Insights**: Statistics on listening habits and room analytics.
 - **Content Moderation**: Automated moderation tools and options to report and block users.
@@ -240,13 +239,8 @@ Our software will cater for above user group in the form of user stories as foll
 - **User Story**: As a user, I want to receive real-time notifications for important activities within the app.
 - **Acceptance Criteria**: The system shall allow users to receive real-time notifications for room invitations, song recommendations, friend requests, room recommendations, trending rooms and live rooms by artists/curators.
 
-#### 2.21 Lyrics Features
-- **Priority**: High
-- **Estimate**: 7
-- **User Story**: As a user, I want the ability to view lyrics for the currently playing song.
-- **Acceptance Criteria**: The system shall display lyrics for the currently playing song using APIs from services like Last.fm or Musixmatch.
 
-#### 2.22 Integration with Music Services
+#### 2.21 Integration with Music Services
 - **Priority**: High
 - **Estimate**: 8
 - **User Story**: As a user, I want the app to integrate seamlessly with popular music streaming services for easy access to music.
@@ -255,7 +249,7 @@ Our software will cater for above user group in the form of user stories as foll
   - Users should be able to save collaborative playlists to their streaming service accounts.
 
 
-#### 2.23 Queue Managment
+#### 2.22 Queue Managment
 - **Priority**: High
 - **Estimate**: 8
 - **User Story**: As a user, I want to be able to add songs to the playlist.
@@ -264,7 +258,7 @@ Our software will cater for above user group in the form of user stories as foll
   - Changes should be saved.
   
 
-#### 2.24 Room Creation and Editing
+#### 2.23 Room Creation and Editing
 - **Priority**: High
 - **Estimate**: 8
 - **User Story**: As a user, I want to be able create new rooms and edit the detaisl later.
@@ -273,7 +267,7 @@ Our software will cater for above user group in the form of user stories as foll
   - The system allows the user to change the details of the room later and reflects those changes.
  
 
-####  25. Bookmark Rooms
+#### 2.24 Bookmark Rooms
 - **Priority**: High
 - **Estimate**: 5
 - **User Story**: As a user, I want to bookmark my favorite rooms so that I can acces them later.
@@ -281,7 +275,7 @@ Our software will cater for above user group in the form of user stories as foll
   - The system will allow the user to bookmark a room and it will display in there profile to easily access later.
 
  
-#### 2.26 Playback
+#### 2.25 Playback
 - **Priority**: High
 - **Estimate**: 8
 - **User Story**: As a user, I want control playback in the room I created.
@@ -481,104 +475,99 @@ Our software will cater for above user group in the form of user stories as foll
   - **FR9.2.1.1**: Schedule
   - **FR9.2.1.2**: Participants
 
-#### FR10: Lyrics
+#### FR10: Notification System
 
-##### FR10.1: Lyrics Display
-- **FR10.1.1**: The app should display lyrics for the currently playing song using APIs from services like Last.fm or Musixmatch.
+##### FR10.1: Real-Time Notifications
+- **FR10.1.1**: Users should receive real-time notifications (should they opt-in) for:
+  - **FR10.1.1.1**: Room invitations
+  - **FR10.1.1.2**: Song recommendations
+  - **FR10.1.1.3**: Friend requests
+  - **FR10.1.1.4**: Room recommendations
+  - **FR10.1.1.5**: Trending rooms
+  - **FR10.1.1.6**: Live rooms by artists/curators
+  - **FR10.1.1.7**: Other activities
 
-#### FR11: Notification System
+#### FR11: Music Analytics and Insights
 
-##### FR11.1: Real-Time Notifications
-- **FR11.1.1**: Users should receive real-time notifications (should they opt-in) for:
-  - **FR11.1.1.1**: Room invitations
-  - **FR11.1.1.2**: Song recommendations
-  - **FR11.1.1.3**: Friend requests
-  - **FR11.1.1.4**: Room recommendations
-  - **FR11.1.1.5**: Trending rooms
-  - **FR11.1.1.6**: Live rooms by artists/curators
-  - **FR11.1.1.7**: Other activities
+##### FR11.1: Listening Stats
+- **FR11.1.1**: Users should have access to statistics about their listening habits, such as:
+  - **FR11.1.1.1**: Total listening time
+  - **FR11.1.1.2**: Most played songs
+  - **FR11.1.1.3**: Genres
+  - **FR11.1.1.4**: Artists
 
-#### FR12: Music Analytics and Insights
+##### FR11.2: Room Analytics
+- **FR11.2.1**: Room creators should be able to see analytics for their rooms, including:
+  - **FR11.2.1.1**: Number of participants
+  - **FR11.2.1.2**: Most voted songs
+  - **FR11.2.1.3**: Activity levels
 
-##### FR12.1: Listening Stats
-- **FR12.1.1**: Users should have access to statistics about their listening habits, such as:
-  - **FR12.1.1.1**: Total listening time
-  - **FR12.1.1.2**: Most played songs
-  - **FR12.1.1.3**: Genres
-  - **FR12.1.1.4**: Artists
+#### FR12: Content Moderation
 
-##### FR12.2: Room Analytics
-- **FR12.2.1**: Room creators should be able to see analytics for their rooms, including:
-  - **FR12.2.1.1**: Number of participants
-  - **FR12.2.1.2**: Most voted songs
-  - **FR12.2.1.3**: Activity levels
+##### FR12.1: Automated Moderation
+- **FR12.1.1**: Implement automated moderation tools to filter out inappropriate content in:
+  - **FR12.1.1.1**: Chat messages
+  - **FR12.1.1.2**: User profiles
 
-#### FR13: Content Moderation
+##### FR12.2: Report and Block
+- **FR12.2.1**: Users should be able to report inappropriate behavior.
+- **FR12.2.2**: Users should be able to block other users.
 
-##### FR13.1: Automated Moderation
-- **FR13.1.1**: Implement automated moderation tools to filter out inappropriate content in:
-  - **FR13.1.1.1**: Chat messages
-  - **FR13.1.1.2**: User profiles
+#### FR13: Event Calendar and Scheduling
 
-##### FR13.2: Report and Block
-- **FR13.2.1**: Users should be able to report inappropriate behavior.
-- **FR13.2.2**: Users should be able to block other users.
+##### FR13.1: Event Scheduling
+- **FR13.1.1**: Users should be able to schedule events such as:
+  - **FR13.1.1.1**: Virtual concerts
+  - **FR13.1.1.2**: Listening parties
+  - **FR13.1.1.3**: DJ sessions within the app
 
-#### FR14: Event Calendar and Scheduling
+##### FR13.2: Calendar Integration
+- **FR13.2.1**: Integrate with calendar apps (e.g., Google Calendar) to add reminders for upcoming events.
 
-##### FR14.1: Event Scheduling
-- **FR14.1.1**: Users should be able to schedule events such as:
-  - **FR14.1.1.1**: Virtual concerts
-  - **FR14.1.1.2**: Listening parties
-  - **FR14.1.1.3**: DJ sessions within the app
+#### FR14: Advanced Search and Filters
 
-##### FR14.2: Calendar Integration
-- **FR14.2.1**: Integrate with calendar apps (e.g., Google Calendar) to add reminders for upcoming events.
+##### FR14.1: Search Functionality
+- **FR14.1.1**: Users should be able to search for:
+  - **FR14.1.1.1**: Rooms
+  - **FR14.1.1.2**: Users
+  - **FR14.1.1.3**: Songs using advanced filters like genre, mood, popularity, and activity level
 
-#### FR15: Advanced Search and Filters
+##### FR14.2: Saved Searches
+- **FR14.2.1**: Allow users to save their search queries for quick access later.
 
-##### FR15.1: Search Functionality
-- **FR15.1.1**: Users should be able to search for:
-  - **FR15.1.1.1**: Rooms
-  - **FR15.1.1.2**: Users
-  - **FR15.1.1.3**: Songs using advanced filters like genre, mood, popularity, and activity level
+#### FR15: Security and Privacy
 
-##### FR15.2: Saved Searches
-- **FR15.2.1**: Allow users to save their search queries for quick access later.
+##### FR15.1: Data Encryption
+- **FR15.1.1**: All sensitive user data should be encrypted.
 
-#### FR16: Security and Privacy
+##### FR15.2: Access Control
+- **FR15.2.1**: Implement role-based access control for managing room permissions and administrative tasks.
 
-##### FR16.1: Data Encryption
-- **FR16.1.1**: All sensitive user data should be encrypted.
+##### FR15.3: Privacy Settings
+- **FR15.3.1**: Users should be able to configure their privacy settings, including:
+  - **FR15.3.1.1**: Profile visibility
+  - **FR15.3.1.2**: Data sharing preferences
 
-##### FR16.2: Access Control
-- **FR16.2.1**: Implement role-based access control for managing room permissions and administrative tasks.
+##### FR15.4: Data Policies
+- **FR15.4.1**: Users should be able to request data stored about them for download.
+- **FR15.4.2**: Users should be able to request for data to be deleted.
 
-##### FR16.3: Privacy Settings
-- **FR16.3.1**: Users should be able to configure their privacy settings, including:
-  - **FR16.3.1.1**: Profile visibility
-  - **FR16.3.1.2**: Data sharing preferences
+#### FR16: Accessibility, Usability, and Performance
 
-##### FR16.4: Data Policies
-- **FR16.4.1**: Users should be able to request data stored about them for download.
-- **FR16.4.2**: Users should be able to request for data to be deleted.
+##### FR16.1: Responsive Design
+- **FR16.1.1**: The app should be fully responsive and usable on various devices and screen sizes.
 
-#### FR17: Accessibility, Usability, and Performance
+##### FR16.2: Language Translation
+- **FR16.2.1**: The app should be available in various LLM-powered language translations for a better user experience.
 
-##### FR17.1: Responsive Design
-- **FR17.1.1**: The app should be fully responsive and usable on various devices and screen sizes.
+##### FR16.3: Accessibility Features
+- **FR16.3.1**: Ensure the app is accessible to users with disabilities by implementing features like:
+  - **FR16.3.1.1**: Screen reader support
+  - **FR16.3.1.2**: High contrast modes
+  - **FR16.3.1.3**: Keyboard navigation
 
-##### FR17.2: Language Translation
-- **FR17.2.1**: The app should be available in various LLM-powered language translations for a better user experience.
-
-##### FR17.3: Accessibility Features
-- **FR17.3.1**: Ensure the app is accessible to users with disabilities by implementing features like:
-  - **FR17.3.1.1**: Screen reader support
-  - **FR17.3.1.2**: High contrast modes
-  - **FR17.3.1.3**: Keyboard navigation
-
-##### FR17.4: Responsiveness
-- **FR17.4.1**: The app should be optimized for fast loading times and smooth performance across all devices and network conditions.
+##### FR16.4: Responsiveness
+- **FR16.4.1**: The app should be optimized for fast loading times and smooth performance across all devices and network conditions.
 
 ## 4. Use Case Diagram
 
@@ -641,17 +630,10 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 - **Specification:**
   - Low-latency for streaming and social interaction
   - App should be responsive
-  - Acceptable limits for CPU, memory, and network usage to ensure efficient operation.
+  - Acceptable limits for network usage to ensure efficient operation.
 
 - **Quantification:**
-  - It will take 2 seconds for each page to load for all users.
-  - It will take 1 second for the initial content to appear on the screen
-  - It will take 1 second for buttons and other interactive elements to respond
-  - Less than 2 errors should be encountered during user interactions on average
-  - The system shall process up to 100 transactions per second for end-users
-  - Average CPU Usage: 5-15%
-  - Average Memory Usage: 10-30%
-  - Average Network Usage: 5-15%
+  - The system shall process up to 25 transactions per second for end-users
 
 
 
@@ -659,8 +641,6 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 
 - **Specification:**
   - Ensure proper user roles and permissions are defined and enforced
-  - Authentication
-    - The system shall support two-factor authentication for all users
   - Utilise prepared SQL queries
   - Password Hashing and Salting
   - Rate limitation
@@ -672,13 +652,6 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 
 - **Quantification:**
   - Input should be validated and sanitised to prevent SQL injection attacks
-  - Measure the effectiveness of input validation techniques in preventing malicious input
-  - Assess the usage and effectiveness of regular expressions in input validation
-  - 5 login attempts allowed per minute
-    - 1 minute login lock
-  - 20 login attempts allowed per hour
-    - At 10 attempts lock for 5 minutes
-    - At 20 lock for 15 minutes
   - Check that the API is only used by the app
 
 
@@ -689,9 +662,7 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
   - Allow more storage to be allocated to the database so more users can register if necessary.
 
 - **Quantification:**
-  - Track the number of monthly active users to determine the scalability requirements
   - Load testing
-  - The system should be able to cater for 50 000 users
 
 
 
@@ -700,8 +671,6 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
 - **Specification:**
   - Ensure that the interface is intuitive and easy to navigate for all user types
   - Ensure that the app responds quickly to user interactions
-  - The system shall comply with WCAG 2.1 Level AA for visually impaired users
-  - Support for multiple languages and regional settings to cater to a global audience 
 
 - **Quantification:**
   - Usability testing
@@ -758,8 +727,7 @@ A more elaborate description of how these classes relate is in 6.4 - Design Patt
     - Regularly test backup integrity
 
 - **Quantification:**
-  - 20 minutes is the maximum acceptable downtime
-
+  - 10 seconds is the maximum acceptable downtime
 
 
 ### 6.3 Architectural Patterns
