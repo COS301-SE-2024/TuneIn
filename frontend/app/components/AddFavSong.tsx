@@ -68,7 +68,6 @@ const AddFavSong: React.FC<FavSongProps> = ({ visible, handleSave }) => {
 			duration_ms: track.duration_ms,
 		};
 		setPlaylist((prevPlaylist) => [...prevPlaylist, simplifiedTrack]);
-		console.log(playlist);
 	};
 
 	const removeFromPlaylist = (trackId: string) => {

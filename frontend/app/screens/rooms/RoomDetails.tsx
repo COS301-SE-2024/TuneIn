@@ -19,7 +19,6 @@ import { RoomDetailsProps } from "../../models/roomdetails";
 import uploadImage from "../../services/ImageUpload";
 import auth from "../../services/AuthManagement"; // Import AuthManagement
 import * as utils from "../../services/Utils"; // Import Utils
-import CyanButton from "../../components/CyanButton";
 import { colors } from "../../styles/colors";
 import CreateButton from "../../components/CreateButton";
 import { start } from "repl";
@@ -148,7 +147,7 @@ const RoomDetails: React.FC = () => {
 		if (roomDetails.description !== "")
 			newRoom["description"] = roomDetails.description;
 		else {
-			newRoom["description"] = "This room has no description.";
+			newRoom["description"] = "";
 		}
 		newRoom["has_explicit_content"] = roomDetails.isExplicit;
 		newRoom["room_name"] = roomDetails.name;
@@ -165,9 +164,10 @@ const RoomDetails: React.FC = () => {
 			return;
 		}
 		if (image !== null) {
-			imageURL = await uploadImage(image, roomDetails.name);
+			imageURL = (await uploadImage(image, roomDetails.name)) ?? ""; // Provide a default empty string
 			// console.log('Image URL:', imageURL);
 		}
+
 		newRoom["room_image"] = imageURL;
 		const token = await auth.getToken();
 		// console.log('Token:', token);

@@ -15,14 +15,14 @@ import { Player } from "../../PlayerContext";
 import { SongPair, convertQueue } from "../../models/SongPair";
 import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 
-const VOTING_ENABLED = false;
-
 const Playlist = () => {
 	const { roomQueue, spotifyAuth } = useLive();
 	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
 	const router = useRouter();
 	const playerContext = useContext(Player);
 	const [localQueue, setLocalQueue] = useState<SongPair[]>([]);
+
+	console.log("this is the room queue: " + roomQueue);
 
 	if (!playerContext) {
 		throw new Error(
@@ -67,13 +67,16 @@ const Playlist = () => {
 				});
 			}
 		}
-	}, [fetchSongInfo, roomQueue]);
+	}, [fetchSongInfo, localQueue, roomQueue]);
+
+	// Filter the localQueue to remove duplicates based on spotifyID
+	const uniqueQueue = localQueue.filter(
+		(s, index, self) =>
+			index === self.findIndex((t) => t.song.spotifyID === s.song.spotifyID),
+	);
 
 	return (
 		<View style={styles.container}>
-			{/* RoomTab component */}
-			{/* <RoomTab activeTab="Queue" setActiveTab={() => {}} />{" "} */}
-			{/* Set activeTab to "Queue" */}
 			<View style={styles.header}>
 				<TouchableOpacity
 					style={styles.backButton}
@@ -85,13 +88,12 @@ const Playlist = () => {
 				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
 			<View style={styles.songListContainer}>
-				{localQueue.length > 0 ? (
+				{uniqueQueue.length > 0 ? (
 					<ScrollView>
-						{localQueue.map((s, index) => (
+						{uniqueQueue.map((s) => (
 							<SongList
-								key={s.song.index}
+								key={s.song.spotifyID} // Use a unique identifier like spotifyID
 								song={s}
-								showVoting={VOTING_ENABLED}
 							/>
 						))}
 					</ScrollView>

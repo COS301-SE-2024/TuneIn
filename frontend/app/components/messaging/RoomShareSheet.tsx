@@ -7,9 +7,12 @@ import {
 	StyleSheet,
 	Easing,
 	TextInput,
+	Platform,
 	FlatList,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
+	ToastAndroid,
+	Alert,
 } from "react-native";
 import { colors } from "../../styles/colors";
 import { Room } from "../../models/Room"; // Assuming this contains the data model
@@ -19,6 +22,8 @@ import axios from "axios";
 import * as utils from "../../services/Utils"; // For API_BASE_URL
 import { UserDto } from "../../../api";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { useAPI } from "../../APIContext";
+
 interface RoomShareSheetProps {
 	room: Room;
 	isVisible: boolean;
@@ -51,7 +56,7 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 	const [filteredChats, setFilteredChats] = useState<ProfileCardProps[]>([]); // Filtered friends state
 	const [selectedUsers, setSelectedUsers] = useState<UserDto[]>([]); // Selected users state
 	const selfRef = React.useRef<UserDto | null>(null); // Explicitly define type and initialize with null
-
+	const { rooms } = useAPI();
 	useEffect(() => {
 		if (isVisible) {
 			Animated.timing(slideAnim, {
@@ -117,17 +122,37 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 		setSearchQuery(""); // Clear search query
 	};
 
-	const handleShare = (room: Room) => {
+	const handleShare = async (room: Room) => {
+		console.log("Sharing Room:", room);
 		console.log("Sharing with selected contacts:");
-		selectedUsers.forEach((user) => {
-			console.log(user.profile_name); // Print the name of each selected user
-		});
-		console.log("Room:", room.name);
-		// Add your share functionality here
+		const userIDs = selectedUsers.map((user) => user.userID); // Get the user IDs of the selected users
 
-		// Clear selected users after sharing
-		setSelectedUsers([]);
-		onClose(); // Close the modal after sharing
+		if (room.id) {
+			rooms
+				.shareRoom(room.id, userIDs)
+				.then((response) => {
+					if (Platform.OS === "android" && ToastAndroid) {
+						ToastAndroid.show("Room shared successfully", ToastAndroid.SHORT);
+					} else {
+						Alert.alert("Success", "Room shared successfully.");
+					}
+				})
+				.catch((error) => {
+					console.log("Error sharing room: ", error);
+					if (Platform.OS === "android" && ToastAndroid) {
+						ToastAndroid.show("Failed to share room", ToastAndroid.SHORT);
+					} else {
+						Alert.alert("Error", "Failed to share room.");
+					}
+				});
+		} else {
+			console.error("Room ID is undefined.");
+			if (Platform.OS === "android" && ToastAndroid) {
+				ToastAndroid.show("Room ID is missing", ToastAndroid.SHORT);
+			} else {
+				Alert.alert("Error", "Room ID is missing.");
+			}
+		}
 	};
 
 	const updateChatSelection = (user: UserDto) => {
@@ -236,56 +261,51 @@ const RoomShareSheet: React.FC<RoomShareSheetProps> = ({
 const styles = StyleSheet.create({
 	modalOverlay: {
 		flex: 1,
-		justifyContent: "flex-end",
 		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		justifyContent: "flex-end",
 	},
 	popupContainer: {
 		backgroundColor: colors.backgroundColor,
-		padding: 30,
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 5,
+		padding: 16,
+		borderTopLeftRadius: 16,
+		borderTopRightRadius: 16,
+		minHeight: "60%",
 	},
 	searchContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		borderColor: "#CCCCCC",
-		borderWidth: 1,
-		borderRadius: 20,
-		paddingHorizontal: 16,
-		marginBottom: 20,
+		marginBottom: 16,
 	},
 	searchInput: {
 		flex: 1,
-		height: 40,
+		padding: 8,
+		borderRadius: 8,
+		backgroundColor: "#f1f1f1",
 	},
 	clearButton: {
-		paddingHorizontal: 8,
+		marginLeft: 8,
 	},
 	clearButtonText: {
-		color: "#999",
-		fontSize: 16,
+		fontSize: 12,
+		color: colors.primary,
 	},
 	noResultsContainer: {
+		flex: 1,
+		justifyContent: "center",
 		alignItems: "center",
-		paddingVertical: 20,
 	},
 	noResultsText: {
 		color: "#666666",
-		fontSize: 16,
 	},
 	shareButton: {
-		paddingVertical: 15,
-		borderRadius: 25,
-		marginTop: 20,
+		marginTop: 16,
+		paddingVertical: 12,
+		borderRadius: 8,
 		alignItems: "center",
 	},
 	shareButtonText: {
 		fontWeight: "bold",
+		fontSize: 16,
 	},
 });
 

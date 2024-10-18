@@ -144,7 +144,6 @@ export function useRoomControls({
 	spotifyAuth,
 	pollLatency,
 }: RoomControlProps): RoomControls {
-	console.log("useRoomControls()");
 	const { socketState, updateState } = useLiveState();
 	const spotify: SpotifyApi | undefined = useMemo(() => {
 		if (currentUser && currentUser.hasSpotifyAccount && spotifyTokens) {
@@ -304,9 +303,12 @@ export function useRoomControls({
 		): Promise<void> {
 			try {
 				console.log(`call handlePlayback`);
+
 				if (!spotifyTokens) {
 					throw new Error("Spotify tokens not found");
 				}
+
+				const { tokens } = spotifyTokens; // Access tokens from SpotifyTokenPair
 
 				if (!spotify) {
 					throw new Error(
@@ -347,7 +349,6 @@ export function useRoomControls({
 					setDeviceError("Active Device ID is null for an unknown reason.");
 					return;
 				}
-				console.log("active device:", device);
 
 				if (action === "play") {
 					if (!playlistID || !song) {
@@ -356,25 +357,6 @@ export function useRoomControls({
 
 					const trackURI: string = `spotify:track:${song.spotifyID}`;
 					const position = song.playlistIndex;
-					// if (song) {
-					// 	trackURI
-					// 	position = ;
-					// } else {
-					// 	if (!currentSongRef.current) {
-					// 		if (roomQueue.length === 0) {
-					// 			throw new Error("No song is currently playing");
-					// 		} else {
-					// 			const s: RoomSongDto = roomQueue[0];
-					// 			trackURI = `spotify:track:${s.spotifyID}`;
-					// 			song = s;
-					// 			position = s.playlistIndex;
-					// 		}
-					// 	} else {
-					// 		trackURI = `spotify:track:${currentSongRef.current.spotifyID}`;
-					// 		song = currentSongRef.current;
-					// 		position = currentSongRef.current.playlistIndex;
-					// 	}
-					// }
 					console.log(`Track URI: ${trackURI}`);
 					if (!validTrackUri(trackURI)) {
 						throw new Error("Invalid track URI");
@@ -384,16 +366,6 @@ export function useRoomControls({
 					if (!validPlaylistUri(playlistURI)) {
 						throw new Error("Invalid playlist URI");
 					}
-					// if (currentRoom) {
-					// 	if (roomQueue.length === 0) {
-					// 		alert("No songs in queue");
-					// 		return;
-					// 	}
-					// 	playlistURI = ;
-					// 	if (!validPlaylistUri(playlistURI)) {
-					// 		throw new Error("Invalid playlist URI");
-					// 	}
-					// }
 
 					const st = song.startTime;
 					let offsetMs = 0;
@@ -406,36 +378,43 @@ export function useRoomControls({
 						console.log(`Offset: ${offsetMs}`);
 					}
 
-					// await spotify.player.startResumePlayback(
-					// 	device.id,
-					// 	undefined,
-					// 	[uri],
-					// 	undefined,
-					// 	offsetMs,
-					// );
-					console.table({
-						deviceID: device.id,
-						playlistURI: playlistURI,
-						position: position,
-						offsetMs: offsetMs,
-					});
-					await spotify.player
-						.startResumePlayback(
-							device.id,
-							playlistURI,
-							undefined,
-							{ position: position },
-							offsetMs,
-						)
-						.catch((err) => {
-							console.error("An error occurred while starting playback", err);
-							alert("An error occurred while starting playback: " + err);
-							throw err;
-						});
+					// Construct the request payload
+					const payload = {
+						context_uri: playlistURI,
+						offset: {
+							position: position,
+						},
+						position_ms: offsetMs - 5000,
+					};
+
+					// Fetch request to the Spotify API
+					const response = await fetch(
+						`https://api.spotify.com/v1/me/player/play`,
+						{
+							method: "PUT",
+							headers: {
+								Authorization: `Bearer ${tokens.access_token}`, // Use the access token
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify(payload),
+						},
+					);
+
+					if (!response.ok) {
+						const errorText = await response.text();
+						console.error(
+							"An error occurred while starting playback",
+							errorText,
+						);
+						alert("An error occurred while starting playback: " + errorText);
+						throw new Error(errorText);
+					}
+
 					console.log("Playback action (PLAY) successful");
 					return;
 				}
 
+				// Handle other actions
 				try {
 					switch (action) {
 						case "pause":
@@ -460,7 +439,7 @@ export function useRoomControls({
 			}
 		},
 		[
-			spotifyTokens,
+			spotifyTokens, // Add spotifyTokenPair as a dependency
 			spotify,
 			activeDevice,
 			spotifyDevices.devices.length,
@@ -495,9 +474,6 @@ export function useRoomControls({
 				return false;
 			}
 			if (!spotify) {
-				// throw new Error(
-				// 	"User either does not have a Spotify account or is not logged in",
-				// );
 				console.log(`userListeningToRoom false because !spotify`);
 				return false;
 			}
@@ -545,12 +521,6 @@ export function useRoomControls({
 					return false;
 				}
 				return true;
-				// if (state.item === null) {
-				// 	return false;
-				// }
-				// if (state.item.id === currentSongRef.current.spotifyID) {
-				// 	return true;
-				// }
 			} else {
 				console.log(`userListeningToRoom false because !roomPlaying`);
 			}
@@ -878,12 +848,15 @@ export function useRoomControls({
 			await spotifyAuth.getSpotifyTokens(); // will trigger a refresh (if the tokens are expired)
 			await getDevices();
 			const currentSong: RoomSongDto | undefined = currentSongRef.current;
+			console.log("Current song: " + currentSong);
 			if (currentRoom && currentSong && spotify) {
 				const syncUserSpotify = async () => {
 					try {
 						let listening = await userListeningToRoom(
 							currentSong.startTime !== undefined,
 						);
+						console.log("current song start time: " + currentSong.startTime);
+						console.log("current song index: " + currentSong.index);
 						let attempts = 0;
 						while (!listening) {
 							attempts++;
@@ -1039,10 +1012,6 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.ENQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: enqueueSongs");
-			// socket.volatile
-			// 	.timeout(1000)
-			// 	.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			// console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, socket],
 	);
@@ -1074,8 +1043,6 @@ export function useRoomControls({
 			};
 			socket.emit(SOCKET_EVENTS.DEQUEUE_SONG, JSON.stringify(input));
 			console.log("emitted: dequeueSongs");
-			// socket.volatile.emit(SOCKET_EVENTS.REQUEST_QUEUE, JSON.stringify(input));
-			// console.log("emitted: requestQueue");
 		},
 		[currentRoom, currentUser, roomQueue, setRoomQueue, socket],
 	);
@@ -1325,11 +1292,6 @@ export function useRoomControls({
 
 	const canControlRoom = useCallback(
 		function (): boolean {
-			console.log("canControlRoom currentUser:", currentUser);
-			console.log("canControlRoom room:", currentRoom);
-			console.log(
-				`(!currentRoom): ${!currentRoom}, (!currentUser): ${!currentUser}, (!currentRoom.creator): ${!currentRoom?.creator}, (currentRoom.creator.userID === currentUser.userID): ${currentRoom?.creator?.userID === currentUser?.userID}`,
-			);
 			if (!currentRoom) {
 				return false;
 			}

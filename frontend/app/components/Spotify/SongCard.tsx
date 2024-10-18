@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
 		marginHorizontal: 5,
 	},
 	iconText: {
-		fontSize: 33,
+		fontSize: 25,
 		fontWeight: "bold",
 		marginBottom: 5,
 	},

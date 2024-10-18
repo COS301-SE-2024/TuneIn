@@ -28,7 +28,6 @@ interface PlayerContextType {
 	setUserData: React.Dispatch<React.SetStateAction<UserDto | null>>;
 }
 
-console.log("hello player context!");
 const Player = createContext<PlayerContextType | undefined>(undefined);
 
 interface PlayerContextProviderProps {

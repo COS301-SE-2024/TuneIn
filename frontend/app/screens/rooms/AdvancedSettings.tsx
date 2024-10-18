@@ -464,9 +464,9 @@ const AdvancedSettings = () => {
 					/>
 				</TouchableOpacity>
 				<Text style={styles.headerText}>Advanced Settings</Text>
-				<TouchableOpacity onPress={handleOpenPopup}>
+				{/* <TouchableOpacity onPress={handleOpenPopup}>
 					<Icon name="share" size={22} color={colors.primaryText} />
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 			</View>
 			{/* Popup component */}
 			<RoomShareSheet
