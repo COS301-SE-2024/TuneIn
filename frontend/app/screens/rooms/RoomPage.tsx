@@ -76,6 +76,8 @@ const RoomPage: React.FC = () => {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
 		}
 	};
+	const [isLoadingPause, setIsLoadingPause] = useState(false);
+	const [isLoadingNext, setIsLoadingNext] = useState(false);
 	const [thisRoom, setThisRoom] = useState<RoomDto>();
 	const [userInRoom, setUserInRoom] = useState(false);
 	const trackPositionIntervalRef = useRef<number | null>(null);
@@ -143,9 +145,10 @@ const RoomPage: React.FC = () => {
 		rooms,
 		currentRoom,
 		localRoomPlaying,
-		optimisticPlaybackState,
 		ownerPlaying,
+		optimisticPlaybackState,
 		roomPlaying,
+		userInRoom,
 		fetchSongInfo,
 	]);
 
@@ -190,6 +193,10 @@ const RoomPage: React.FC = () => {
 			if (userInRoom) {
 				console.log("playPauseTrack playPauseTrack playPauseTrack");
 				if (roomControls.canControlRoom()) {
+					setIsLoadingPause(true);
+					setTimeout(() => {
+						setIsLoadingPause(false);
+					}, 1000); // 1 second loader
 					if (!ownerPlaying) {
 						console.log("starting playback");
 						setOwnerPlaying(true); //set owner's request to play
@@ -223,6 +230,10 @@ const RoomPage: React.FC = () => {
 
 	const playNextTrack = useCallback(() => {
 		if (userInRoom) {
+			setIsLoadingPause(true);
+			setTimeout(() => {
+				setIsLoadingPause(false);
+			}, 1000); // 1 second loader
 			console.log("playNextTrack playNextTrack playNextTrack");
 			if (roomControls.canControlRoom()) {
 				roomControls.playbackHandler.nextTrack();
