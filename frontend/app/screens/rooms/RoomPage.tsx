@@ -94,7 +94,7 @@ const RoomPage: React.FC = () => {
 	const [ownerPlaying, setOwnerPlaying] = useState(roomPlaying);
 
 	const syncWithRoom = () => {
-		roomControls.playbackHandler.startPlayback();
+		roomControls.playbackHandler.syncUserPlayback();
 	};
 
 	const getAndSetRoomInfo = useCallback(async () => {

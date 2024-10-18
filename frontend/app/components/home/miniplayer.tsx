@@ -86,7 +86,11 @@ const Miniplayer: React.FC = () => {
 			>
 				<Animated.View style={[styles.imageContainer, animatedStyle]}>
 					<Image
-						source={{ uri: currentRoom.backgroundImage }}
+						source={
+							currentRoom.backgroundImage
+								? { uri: currentRoom.backgroundImage }
+								: require("../../../assets/imageholder.jpg")
+						}
 						style={styles.backgroundImage}
 						testID="background-image"
 					/>
