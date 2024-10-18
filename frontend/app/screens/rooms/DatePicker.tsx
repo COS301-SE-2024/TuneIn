@@ -30,31 +30,36 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 	const [showStartDatePicker, setShowStartDatePicker] = useState(false);
 	const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
-	// Start date change handler
 	const handleStartDateChange = (
 		event: DateTimePickerEvent,
 		selectedDate?: Date | undefined,
 	) => {
-		const currentDate = selectedDate || startDate;
-		setShowStartDatePicker(false); // Close the picker after date selection
-		setStartDate(currentDate);
+		if (event.type === "set") {
+			const currentDate = selectedDate ?? startDate;
+			setShowStartDatePicker(false);
+			setStartDate(currentDate);
+		} else {
+			setShowStartDatePicker(false); // Close if user cancels
+		}
 	};
 
-	// End date change handler
 	const handleEndDateChange = (
 		event: DateTimePickerEvent,
 		selectedDate?: Date | undefined,
 	) => {
-		const currentDate = selectedDate || endDate;
-		setShowEndDatePicker(false); // Close the picker after date selection
-		setEndDate(currentDate);
+		if (event.type === "set") {
+			const currentDate = selectedDate ?? endDate;
+			setShowEndDatePicker(false);
+			setEndDate(currentDate);
+		} else {
+			setShowEndDatePicker(false); // Close if user cancels
+		}
 	};
 
 	return (
 		<View style={styles.container}>
-			{/* Start Date Picker */}
 			<TouchableOpacity
-				onPress={() => setShowStartDatePicker(true)} // Open DateTimePicker directly
+				onPress={() => setShowStartDatePicker(true)}
 				style={styles.dateTimePicker}
 			>
 				<Text
@@ -69,7 +74,6 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 				</Text>
 			</TouchableOpacity>
 
-			{/* Show DateTimePicker for Android/iOS when needed */}
 			{showStartDatePicker && Platform.OS !== "web" && (
 				<DateTimePicker
 					value={startDate || new Date()}
@@ -79,7 +83,6 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 				/>
 			)}
 
-			{/* Web Date Picker */}
 			{showStartDatePicker && Platform.OS === "web" && (
 				<DatePicker
 					selected={startDate}
@@ -89,12 +92,10 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 				/>
 			)}
 
-			{/* Add more padding below the date picker */}
 			<View style={styles.spacing} />
 
-			{/* End Date Picker */}
 			<TouchableOpacity
-				onPress={() => setShowEndDatePicker(true)} // Open DateTimePicker directly
+				onPress={() => setShowEndDatePicker(true)}
 				style={styles.dateTimePicker}
 			>
 				<Text
@@ -109,7 +110,6 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 				</Text>
 			</TouchableOpacity>
 
-			{/* Show DateTimePicker for Android/iOS when needed */}
 			{showEndDatePicker && Platform.OS !== "web" && (
 				<DateTimePicker
 					value={endDate || new Date()}
@@ -119,7 +119,6 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 				/>
 			)}
 
-			{/* Web Date Picker */}
 			{showEndDatePicker && Platform.OS === "web" && (
 				<DatePicker
 					selected={endDate}

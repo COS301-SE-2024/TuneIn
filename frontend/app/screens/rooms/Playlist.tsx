@@ -15,8 +15,6 @@ import { Player } from "../../PlayerContext";
 import { SongPair, convertQueue } from "../../models/SongPair";
 import { useSpotifyTracks } from "../../hooks/useSpotifyTracks";
 
-const VOTING_ENABLED = false;
-
 const Playlist = () => {
 	const { roomQueue, spotifyAuth } = useLive();
 	const { fetchSongInfo } = useSpotifyTracks(spotifyAuth);
@@ -67,7 +65,13 @@ const Playlist = () => {
 				});
 			}
 		}
-	}, [fetchSongInfo, roomQueue]);
+	}, [fetchSongInfo, localQueue, roomQueue]);
+
+	// Filter the localQueue to remove duplicates based on spotifyID
+	const uniqueQueue = localQueue.filter(
+		(s, index, self) =>
+			index === self.findIndex((t) => t.song.spotifyID === s.song.spotifyID),
+	);
 
 	return (
 		<View style={styles.container}>
@@ -85,14 +89,10 @@ const Playlist = () => {
 				{/* <Text style={styles.pageName}>Queue</Text> */}
 			</View>
 			<View style={styles.songListContainer}>
-				{localQueue.length > 0 ? (
+				{uniqueQueue.length > 0 ? (
 					<ScrollView>
-						{localQueue.map((s, index) => (
-							<SongList
-								key={s.song.index}
-								song={s}
-								showVoting={VOTING_ENABLED}
-							/>
+						{uniqueQueue.map((s, index) => (
+							<SongList key={s.song.spotifyID} song={s} />
 						))}
 					</ScrollView>
 				) : (

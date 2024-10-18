@@ -18,73 +18,73 @@ import { colors } from "../../styles/colors";
 const CreateRoomScreen: React.FC = () => {
 	const router = useRouter();
 	const [isSwitched, setIsSwitched] = useState(false);
-	const [newRoom] = useState<{
-		is_permanent: boolean;
-		is_private: boolean;
-		is_scheduled: boolean;
-		start_date: Date | null;
-		end_date: Date | null;
-	}>({
+	const [newRoom, setNewRoom] = useState({
 		is_permanent: true,
 		is_private: false,
 		is_scheduled: false,
-		start_date: null,
-		end_date: null,
+		start_date: null as Date | null,
+		end_date: null as Date | null,
 	});
 	const [startDate, setStartDate] = useState<Date | undefined>(undefined);
 	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
 	const handleToggleChange = (isFirstOptionSelected: boolean) => {
-		newRoom["is_permanent"] = isFirstOptionSelected;
+		setNewRoom((prevRoom) => ({
+			...prevRoom,
+			is_permanent: isFirstOptionSelected,
+		}));
 	};
 
 	const handleToggleChange2 = (isFirstOptionSelected: boolean) => {
-		newRoom["is_private"] = !isFirstOptionSelected;
+		setNewRoom((prevRoom) => ({
+			...prevRoom,
+			is_private: !isFirstOptionSelected,
+		}));
+	};
+
+	const showToastOrAlert = (message: string) => {
+		Platform.OS === "web"
+			? alert(message)
+			: ToastAndroid.show(message, ToastAndroid.SHORT);
 	};
 
 	const navigateToRoomDetails = () => {
 		if (isSwitched) {
-			newRoom["start_date"] = startDate ?? null;
-			newRoom["end_date"] = endDate ?? null;
+			const updatedRoom = {
+				...newRoom,
+				start_date: startDate ?? null,
+				end_date: endDate ?? null,
+			};
 
 			if (!startDate && !endDate) {
-				Platform.OS === "web"
-					? alert("Please select a start or end date")
-					: ToastAndroid.show(
-							"Please select a start or end date",
-							ToastAndroid.SHORT,
-						);
+				showToastOrAlert("Please select a start or end date");
 				return;
 			}
 
 			if (startDate && endDate && startDate >= endDate) {
-				Platform.OS === "web"
-					? alert("Start date must be before end date")
-					: ToastAndroid.show(
-							"Start date must be before end date",
-							ToastAndroid.SHORT,
-						);
+				showToastOrAlert("Start date must be before end date");
 				return;
 			}
 
 			if (startDate && startDate < new Date()) {
-				Platform.OS === "web"
-					? alert("Start date must be in the future")
-					: ToastAndroid.show(
-							"Start date must be in the future",
-							ToastAndroid.SHORT,
-						);
+				showToastOrAlert("Start date must be in the future");
 				return;
 			}
 
 			if (endDate && endDate < new Date()) {
-				alert("End date must be in the future");
+				showToastOrAlert("End date must be in the future");
 				return;
 			}
+
+			setNewRoom(updatedRoom);
 		}
 
-		newRoom["is_scheduled"] = isSwitched;
-		const room = JSON.stringify(newRoom);
+		const updatedRoom = {
+			...newRoom,
+			is_scheduled: isSwitched,
+		};
+		const room = JSON.stringify(updatedRoom);
+
 		router.navigate({
 			pathname: "/screens/rooms/RoomDetails",
 			params: { room: room },
@@ -120,15 +120,15 @@ const CreateRoomScreen: React.FC = () => {
 								onChanged={handleToggleChange2}
 							/>
 						</View>
-						<View style={styles.scheduleContainer}>
+						{/* <View style={styles.scheduleContainer}>
 							<Text style={styles.scheduleText}>Schedule for later</Text>
 							<Switch
 								value={isSwitched}
 								onValueChange={setIsSwitched}
-								thumbColor={isSwitched ? "#fffff" : "#ffffff"}
+								thumbColor={isSwitched ? "#ffffff" : "#ffffff"}
 								trackColor={{ false: "#767577", true: colors.primary }}
 							/>
-						</View>
+						</View> */}
 						{isSwitched && (
 							<View style={styles.dateTimePickerContainer}>
 								<DateTimePickerComponent
@@ -138,7 +138,7 @@ const CreateRoomScreen: React.FC = () => {
 									setEndDate={setEndDate}
 								/>
 								<TouchableOpacity
-									style={styles.clearDatesButton} // Make it a button
+									style={styles.clearDatesButton}
 									onPress={() => {
 										setStartDate(undefined);
 										setEndDate(undefined);
@@ -163,13 +163,13 @@ const styles = {
 		backgroundColor: colors.primary,
 		borderRadius: 5,
 		marginTop: 10,
-		alignSelf: "center", // Center the button
+		alignSelf: "center" as "center", // Center the button
 	},
 	clearDatesButtonText: {
 		color: "#fff",
-		fontWeight: "bold",
+		fontWeight: "bold" as "bold",
 		fontSize: 16,
-		textAlign: "center",
+		textAlign: "center" as "center",
 	},
 	keyboardAvoidingView: {
 		flex: 1,
@@ -184,18 +184,18 @@ const styles = {
 		paddingTop: 20,
 	},
 	header: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
+		flexDirection: "row" as "row", // explicitly cast as valid values
+		alignItems: "center" as "center", // explicitly cast as valid values
+		justifyContent: "space-between" as "space-between", // explicitly cast as valid values
 		padding: 10,
 	},
 	closeButton: {
 		fontSize: 20,
-		fontWeight: "bold",
+		fontWeight: "bold" as "bold",
 	},
 	headerTitle: {
 		fontSize: 20,
-		fontWeight: "bold",
+		fontWeight: "bold" as "bold", // Explicitly cast to "bold"
 	},
 	headerSpacer: {
 		width: 20,
@@ -209,20 +209,20 @@ const styles = {
 		marginBottom: 20,
 	},
 	scheduleContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
+		flexDirection: "row" as "row",
+		alignItems: "center" as "center",
+		justifyContent: "space-between" as "space-between",
 	},
 	scheduleText: {
 		fontSize: 16,
-		fontWeight: "bold",
+		fontWeight: "bold" as "bold",
 	},
 	dateTimePickerContainer: {
 		marginTop: 0,
 		zIndex: 1,
 		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
+		justifyContent: "center" as "center",
+		alignItems: "center" as "center",
 		padding: 20,
 	},
 };
