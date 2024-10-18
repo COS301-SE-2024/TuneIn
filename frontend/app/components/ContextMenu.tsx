@@ -64,14 +64,6 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 					<TouchableOpacity onPress={onRoomInfo} style={styles.menuItem}>
 						<Text style={styles.menuText}>Room Info</Text>
 					</TouchableOpacity>
-
-					<TouchableOpacity onPress={onShareRoom} style={styles.menuItem}>
-						<Text style={styles.menuText}>
-							<Foundation name="share" size={16} color="black" />
-							{"  "}
-							Share
-						</Text>
-					</TouchableOpacity>
 					<TouchableOpacity onPress={onSavePlaylist} style={styles.menuItem}>
 						<Text style={styles.menuText}>
 							{/* <MaterialIcons name="save-alt" size={24} color="black" /> */}
