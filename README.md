@@ -1,14 +1,13 @@
 ![logo](https://github.com/user-attachments/assets/24c5d841-5e78-4b37-ad56-412f3cd276b9)
 
 <div align="center">
-<br>
   Apollo🚀 - COS301 Capstone 2024
   <p align="center">
     <br />
     <a href="https://github.com/COS301-SE-2024/TuneIn/tree/a3fb51745d1c63cb4e650364a5de70b35931d8fe/documentation"><strong>📄Explore the docs»</strong></a>
     <br />
 <br>
-    <a  align="center" href="https://expo.dev/accounts/apollotunein/projects/tunein/builds/a3f68836-faf8-4e69-ba46-8400c52568e9" target="_blank">🔗domainpulse.app</a><br>
+    <a  align="center" href="https://expo.dev/accounts/apollotunein/projects/tunein/builds/a3f68836-faf8-4e69-ba46-8400c52568e9" target="_blank">🔗 TuneIn APK</a><br>
 
   </p>
 
@@ -16,6 +15,7 @@
 </div>
   <br />
     <br />
+    
       <br />
         <br />
 
@@ -161,11 +161,12 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
   </tr>
 </table>
 
-
+## 🎥: Demo Video
+[Demo 4](https://drive.google.com/file/d/1G5fnKZMMLEASQmIk50pQW2MZ_Viv4fmK/view?usp=sharing)
 
 
 ## :blue_book: Documentation
-[User Manual](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/User%20Manual.pdf)
+[User Manual](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/User%20Manualv2.pdf)
 
 [Coding Standards/Quality](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/CodingStandards.pdf)
 
@@ -173,7 +174,7 @@ TuneIn isn't just an app—it's a gateway to a world where music brings people c
 
 [our UI design / wireframe](https://www.figma.com/design/vM3jH8s1Xt2CLlFjRRkzQ8/LoFi?node-id=0-1&t=8Qu3n4sAnXvIIUYE-1)
 
-[SRS](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/SRCv4.pdf)
+[SRS](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/SRS.pdf)
 
 [Technical Installation Manual](https://github.com/COS301-SE-2024/TuneIn/blob/develop/documentation/Techincal%20Installation%20Manual.pdf)
 
