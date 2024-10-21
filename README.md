@@ -1,4 +1,24 @@
-# TuneIn
+![logo](https://github.com/user-attachments/assets/24c5d841-5e78-4b37-ad56-412f3cd276b9)
+
+<div align="center">
+<br>
+  Apollo🚀 - COS301 Capstone 2024
+  <p align="center">
+    <br />
+    <a href="https://github.com/COS301-SE-2024/TuneIn/tree/a3fb51745d1c63cb4e650364a5de70b35931d8fe/documentation"><strong>📄Explore the docs»</strong></a>
+    <br />
+<br>
+    <a  align="center" href="https://expo.dev/accounts/apollotunein/projects/tunein/builds/a3f68836-faf8-4e69-ba46-8400c52568e9" target="_blank">🔗domainpulse.app</a><br>
+
+  </p>
+
+
+</div>
+  <br />
+    <br />
+      <br />
+        <br />
+
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 
 <div><a href="https://codecov.io/github/COS301-SE-2024/TuneIn" >
