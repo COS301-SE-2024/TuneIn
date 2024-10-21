@@ -111,6 +111,62 @@ Run the backend server:
 npm run start
 ```
 
+## Setting Up a Spotify App
+
+To enable Spotify-related functionality in the TuneIn app, you need to create and configure a Spotify Developer application. Follow the steps below:
+
+### Step 1: Create a Spotify Developer Account
+
+1. Visit the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and log in with your Spotify account. If you don't have an account, create one first.
+   
+2. Once logged in, click on the **Create an App** button.
+
+### Step 2: Create a Spotify App
+
+1. Give your application a **name** (e.g., "TuneIn App") and a **description** (optional).
+   
+2. Accept the terms and conditions, then click **Create**.
+
+### Step 3: Configure Redirect URIs
+
+1. After creating the app, you’ll be redirected to the app’s settings page.
+   
+2. Under the **Redirect URIs** section, click **Edit Settings** and add the following URI:
+
+http://localhost:3000/auth/spotify/callback
+
+
+Make sure to click **Save** after adding the URI.
+
+### Step 4: Obtain Client ID and Client Secret
+
+1. On the app's settings page, you will see a **Client ID** and **Client Secret**. Copy these values as they will be needed for the `.env` configuration files.
+
+### Step 5: Set Environment Variables
+
+Add the following environment variables in both your backend and frontend `.env` files:
+
+```plaintext
+SPOTIFY_CLIENT_ID="<your-spotify-client-id>"
+SPOTIFY_CLIENT_SECRET="<your-spotify-client-secret>"
+SPOTIFY_REDIRECT_URI="http://localhost:3000/auth/spotify/callback"
+``` 
+Replace <your-spotify-client-id> and <your-spotify-client-secret> with the actual values from your Spotify app.
+
+### Step 6: Set Up Permissions (Scopes)
+In the Spotify Dashboard, click on Edit Settings for your app.
+
+In the OAuth section, make sure to request the necessary scopes for your application, such as:
+
+- `user-read-playback-state`
+- `user-modify-playback-state`
+- `user-read-currently-playing`
+- `user-read-recently-played`
+- `playlist-read-private`
+- `playlist-modify-private`
+
+These permissions will allow the app to access Spotify data and control playback.
+
 ## Setup Frontend
 
 ### Step 1: Navigate to Frontend Folder
