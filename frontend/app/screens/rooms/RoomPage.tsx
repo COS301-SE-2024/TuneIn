@@ -478,7 +478,9 @@ const RoomPage: React.FC = () => {
 					<SongRoomWidget song={userInRoom ? localCurrentSong : undefined} />
 				</View>
 
-				{roomControls.canControlRoom() ? (
+				{roomControls.canControlRoom() &&
+				currentRoom &&
+				currentRoom.roomID === roomID ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.controlButton}
