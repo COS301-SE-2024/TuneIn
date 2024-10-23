@@ -6,36 +6,25 @@ import {
 	Dimensions,
 	ImageBackground,
 	Animated,
-	PanResponder,
-	ScrollView,
 	TouchableOpacity,
 	NativeSyntheticEvent,
 	NativeScrollEvent,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router"; // Import useRouter
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "../../styles/colors";
-import SongList from "../../components/SongList"; // Assuming you have this component
-import { Room, formatRoomData } from "../../models/Room"; // Importing Room type and formatter
-import { Track } from "../../models/Track";
+import { Room, formatRoomData } from "../../models/Room";
+
 const placeholderImage = require("../../../assets/imageholder.jpg");
 
-type Queues = {
-	[key: string]: Track[];
-};
-
 const SplittingRoom: React.FC = () => {
-	const router = useRouter(); // Initialize the router
-	const { queues: queuesParam, rooms: roomsParam } = useLocalSearchParams();
+	const router = useRouter();
+	const { rooms: roomsParam } = useLocalSearchParams();
 	const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
-	const [isCollapsed, setIsCollapsed] = useState(false);
 	const scrollX = useRef(new Animated.Value(0)).current;
-	const animatedHeight = useRef(new Animated.Value(0)).current;
-	const [playlist, setPlaylist] = useState<Track[]>([]);
-	const [queues, setQueues] = useState<Queues>({});
+	const [activeGenres, setActiveGenres] = useState<string[]>([]);
 
-	// Get room data from searchParams and format it
 	const rooms: Room[] = useMemo(() => {
 		try {
 			const parsedRooms = JSON.parse(roomsParam as string);
@@ -45,58 +34,18 @@ const SplittingRoom: React.FC = () => {
 			return [];
 		}
 	}, [roomsParam]);
-	// Set queues from searchParams
+
 	useEffect(() => {
-		try {
-			const parsedQueues = JSON.parse(queuesParam as string);
-			if (typeof parsedQueues === "object" && parsedQueues !== null) {
-				const formattedQueues: Queues = Object.fromEntries(
-					Object.entries(parsedQueues).map(([key, queue]) => {
-						if (Array.isArray(queue)) {
-							return [key, queue]; // Ensure size 2 for each queue
-						}
-						return [key, []]; // Default to empty array if not an array
-					}),
-				);
-				setQueues(formattedQueues);
-				setPlaylist(formattedQueues[Object.keys(formattedQueues)[0]] || []); // Initialize with the first queue
-			}
-		} catch (error) {
-			console.error("Failed to parse queues:", error);
+		if (rooms[currentRoomIndex]) {
+			const genres = rooms[currentRoomIndex].tags;
+			setActiveGenres(genres || []);
 		}
-	}, [queuesParam]);
+	}, [currentRoomIndex, rooms]);
 
 	const { width, height } = Dimensions.get("window");
 	const cardWidth = width * 0.75;
-	const cardHeight = height * 0.55;
-	const collapsedHeight = height * 0.3;
-	const expandedHeight = height * 0.6;
+	const cardHeight = height * 0.55; // Increased card height
 	const spacing = 25;
-
-	useEffect(() => {
-		Animated.timing(animatedHeight, {
-			toValue: isCollapsed ? collapsedHeight : expandedHeight,
-			duration: 300,
-			useNativeDriver: false,
-		}).start();
-	}, [isCollapsed, animatedHeight, collapsedHeight, expandedHeight]);
-
-	const panResponder = PanResponder.create({
-		onMoveShouldSetPanResponder: (evt, gestureState) => {
-			return Math.abs(gestureState.dy) > 20;
-		},
-		onPanResponderMove: (evt, gestureState) => {
-			const newHeight = isCollapsed
-				? collapsedHeight + gestureState.dy
-				: expandedHeight + gestureState.dy;
-			animatedHeight.setValue(
-				Math.max(collapsedHeight, Math.min(expandedHeight, newHeight)),
-			);
-		},
-		onPanResponderRelease: (evt, gestureState) => {
-			setIsCollapsed(gestureState.dy < 0);
-		},
-	});
 
 	const navigateToRoomPage = (room: Room) => {
 		router.navigate({
@@ -107,6 +56,16 @@ const SplittingRoom: React.FC = () => {
 
 	return (
 		<View style={styles.container}>
+			{/* Header with back chevron and centered title */}
+			<View style={styles.header}>
+				<TouchableOpacity onPress={() => router.back()}>
+					<Ionicons name="chevron-back" size={24} color="#000" />
+				</TouchableOpacity>
+				<Text style={styles.pageTitle}>Room Explorer</Text>
+			</View>
+			<View style={styles.headerBottomLine} />
+			{/* Grey line at the bottom of the header */}
+			{/* Room Cards */}
 			<Animated.FlatList
 				data={rooms}
 				testID="rooms-flat-list"
@@ -129,7 +88,6 @@ const SplittingRoom: React.FC = () => {
 							);
 							if (newIndex !== currentRoomIndex) {
 								setCurrentRoomIndex(newIndex);
-								setPlaylist(queues[newIndex.toString()]);
 							}
 						},
 					},
@@ -155,7 +113,6 @@ const SplittingRoom: React.FC = () => {
 								height: cardHeight,
 								marginHorizontal: spacing / 2,
 								borderRadius: 20,
-								marginTop: 25,
 								overflow: "hidden",
 							}}
 						>
@@ -166,6 +123,7 @@ const SplittingRoom: React.FC = () => {
 									transform: [{ translateY }],
 								}}
 							>
+								{/* Image with grey overlay */}
 								<ImageBackground
 									source={
 										item?.backgroundImage
@@ -175,21 +133,12 @@ const SplittingRoom: React.FC = () => {
 									style={styles.upperSection}
 									imageStyle={styles.backgroundImage}
 								>
+									<View style={styles.greyOverlay} />
 									<LinearGradient
 										colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
-										style={styles.gradientOverlay}
 									/>
 									<View style={styles.cardContent}>
 										<Text style={styles.roomName}>{item?.name}</Text>
-										<Text style={styles.topGenre}>
-											{item?.genre ? item.genre : item.tags[0]}
-										</Text>
-										<View style={styles.peopleCountContainer}>
-											<Icon name="users" size={20} color="#fff" />
-											<Text style={styles.participants}>
-												{item?.roomSize || 0}
-											</Text>
-										</View>
 									</View>
 								</ImageBackground>
 							</Animated.View>
@@ -197,45 +146,19 @@ const SplittingRoom: React.FC = () => {
 					);
 				}}
 			/>
-			<Animated.View
-				style={[styles.drawerContainer, { height: animatedHeight }]}
-			>
-				<TouchableOpacity
-					style={styles.drawerHeader}
-					onPress={() => setIsCollapsed((prev) => !prev)}
-					{...panResponder.panHandlers}
-				>
-					<Text style={styles.drawerTitle}>Queue</Text>
-					<Icon
-						name={isCollapsed ? "chevron-up" : "chevron-down"}
-						size={20}
-						color="#fff"
-						testID="drawer-icon"
-					/>
-				</TouchableOpacity>
-				<ScrollView
-					style={styles.lowerSection}
-					contentContainerStyle={styles.scrollViewContent}
-					nestedScrollEnabled={true}
-				>
-					{playlist.length > 0 ? (
-						playlist.map((track, index) => (
-							<SongList
-								key={track.id || index}
-								songNumber={index + 1}
-								track={track}
-								showVoting={false}
-								isCurrent={index === currentRoomIndex}
-								index={index}
-							/>
-						))
-					) : (
-						<View style={styles.emptyQueueContainer}>
-							<Text style={styles.emptyQueueText}>The queue is empty</Text>
+			{/* Genre Pills Section */}
+			<View style={styles.genreSection}>
+				<Text style={styles.genreSectionTitle}>Genres</Text>
+				<View style={styles.genreBottomLine} />
+				<View style={styles.genrePillsContainer}>
+					{activeGenres.map((genre, index) => (
+						<View key={index} style={styles.genrePill}>
+							<Text style={styles.genreText}>{genre}</Text>
 						</View>
-					)}
-				</ScrollView>
-			</Animated.View>
+					))}
+				</View>
+				{/* Line at the bottom of the genres */}
+			</View>
 		</View>
 	);
 };
@@ -244,10 +167,32 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: "center",
-		justifyContent: "center",
 		backgroundColor: colors.backgroundColor,
 	},
+	header: {
+		width: "100%",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		paddingHorizontal: 20,
+		paddingBottom: 5,
+		height: 50,
+		backgroundColor: "white",
+	},
+	pageTitle: {
+		fontSize: 20,
+		fontWeight: "bold",
+		color: colors.primaryText,
+		textAlign: "center",
+		flex: 1,
+	},
+	headerBottomLine: {
+		height: 1,
+		width: "100%",
+		backgroundColor: "#C0C0C0", // Grey line color
+	},
 	flatListContentContainer: {
+		marginTop: 30,
 		paddingHorizontal: 15,
 	},
 	flatListPadding: {
@@ -275,66 +220,53 @@ const styles = StyleSheet.create({
 		color: "#fff",
 		textAlign: "center",
 	},
-	topGenre: {
-		fontSize: 18,
-		color: "#a1a1a1",
-		marginBottom: 10,
-		fontWeight: "bold",
-	},
-	peopleCountContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-	},
-	participants: {
-		fontSize: 18,
-		fontWeight: "bold",
-		color: "#fff",
-		marginLeft: 5,
-	},
-	drawerContainer: {
-		width: "99%",
-		position: "absolute",
-		bottom: 0,
-		backgroundColor: colors.primary,
-		borderTopLeftRadius: 15,
-		borderTopRightRadius: 15,
-		overflow: "hidden",
-		paddingLeft: 10,
-		paddingRight: 10,
-	},
-	drawerHeader: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-		padding: 20,
-	},
-	drawerTitle: {
-		color: "#fff",
-		fontSize: 24,
-		fontWeight: "bold",
-		textAlign: "center",
-		marginRight: 10,
-	},
-	lowerSection: {
-		flex: 1,
-		width: "100%",
-	},
-	scrollViewContent: {
-		paddingBottom: 80,
-	},
-	emptyQueueContainer: {
-		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	emptyQueueText: {
-		fontSize: 18,
-		color: "#fff",
-		textAlign: "center",
-	},
-	gradientOverlay: {
+	greyOverlay: {
 		...StyleSheet.absoluteFillObject,
+		backgroundColor: "rgba(0, 0, 0, 0.5)", // Grey out the image
 		borderRadius: 20,
+	},
+	genreSection: {
+		width: "95%", // Adjust to take up 95% of the width
+		height: "25%", // Height remains the same
+		position: "absolute", // Position relative to the screen
+		bottom: 0, // Stick it to the bottom of the screen
+		backgroundColor: colors.backgroundColor, // Light background to distinguish
+		alignItems: "center",
+		justifyContent: "flex-start", // Align to start to position the title higher
+		borderRadius: 15,
+		shadowColor: "#000",
+		shadowOpacity: 0.3,
+		shadowRadius: 10,
+		elevation: 5, // Add elevation for distinction
+		paddingTop: 10, // Space above the title
+	},
+	genreSectionTitle: {
+		fontSize: 20,
+		fontWeight: "bold",
+		color: colors.primaryText,
+	},
+	genrePillsContainer: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		justifyContent: "center",
+	},
+	genrePill: {
+		backgroundColor: colors.primary,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
+		borderRadius: 15,
+		margin: 5,
+	},
+	genreText: {
+		color: "#fff",
+		fontWeight: "bold",
+		marginBottom: 2, // Space below the title
+	},
+	genreBottomLine: {
+		height: 2,
+		width: "93%", // Takes up 80% of the width
+		backgroundColor: "#C0C0C0",
+		marginTop: 5, // Space above the line
 	},
 });
 
