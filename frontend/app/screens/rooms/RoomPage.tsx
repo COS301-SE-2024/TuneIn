@@ -475,9 +475,7 @@ const RoomPage: React.FC = () => {
 					<Text>{rs.constructArtistString(currentSong)}</Text>
 				</View> */}
 
-				{roomControls.canControlRoom() &&
-				currentRoom &&
-				currentRoom.roomID === roomID ? (
+				{roomControls.canControlRoom() ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						{/* <TouchableOpacity
 							style={styles.controlButton}
