@@ -73,8 +73,9 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 			{showStartDatePicker && Platform.OS !== "web" && (
 				<DateTimePicker
 					value={startDate || new Date()}
-					mode="datetime"
+					mode="date"
 					display="default"
+					minimumDate={new Date()} // Set minimum date
 					onChange={handleStartDateChange}
 				/>
 			)}
@@ -113,8 +114,9 @@ const DateTimePickerComponent: React.FC<DateTimePickerComponentProps> = ({
 			{showEndDatePicker && Platform.OS !== "web" && (
 				<DateTimePicker
 					value={endDate || new Date()}
-					mode="datetime"
+					mode="date"
 					display="default"
+					minimumDate={new Date()} // Set
 					onChange={handleEndDateChange}
 				/>
 			)}
