@@ -240,7 +240,7 @@ const RoomPage: React.FC = () => {
 			pathname: "/screens/rooms/ParticipantsPage",
 			params: {
 				participantsFr: JSON.stringify(participants),
-				roomID: roomID,
+				room: JSON.stringify(roomData),
 			},
 		});
 	};
