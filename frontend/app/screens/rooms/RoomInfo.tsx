@@ -55,10 +55,6 @@ const RoomInfoScreen = () => {
 				<Text style={styles.roomName}>
 					{roomData?.name ? getTruncatedRoomName(roomData.name) : "Room"}
 				</Text>
-
-				<TouchableOpacity onPress={handleOpenPopup}>
-					<Icon name="share" size={22} color={colors.primaryText} />
-				</TouchableOpacity>
 			</View>
 
 			{roomData && <RoomDetails room={formatRoomData(roomData)} />}

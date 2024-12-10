@@ -158,51 +158,26 @@ const ChatRoom = () => {
 
 	return (
 		<View style={styles.container}>
-			<Animated.View
-				style={{
-					position: "absolute",
-					bottom: 0,
-					left: 0,
-					right: 0,
-					height: screenHeight - 90,
-					backgroundColor: "#E8EBF2",
-					elevation: 5,
-					paddingHorizontal: 10,
-					paddingTop: 10,
-				}}
-			>
-				<View style={styles.container}>
-					<FlatList
-						style={{ flex: 1, marginTop: 10 }}
-						ref={scrollViewRef}
-						data={roomMessages}
-						renderItem={({ item }) => (
-							<MemoizedCommentWidget
-								username={item.message.sender.username}
-								message={item.message.messageBody}
-								profilePictureUrl={item.message.sender.profile_picture_url}
-								me={item.me}
-							/>
-						)}
-						keyExtractor={(item, index) => index.toString()}
-						contentContainerStyle={{ paddingBottom: 20 }}
-					/>
+			<View style={styles.container}>
+				<FlatList
+					style={{ flex: 1, marginTop: 10 }}
+					ref={scrollViewRef}
+					data={roomMessages}
+					renderItem={({ item }) => (
+						<MemoizedCommentWidget
+							username={item.message.sender.username}
+							message={item.message.messageBody}
+							profilePictureUrl={item.message.sender.profile_picture_url}
+							me={item.me}
+						/>
+					)}
+					keyExtractor={(item, index) => index.toString()}
+					contentContainerStyle={{ paddingBottom: 20 }} // Ensures some padding at the bottom
+					keyboardShouldPersistTaps="handled" // Allows taps while the keyboard is open
+					showsVerticalScrollIndicator={false} // Optional, hides the scroll indicator for a cleaner look
+				/>
 
-					<FlyingView
-						object={localObjects}
-						containerProps={{
-							style: styles.flyingView,
-						}}
-					/>
-				</View>
-				<View
-					style={{
-						flexDirection: "row",
-						alignItems: "center",
-						marginBottom: 20,
-						marginTop: 20,
-					}}
-				>
+				<View style={styles.inputContainer}>
 					<TextInput
 						style={[
 							styles.textInput,
@@ -219,11 +194,12 @@ const ChatRoom = () => {
 					/>
 
 					<EmojiPicker ref={emojiPickerRef} onSelectEmoji={handleSelectEmoji} />
+
 					<TouchableOpacity onPress={sendMessage} style={{ marginLeft: 10 }}>
 						<MaterialIcons name="send" size={24} color={colors.primary} />
 					</TouchableOpacity>
 				</View>
-			</Animated.View>
+			</View>
 		</View>
 	);
 };
@@ -232,22 +208,25 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: "#E8EBF2",
+		paddingTop: 10,
+		paddingHorizontal: 5,
 	},
-	flyingView: {
-		position: "absolute",
-		top: 10,
-		right: 10,
-		width: 150,
-		height: 200,
+	inputContainer: {
+		flexDirection: "row", // Aligns items horizontally
+		alignItems: "center", // Ensures items are vertically centered
+		paddingHorizontal: 10, // Adds padding to the container
+		paddingVertical: 10,
+		backgroundColor: "#fff", // Background color to distinguish input section
+		marginHorizontal: -10,
 	},
 	textInput: {
-		flex: 1,
+		flex: 1, // Ensures the input takes up the available space
 		borderWidth: 1,
 		borderColor: "#ccc",
 		borderRadius: 20,
-		paddingHorizontal: 10,
+		paddingHorizontal: 15,
+		marginHorizontal: 10,
 		paddingVertical: 10,
-		marginRight: 5,
 		minHeight: 40, // Minimum height for TextInput
 		maxHeight: 120, // Optional maximum height for TextInput
 	},

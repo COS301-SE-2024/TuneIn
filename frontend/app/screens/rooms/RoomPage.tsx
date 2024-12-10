@@ -76,6 +76,8 @@ const RoomPage: React.FC = () => {
 			return username.length > 10 ? username.slice(0, 8) + "..." : username;
 		}
 	};
+	const [isLoadingPause, setIsLoadingPause] = useState(false);
+	const [isLoadingNext, setIsLoadingNext] = useState(false);
 	const [thisRoom, setThisRoom] = useState<RoomDto>();
 	const [userInRoom, setUserInRoom] = useState(false);
 	const trackPositionIntervalRef = useRef<number | null>(null);
@@ -92,8 +94,7 @@ const RoomPage: React.FC = () => {
 	const [ownerPlaying, setOwnerPlaying] = useState(roomPlaying);
 
 	const syncWithRoom = () => {
-		// Placeholder function for syncing with the room
-		// console.log("Syncing with room... (functionality to be implemented)");
+		roomControls.playbackHandler.syncUserPlayback();
 	};
 
 	const getAndSetRoomInfo = useCallback(async () => {
@@ -143,9 +144,10 @@ const RoomPage: React.FC = () => {
 		rooms,
 		currentRoom,
 		localRoomPlaying,
-		optimisticPlaybackState,
 		ownerPlaying,
+		optimisticPlaybackState,
 		roomPlaying,
+		userInRoom,
 		fetchSongInfo,
 	]);
 
@@ -190,6 +192,10 @@ const RoomPage: React.FC = () => {
 			if (userInRoom) {
 				console.log("playPauseTrack playPauseTrack playPauseTrack");
 				if (roomControls.canControlRoom()) {
+					setIsLoadingPause(true);
+					setTimeout(() => {
+						setIsLoadingPause(false);
+					}, 1000); // 1 second loader
 					if (!ownerPlaying) {
 						console.log("starting playback");
 						setOwnerPlaying(true); //set owner's request to play
@@ -223,6 +229,10 @@ const RoomPage: React.FC = () => {
 
 	const playNextTrack = useCallback(() => {
 		if (userInRoom) {
+			setIsLoadingPause(true);
+			setTimeout(() => {
+				setIsLoadingPause(false);
+			}, 1000); // 1 second loader
 			console.log("playNextTrack playNextTrack playNextTrack");
 			if (roomControls.canControlRoom()) {
 				roomControls.playbackHandler.nextTrack();
@@ -239,6 +249,16 @@ const RoomPage: React.FC = () => {
 	// };
 
 	const handleViewParticipants = () => {
+		if (!participants || !Array.isArray(participants)) {
+			console.error("Participants is undefined or not an array");
+			return;
+		}
+		if (!roomID) {
+			console.error("roomID is undefined");
+			return;
+		}
+
+		// Proceed with navigation if both participants and roomID are valid
 		router.navigate({
 			pathname: "/screens/rooms/ParticipantsPage",
 			params: {
@@ -309,7 +329,7 @@ const RoomPage: React.FC = () => {
 			}
 		};
 		fetchParticipants();
-	}, [userInRoom]);
+	}, [roomID, userInRoom]);
 
 	useEffect(() => {
 		return () => {
@@ -417,7 +437,7 @@ const RoomPage: React.FC = () => {
 			checkBookmarked();
 		}
 		checkBookmarked();
-	}, []);
+	}, [checkBookmarked, getAndSetRoomInfo, thisRoom]);
 	const handleUserPress = () => {
 		router.navigate(
 			`/screens/profile/ProfilePage?friend=${JSON.stringify({
@@ -477,12 +497,13 @@ const RoomPage: React.FC = () => {
 
 				{roomControls.canControlRoom() ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
-						{/* <TouchableOpacity
+						<TouchableOpacity
 							style={styles.controlButton}
-							onPress={playPreviousTrack}
+							onPress={syncWithRoom} // Function to sync with the room
 						>
-							<FontAwesome5 name="step-backward" size={30} color="black" />
-						</TouchableOpacity> */}
+							<MaterialIcons name="sync" size={28} color="black" />
+						</TouchableOpacity>
+
 						<TouchableOpacity
 							style={styles.controlButton}
 							onPress={() => playPauseTrack()}
@@ -504,7 +525,7 @@ const RoomPage: React.FC = () => {
 							<FontAwesome5 name="step-forward" size={30} color="black" />
 						</TouchableOpacity>
 					</View>
-				) : (
+				) : userInRoom ? (
 					<View style={isSmallScreen ? styles.smallControls : styles.controls}>
 						<TouchableOpacity
 							style={styles.joinLeaveButton}
@@ -516,6 +537,8 @@ const RoomPage: React.FC = () => {
 							</Text>
 						</TouchableOpacity>
 					</View>
+				) : (
+					<View></View>
 				)}
 			</View>
 			{/* <Animated.ScrollView

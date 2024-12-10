@@ -56,7 +56,7 @@ export class AuthManagement {
 		console.log("Clearing from logout");
 		await StorageService.clear();
 		this.tokenSet = false;
-		router.navigate("/screens/WelcomeScreen");
+		router.replace("/screens/WelcomeScreen");
 	}
 
 	public exchangeCognitoToken(token: string): void {

@@ -408,7 +408,11 @@ function MyRoomTabs() {
 
 				{/* Header Title */}
 
-				<Text style={styles.headerTitle}>{roomData.name}</Text>
+				<Text style={styles.headerTitle}>
+					{roomData.name.length > 20
+						? `${roomData.name.substring(0, 20)}...`
+						: roomData.name}
+				</Text>
 
 				{/* Menu Button */}
 				<TouchableOpacity

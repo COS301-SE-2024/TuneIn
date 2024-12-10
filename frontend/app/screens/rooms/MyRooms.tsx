@@ -189,7 +189,9 @@ const MyRooms: React.FC = () => {
 						<View key={month} style={styles.monthContainer}>
 							<Text style={styles.monthHeader}>{month}</Text>
 							{rooms.map((room) => (
-								<RoomCardWidget key={room.roomID} roomCard={room} />
+								<View key={room.roomID} style={styles.roomCardContainer}>
+									<RoomCardWidget roomCard={room} />
+								</View>
 							))}
 						</View>
 					))
@@ -207,6 +209,9 @@ const styles = StyleSheet.create({
 	backButton: {
 		position: "absolute",
 		left: 10,
+	},
+	roomCardContainer: {
+		marginBottom: 25, // Add spacing between RoomCardWidgets
 	},
 	titleContainer: {
 		flexDirection: "row",
